@@ -1,6 +1,6 @@
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 
-const config = (merge, { command, mode }) => {
+module.exports = function (merge, { command, mode }) {
   const baseConfig = {
     projectName: 'law-app',
     date: '2025-7-2',
@@ -101,6 +101,4 @@ const config = (merge, { command, mode }) => {
     return merge({}, baseConfig, devConfig)
   }
   return merge({}, baseConfig, prodConfig)
-})
-
-module.exports = config
+}

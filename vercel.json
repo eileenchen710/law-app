@@ -1,6 +1,11 @@
 {
-  "buildCommand": "npx @tarojs/cli build --type h5",
+  "buildCommand": "npm run build:h5",
   "outputDirectory": "dist",
-  "installCommand": "npm install --legacy-peer-deps",
-  "framework": null
+  "installCommand": "npm ci --legacy-peer-deps || npm install --legacy-peer-deps",
+  "framework": null,
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 30
+    }
+  }
 }

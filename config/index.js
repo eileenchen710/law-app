@@ -1,4 +1,4 @@
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
+// const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 
 module.exports = function (merge, { command, mode }) {
   const baseConfig = {
@@ -40,9 +40,9 @@ module.exports = function (merge, { command, mode }) {
           }
         }
       },
-      webpackChain(chain) {
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
-      }
+      // webpackChain(chain) {
+      //   chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
+      // }
     },
     h5: {
       publicPath: '/',
@@ -69,9 +69,9 @@ module.exports = function (merge, { command, mode }) {
           }
         }
       },
-      webpackChain(chain) {
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
-      }
+      // webpackChain(chain) {
+      //   chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
+      // }
     },
     rn: {
       appName: 'taroDemo',

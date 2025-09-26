@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "law-app",
   "description": "",
-  "appid": "wx5669376452566251",
+  "appid": "wx69ae063cf844d4ae",
   "setting": {
     "urlCheck": true,
     "es6": false,
@@ -35,5 +35,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "2.31.0"
 }

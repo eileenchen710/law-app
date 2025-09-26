@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install && npm run build:h5",
+  "buildCommand": "npx @tarojs/cli build --type h5",
   "outputDirectory": "dist",
-  "installCommand": "npm install --force",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": null
 }

@@ -2,7 +2,7 @@
 // https://docs.taro.zone/docs/next/babel-config
 module.exports = {
   presets: [
-    ['taro', {
+    ['babel-preset-taro', {
       framework: 'react',
       ts: true,
       compiler: 'webpack5',

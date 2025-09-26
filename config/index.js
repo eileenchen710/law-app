@@ -14,7 +14,7 @@ module.exports = function (merge, { command, mode }) {
     sourceRoot: 'src',
     outputRoot: 'dist',
     plugins: [
-      "@tarojs/plugin-generator"
+      // "@tarojs/plugin-generator"
     ],
     defineConstants: {},
     copy: {

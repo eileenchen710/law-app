@@ -1,6 +1,12 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
   "buildCommand": "npm run build:h5",
-  "outputDirectory": "dist",
   "installCommand": "npm_config_production=false npm ci --legacy-peer-deps || npm_config_production=false npm install --legacy-peer-deps",
-  "framework": null
+  "framework": null,
+  "outputDirectory": "dist"
 }

@@ -7,3 +7,5 @@ node_modules/
 .swc
 *.local
 ui/
+.vercel
+.env*.local

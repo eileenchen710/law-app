@@ -3,9 +3,9 @@ const http = require('http');
 const { parse } = require('url');
 
 const handlers = {
-  services: require('../api/services/index.js'),
-  appointments: require('../api/appointments/index.js'),
-  firms: require('../api/firms/index.js'),
+  services: require('../api/_handlers/services.js'),
+  appointments: require('../api/_handlers/appointments.js'),
+  firms: require('../api/_handlers/firms.js'),
 };
 
 function enhanceResponse(res) {

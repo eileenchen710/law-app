@@ -2,6 +2,8 @@ const connectToDatabase = require('../../_lib/db');
 const Firm = require('../../models/firm');
 
 module.exports = async function handler(req, res) {
+  console.log('Firms list API called:', { method: req.method, query: req.query });
+  
   // 设置CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -20,7 +22,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    console.log('Connecting to database...');
+    const dbStartTime = Date.now();
     await connectToDatabase();
+    console.log(`Database connected in ${Date.now() - dbStartTime}ms`);
     
     const { q, city, page = 1, size = 10 } = req.query;
     
@@ -40,15 +45,21 @@ module.exports = async function handler(req, res) {
     }
 
     // 查询总数
+    console.log('Counting documents with query:', query);
+    const countStartTime = Date.now();
     const total = await Firm.countDocuments(query);
+    console.log(`Count completed in ${Date.now() - countStartTime}ms, found ${total} documents`);
 
     // 查询律所列表
+    console.log('Fetching firms with pagination:', { skip, limit });
+    const queryStartTime = Date.now();
     const firms = await Firm.find(query)
       .select('name description address city contact_email contact_phone email phone available_times')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+    console.log(`Query completed in ${Date.now() - queryStartTime}ms, fetched ${firms.length} firms`);
 
     // 格式化响应数据
     const items = firms.map(firm => ({

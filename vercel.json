@@ -1,10 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    }
-  ],
   "buildCommand": "npm run build:h5",
   "installCommand": "npm_config_production=false npm ci --legacy-peer-deps || npm_config_production=false npm install --legacy-peer-deps",
   "framework": null,
@@ -15,10 +9,10 @@
       "maxDuration": 30
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "^/api(?:/(.*))?$",
-      "dest": "/api/index"
+      "source": "/api/:match*",
+      "destination": "/api"
     }
   ]
 }

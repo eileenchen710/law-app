@@ -1,0 +1,82 @@
+const connectToDatabase = require('../../_lib/db');
+const Firm = require('../../models/firm');
+
+module.exports = async function handler(req, res) {
+  // 设置CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('ETag', `W/"${Date.now()}-${Math.random().toString(36).slice(2)}"`);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    await connectToDatabase();
+    
+    const { q, city, page = 1, size = 10 } = req.query;
+    
+    // 计算分页
+    const skip = (parseInt(page) - 1) * parseInt(size);
+    const limit = parseInt(size);
+
+    // 构建查询条件
+    const query = {};
+    
+    if (q) {
+      query.name = { $regex: q, $options: 'i' };
+    }
+    
+    if (city) {
+      query.city = city;
+    }
+
+    // 查询总数
+    const total = await Firm.countDocuments(query);
+
+    // 查询律所列表
+    const firms = await Firm.find(query)
+      .select('name description address city contact_email contact_phone email phone available_times')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // 格式化响应数据
+    const items = firms.map(firm => ({
+      id: firm._id.toString(),
+      name: firm.name,
+      description: firm.description,
+      address: firm.address,
+      city: firm.city,
+      contact_email: firm.contact_email || firm.email,
+      contact_phone: firm.contact_phone || firm.phone,
+      available_times: (firm.available_times || [])
+        .filter(time => new Date(time) > new Date())
+        .map(time => new Date(time).toISOString())
+    }));
+
+    res.status(200).json({
+      items,
+      total,
+      page: parseInt(page),
+      size: parseInt(size),
+      pages: Math.ceil(total / parseInt(size))
+    });
+
+  } catch (error) {
+    console.error('Error fetching firms:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch firms',
+      details: error.message 
+    });
+  }
+};

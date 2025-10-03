@@ -8,6 +8,10 @@ import heroImage from "../../assets/legal-app-hero.png";
 import lawFirmLogo from "../../assets/fu_du.png";
 import ServiceCard from "./components/ServiceCard";
 
+import { fetchAppointments, fetchFirmById, fetchFirms, fetchServiceById, fetchServices } from "../../services/api";
+import type { ApiError } from "../../services/http";
+import type { AppointmentPayload } from "../../services/types";
+
 // 服务分类数据
 const serviceCategories = [
   { id: "criminal", name: "刑事辩护", icon: "⚖️" },
@@ -143,6 +147,17 @@ const legalServices = [
   },
 ];
 
+function logApiFailure(tag: string, error: unknown) {
+  const err = error as ApiError | Error;
+  const message = (err as ApiError).message || err.message || String(error);
+  const data = (err as ApiError).data;
+  if (data) {
+    console.error(`❌ ${tag} API 调用失败:`, message, data);
+  } else {
+    console.error(`❌ ${tag} API 调用失败:`, message);
+  }
+}
+
 export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeFirm, setActiveFirm] = useState("2");
@@ -154,6 +169,68 @@ export default function Index() {
 
   useLoad(() => {
     console.log("Page loaded.");
+    console.log("开始测试 API 接口...");
+
+    const runTests = async () => {
+      try {
+        const firms = await fetchFirms({ page: 1, size: 5 });
+        console.log("✅ 律所列表 API 测试成功:", firms);
+        console.log(`  - 获取到 ${firms.items?.length || 0} 个律所`);
+        console.log(`  - 总共 ${firms.total || 0} 个律所`);
+
+        if (firms.items && firms.items.length > 0) {
+          const firstFirmId = firms.items[0].id;
+          const firmDetail = await fetchFirmById(firstFirmId);
+          console.log("✅ 律所详情 API 测试成功:", firmDetail);
+          console.log(`  - 律所名称: ${firmDetail.name}`);
+          console.log(`  - 包含 ${firmDetail.services?.length || 0} 个服务`);
+        }
+      } catch (error) {
+        logApiFailure('律所', error);
+      }
+
+      try {
+        const services = await fetchServices({ page: 1, size: 5 });
+        console.log("✅ 服务列表 API 测试成功:", services);
+        console.log(`  - 获取到 ${services.items?.length || 0} 个服务`);
+
+        if (services.items && services.items.length > 0) {
+          const firstServiceId = services.items[0].id;
+          const serviceDetail = await fetchServiceById(firstServiceId);
+          console.log("✅ 服务详情 API 测试成功:", serviceDetail);
+          console.log(`  - 服务名称: ${serviceDetail.title}`);
+          console.log(`  - 所属律所: ${serviceDetail.firm?.name || serviceDetail.firm_name || '未知'}`);
+        }
+      } catch (error) {
+        logApiFailure('服务', error);
+      }
+
+      try {
+        const appointments = await fetchAppointments({ page: 1, size: 5 });
+        console.log("✅ 预约列表 API 测试成功:", appointments);
+        console.log(`  - 获取到 ${appointments.items?.length || 0} 个预约`);
+      } catch (error) {
+        logApiFailure('预约', error);
+      }
+    };
+
+    runTests().catch((error) => {
+      logApiFailure('API 调试', error);
+    });
+
+    const testAppointment: AppointmentPayload = {
+      name: "测试用户",
+      phone: "13800138000",
+      email: "test@example.com",
+      firm_id: "test_firm_id",
+      service_id: "test_service_id",
+      time: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      remark: "这是一个测试预约",
+    };
+
+    console.log("📝 准备测试提交预约（POST 请求）...");
+    console.log("  测试数据:", testAppointment);
+    console.log("  注意: 需要替换为实际的 firm_id 和 service_id 才能成功提交");
   });
 
   usePageScroll((res) => {

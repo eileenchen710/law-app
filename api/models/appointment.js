@@ -7,14 +7,44 @@ const AppointmentSchema = new Schema(
       required: true,
       trim: true,
     },
-    contact: {
+    phone: {
       type: String,
       required: true,
       trim: true,
     },
+    email: {
+      type: String,
+      trim: true,
+    },
+    firm_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Firm',
+      required: true,
+    },
+    service_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Service',
+      required: true,
+    },
+    appointment_time: {
+      type: Date,
+      required: true,
+    },
+    remark: {
+      type: String,
+      trim: true,
+    },
+    status: {
+      type: String,
+      default: 'pending',
+      enum: ['pending', 'confirmed', 'cancelled', 'completed'],
+    },
+    contact: {
+      type: String,
+      trim: true,
+    },
     description: {
       type: String,
-      required: true,
       trim: true,
     },
   },

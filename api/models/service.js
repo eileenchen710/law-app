@@ -2,6 +2,11 @@
 
 const ServiceSchema = new Schema(
   {
+    firm_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Firm',
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -17,14 +22,21 @@ const ServiceSchema = new Schema(
       required: true,
       trim: true,
     },
+    price: {
+      type: Number,
+      min: 0,
+    },
     lawyerInfo: {
       type: Schema.Types.Mixed,
-      required: true,
     },
     status: {
       type: String,
-      required: true,
+      default: 'active',
       trim: true,
+    },
+    available_times: {
+      type: [Date],
+      default: [],
     },
   },
   {

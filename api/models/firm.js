@@ -36,9 +36,9 @@ const FirmSchema = new Schema(
     },
     slug: {
       type: String,
-      required: true,
       trim: true,
       unique: true,
+      sparse: true,
     },
     city: {
       type: String,
@@ -55,6 +55,14 @@ const FirmSchema = new Schema(
       trim: true,
     },
     email: {
+      type: String,
+      trim: true,
+    },
+    contact_email: {
+      type: String,
+      trim: true,
+    },
+    contact_phone: {
       type: String,
       trim: true,
     },
@@ -77,6 +85,10 @@ const FirmSchema = new Schema(
     },
     lawyers: {
       type: [LawyerSchema],
+      default: [],
+    },
+    available_times: {
+      type: [Date],
       default: [],
     },
   },

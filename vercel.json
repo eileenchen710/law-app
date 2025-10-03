@@ -8,5 +8,17 @@
   "buildCommand": "npm run build:h5",
   "installCommand": "npm_config_production=false npm ci --legacy-peer-deps || npm_config_production=false npm install --legacy-peer-deps",
   "framework": null,
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "functions": {
+    "api/index.js": {
+      "memory": 256,
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "^/api(?:/(.*))?$",
+      "dest": "api/index.js"
+    }
+  ]
 }

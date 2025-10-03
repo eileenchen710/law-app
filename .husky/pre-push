@@ -4,4 +4,9 @@ if [ ! -f .vercel/project.json ]; then
   exit 0
 fi
 
+if [ -z "$VERCEL_TOKEN" ]; then
+  echo "husky - skipping Vercel build: missing VERCEL_TOKEN" >&2
+  exit 0
+fi
+
 npx vercel build

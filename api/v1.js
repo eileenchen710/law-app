@@ -1,7 +1,4 @@
 const connectToDatabase = require('./_lib/db-optimized');
-const Firm = require('./models/firm');
-const Service = require('./models/service');
-const Appointment = require('./models/appointment');
 
 // Single entry point for all v1 API routes to reduce cold starts
 module.exports = async function handler(req, res) {

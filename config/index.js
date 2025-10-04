@@ -89,7 +89,21 @@ module.exports = function (merge, { command, mode }) {
       stats: true
     },
     mini: {},
-    h5: {}
+    h5: {
+      devServer: {
+        port: 10086,
+        proxy: {
+          '/api': {
+            target: 'https://law-app-six.vercel.app',
+            changeOrigin: true,
+            secure: true,
+            pathRewrite: {
+              '^/api': '/api'
+            }
+          }
+        }
+      }
+    }
   }
 
   const prodConfig = {

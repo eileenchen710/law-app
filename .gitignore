@@ -9,3 +9,12 @@ node_modules/
 ui/
 .vercel
 .env*.local
+
+# Test files
+test-*.js
+check-*.js
+mongo-*.js
+migrate-*.js
+local-api-server.js
+*_README.md
+*.cmd

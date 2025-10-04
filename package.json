@@ -33,20 +33,7 @@
     "dev:server": "tsx watch server/src/index.ts",
     "start:server": "node server/dist/index.js",
     "build:server": "tsc -p server/tsconfig.json",
-    "seed:server": "tsx server/src/scripts/seed.ts",
-    "test:db": "node test-mongodb.js",
-    "test:api": "node scripts/test-api.js",
-    "test:all": "npm run test:db && npm run test:api",
-    "mongo:cli": "node mongo-cli.js",
-    "mongo:inspect": "node mongo-inspect.js",
-    "mongo:query": "node mongo-query.js",
-    "mongo:collections": "node mongo-query.js collections",
-    "mongo:firms": "node mongo-query.js find firms",
-    "mongo:count": "node mongo-query.js count",
-    "mongosh:connect": "mongosh \"mongodb+srv://Vercel-Admin-law-app:hYjZawuSn3rpDA3Z@law-app.3gbhvry.mongodb.net/?retryWrites=true&w=majority/test\"",
-    "mongosh:dbs": "mongosh \"mongodb+srv://Vercel-Admin-law-app:hYjZawuSn3rpDA3Z@law-app.3gbhvry.mongodb.net/?retryWrites=true&w=majority\" --eval \"show databases\"",
-    "mongosh:collections": "mongosh \"mongodb+srv://Vercel-Admin-law-app:hYjZawuSn3rpDA3Z@law-app.3gbhvry.mongodb.net/?retryWrites=true&w=majority/test\" --eval \"show collections\"",
-    "mongosh:firms": "mongosh \"mongodb+srv://Vercel-Admin-law-app:hYjZawuSn3rpDA3Z@law-app.3gbhvry.mongodb.net/?retryWrites=true&w=majority/test\" --eval \"db.firms.find({}, {name: 1, city: 1, email: 1})\""
+    "seed:server": "tsx server/src/scripts/seed.ts"
   },
   "browserslist": [
     "defaults and fully supports es6-module",

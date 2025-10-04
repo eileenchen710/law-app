@@ -1,4 +1,4 @@
-const connectToDatabase = require('../../_lib/db');
+const connectToDatabase = require('../../_lib/db-optimized');
 const Firm = require('../../models/firm');
 
 module.exports = async function handler(req, res) {

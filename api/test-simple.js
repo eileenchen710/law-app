@@ -1,4 +1,4 @@
-const connectToDatabase = require('./_lib/db');
+const connectToDatabase = require('./_lib/db-optimized');
 
 module.exports = async function handler(req, res) {
   console.log('Test API called at:', new Date().toISOString());

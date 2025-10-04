@@ -14,9 +14,15 @@ if (!cached) {
 }
 
 async function connectToDatabase() {
-  if (cached.conn && cached.conn.connection.readyState === 1) {
-    console.log('Using existing database connection');
-    return cached.conn;
+  // Check if we have a cached connection that's ready
+  if (cached.conn) {
+    // For mongoose instance, check if connection is ready
+    const readyState = mongoose.connection.readyState;
+    if (readyState === 1) {
+      console.log('Using existing database connection');
+      return cached.conn;
+    }
+    console.log('Cached connection not ready, state:', readyState);
   }
 
   if (!cached.promise) {
@@ -35,14 +41,18 @@ async function connectToDatabase() {
     };
 
     console.log('Creating new database connection...');
-    cached.promise = mongoose.connect(MONGODB_URI, options).then(async (mongooseInstance) => {
+    cached.promise = mongoose.connect(MONGODB_URI, options).then((mongooseInstance) => {
       console.log('Database connected successfully');
       
-      // Ensure indexes on first connection
+      // Schedule index creation asynchronously (don't block the connection)
       if (!global._indexesEnsured) {
-        const ensureIndexes = require('./ensure-indexes');
-        await ensureIndexes();
         global._indexesEnsured = true;
+        setImmediate(() => {
+          const ensureIndexes = require('./ensure-indexes');
+          ensureIndexes().catch(err => {
+            console.error('Failed to create indexes:', err);
+          });
+        });
       }
       
       return mongooseInstance;

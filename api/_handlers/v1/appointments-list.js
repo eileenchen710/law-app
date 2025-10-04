@@ -1,4 +1,4 @@
-const connectToDatabase = require('../../_lib/db');
+const connectToDatabase = require('../../_lib/db-optimized');
 const Appointment = require('../../models/appointment');
 const Firm = require('../../models/firm');
 const Service = require('../../models/service');

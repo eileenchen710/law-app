@@ -5,8 +5,16 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "memory": 256,
-      "maxDuration": 30
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/health.js": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/_handlers/v1/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
     }
   },
   "rewrites": [

@@ -12,6 +12,14 @@
       "memory": 1024,
       "maxDuration": 60
     },
+    "api/v1-fixed.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/debug-db.js": {
+      "memory": 512,
+      "maxDuration": 10
+    },
     "api/health.js": {
       "memory": 512,
       "maxDuration": 10
@@ -22,6 +30,10 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api/v1-fixed/:match*",
+      "destination": "/api/v1-fixed"
+    },
     {
       "source": "/api/v1/:match*",
       "destination": "/api/v1"

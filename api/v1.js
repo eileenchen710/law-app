@@ -1,4 +1,5 @@
 const connectToDatabase = require('./_lib/db-optimized');
+const mongoose = require('mongoose');
 
 // Single entry point for all v1 API routes to reduce cold starts
 module.exports = async function handler(req, res) {
@@ -58,7 +59,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// Firms list handler
+// Firms list handler - using direct MongoDB access
 async function handleFirmsList(req, res) {
   const { q, city, page = 1, size = 10 } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(size);
@@ -68,14 +69,16 @@ async function handleFirmsList(req, res) {
   if (q) query.name = { $regex: q, $options: 'i' };
   if (city) query.city = city;
   
+  const db = mongoose.connection.db;
+  const firmsCollection = db.collection('firms');
+  
   const [total, firms] = await Promise.all([
-    Firm.countDocuments(query),
-    Firm.find(query)
-      .select('name description address city contact_email contact_phone email phone')
+    firmsCollection.countDocuments(query),
+    firmsCollection.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean()
+      .toArray()
   ]);
   
   const items = firms.map(firm => ({
@@ -97,9 +100,21 @@ async function handleFirmsList(req, res) {
   });
 }
 
-// Firm detail handler
+// Firm detail handler - using direct MongoDB access
 async function handleFirmDetail(req, res, id) {
-  const firm = await Firm.findById(id).lean();
+  const db = mongoose.connection.db;
+  const firmsCollection = db.collection('firms');
+  
+  // Try finding by string id first (for non-ObjectId format)
+  let firm = await firmsCollection.findOne({ _id: id });
+  
+  // If not found, try with ObjectId
+  if (!firm) {
+    const { ObjectId } = require('mongodb');
+    if (ObjectId.isValid(id)) {
+      firm = await firmsCollection.findOne({ _id: new ObjectId(id) });
+    }
+  }
   
   if (!firm) {
     return res.status(404).json({ error: 'Firm not found' });
@@ -132,26 +147,35 @@ async function handleServicesList(req, res) {
   if (firm_id) query.firm_id = firm_id;
   if (category) query.category = category;
   
+  const db = mongoose.connection.db;
+  const servicesCollection = db.collection('services');
+  const firmsCollection = db.collection('firms');
+  
   const [total, services] = await Promise.all([
-    Service.countDocuments(query),
-    Service.find(query)
-      .populate('firm_id', 'name address')
-      .select('title description category price firm_id')
+    servicesCollection.countDocuments(query),
+    servicesCollection.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean()
+      .toArray()
   ]);
   
+  // Manually populate firm info
+  for (const service of services) {
+    if (service.firm_id) {
+      service.firm = await firmsCollection.findOne({ _id: service.firm_id });
+    }
+  }
+  
   const items = services.map(service => ({
-    id: service._id.toString(),
+    id: service._id ? service._id.toString() : service.id,
     title: service.title,
     description: service.description,
     category: service.category,
     price: service.price || null,
-    firm_id: service.firm_id?._id?.toString() || service.firm_id,
-    firm_name: service.firm_id?.name || null,
-    firm_address: service.firm_id?.address || null
+    firm_id: service.firm_id,
+    firm_name: service.firm?.name || null,
+    firm_address: service.firm?.address || null
   }));
   
   res.json({
@@ -163,25 +187,41 @@ async function handleServicesList(req, res) {
   });
 }
 
-// Service detail handler
+// Service detail handler - using direct MongoDB access
 async function handleServiceDetail(req, res, id) {
-  const service = await Service.findById(id)
-    .populate('firm_id', 'name address')
-    .lean();
+  const db = mongoose.connection.db;
+  const servicesCollection = db.collection('services');
+  const firmsCollection = db.collection('firms');
+  
+  let service = await servicesCollection.findOne({ _id: id });
+  
+  if (!service) {
+    const { ObjectId } = require('mongodb');
+    if (ObjectId.isValid(id)) {
+      service = await servicesCollection.findOne({ _id: new ObjectId(id) });
+    }
+  }
   
   if (!service) {
     return res.status(404).json({ error: 'Service not found' });
   }
   
+  // Get firm info if available
+  let firm = null;
+  if (service.firm_id) {
+    const firmsCollection = db.collection('firms');
+    firm = await firmsCollection.findOne({ _id: service.firm_id });
+  }
+  
   res.json({
-    id: service._id.toString(),
+    id: service._id ? service._id.toString() : service.id,
     title: service.title,
     description: service.description,
     category: service.category,
     price: service.price || null,
-    firm_id: service.firm_id?._id?.toString() || service.firm_id,
-    firm_name: service.firm_id?.name || null,
-    firm_address: service.firm_id?.address || null
+    firm_id: service.firm_id,
+    firm_name: firm?.name || null,
+    firm_address: firm?.address || null
   });
 }
 
@@ -202,26 +242,39 @@ async function handleAppointmentsList(req, res) {
     query.appointment_time = { $gte: startDate, $lte: endDate };
   }
   
+  const db = mongoose.connection.db;
+  const appointmentsCollection = db.collection('appointments');
+  const firmsCollection = db.collection('firms');
+  const servicesCollection = db.collection('services');
+  
   const [total, appointments] = await Promise.all([
-    Appointment.countDocuments(query),
-    Appointment.find(query)
-      .populate('firm_id', 'name')
-      .populate('service_id', 'title')
+    appointmentsCollection.countDocuments(query),
+    appointmentsCollection.find(query)
       .sort({ appointment_time: -1 })
       .skip(skip)
       .limit(limit)
-      .lean()
+      .toArray()
   ]);
+  
+  // Manually populate firm and service info
+  for (const apt of appointments) {
+    if (apt.firm_id) {
+      apt.firm = await firmsCollection.findOne({ _id: apt.firm_id });
+    }
+    if (apt.service_id) {
+      apt.service = await servicesCollection.findOne({ _id: apt.service_id });
+    }
+  }
   
   const items = appointments.map(appointment => ({
     id: `apt-${appointment._id.toString()}`,
     name: appointment.name,
     phone: appointment.phone,
     email: appointment.email,
-    firm_id: appointment.firm_id?._id?.toString() || appointment.firm_id,
-    firm_name: appointment.firm_id?.name || null,
-    service_id: appointment.service_id?._id?.toString() || appointment.service_id,
-    service_name: appointment.service_id?.title || null,
+    firm_id: appointment.firm_id,
+    firm_name: appointment.firm?.name || null,
+    service_id: appointment.service_id,
+    service_name: appointment.service?.title || null,
     time: new Date(appointment.appointment_time).toISOString(),
     remark: appointment.remark,
     status: appointment.status,
@@ -249,8 +302,11 @@ async function handleAppointmentCreate(req, res) {
     });
   }
   
-  // Create appointment
-  const appointment = new Appointment({
+  // Create appointment using direct MongoDB
+  const db = mongoose.connection.db;
+  const appointmentsCollection = db.collection('appointments');
+  
+  const appointment = {
     name,
     phone,
     email: email || undefined,
@@ -258,14 +314,16 @@ async function handleAppointmentCreate(req, res) {
     service_id,
     appointment_time: new Date(time),
     remark: remark || undefined,
-    status: 'pending'
-  });
+    status: 'pending',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
   
-  const savedAppointment = await appointment.save();
+  const result = await appointmentsCollection.insertOne(appointment);
   
   res.status(201).json({
     status: 'ok',
     message: '预约提交成功',
-    appointment_id: `apt-${savedAppointment._id.toString()}`
+    appointment_id: `apt-${result.insertedId.toString()}`
   });
 }

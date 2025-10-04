@@ -12,9 +12,9 @@
       "memory": 512,
       "maxDuration": 10
     },
-    "api/_handlers/v1/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
+    "api/test-simple.js": {
+      "memory": 512,
+      "maxDuration": 10
     }
   },
   "rewrites": [

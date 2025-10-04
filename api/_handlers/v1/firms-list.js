@@ -44,22 +44,22 @@ module.exports = async function handler(req, res) {
       query.city = city;
     }
 
-    // 查询总数
-    console.log('Counting documents with query:', query);
-    const countStartTime = Date.now();
-    const total = await Firm.countDocuments(query);
-    console.log(`Count completed in ${Date.now() - countStartTime}ms, found ${total} documents`);
-
-    // 查询律所列表
-    console.log('Fetching firms with pagination:', { skip, limit });
+    // 并行执行计数和查询
+    console.log('Executing parallel queries with:', query);
     const queryStartTime = Date.now();
-    const firms = await Firm.find(query)
-      .select('name description address city contact_email contact_phone email phone available_times')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-    console.log(`Query completed in ${Date.now() - queryStartTime}ms, fetched ${firms.length} firms`);
+    
+    const [total, firms] = await Promise.all([
+      Firm.countDocuments(query),
+      Firm.find(query)
+        .select('name description address city contact_email contact_phone email phone available_times')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .maxTimeMS(5000) // 添加5秒超时
+    ]);
+    
+    console.log(`Queries completed in ${Date.now() - queryStartTime}ms, found ${total} total, fetched ${firms.length} firms`);
 
     // 格式化响应数据
     const items = firms.map(firm => ({

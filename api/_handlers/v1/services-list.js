@@ -17,7 +17,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    console.log('Services API: Connecting to database...');
+    const dbStartTime = Date.now();
     await connectToDatabase();
+    console.log(`Services API: Database connected in ${Date.now() - dbStartTime}ms`);
     
     const { q, firm_id, category, page = 1, size = 10 } = req.query;
     
@@ -43,17 +46,23 @@ module.exports = async function handler(req, res) {
       query.category = category;
     }
 
-    // 查询总数
-    const total = await Service.countDocuments(query);
-
-    // 查询服务列表并关联律所信息
-    const services = await Service.find(query)
-      .populate('firm_id', 'name address')
-      .select('title description category price firm_id available_times')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    // 并行执行计数和查询
+    console.log('Services API: Executing parallel queries');
+    const queryStartTime = Date.now();
+    
+    const [total, services] = await Promise.all([
+      Service.countDocuments(query),
+      Service.find(query)
+        .populate('firm_id', 'name address')
+        .select('title description category price firm_id available_times')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .maxTimeMS(5000)
+    ]);
+    
+    console.log(`Services API: Queries completed in ${Date.now() - queryStartTime}ms`);
 
     // 格式化响应数据
     const items = services.map(service => ({

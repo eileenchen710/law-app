@@ -23,15 +23,28 @@ async function connectToDatabase() {
     const options = {
       bufferCommands: false,
       dbName: MONGODB_DB,
-      maxPoolSize: 1,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 20000,
-      connectTimeoutMS: 10000,
+      maxPoolSize: 5,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      connectTimeoutMS: 5000,
+      heartbeatFrequencyMS: 5000,
+      minPoolSize: 1,
+      maxIdleTimeMS: 10000,
+      retryWrites: true,
+      w: 'majority'
     };
 
     console.log('Creating new database connection...');
-    cached.promise = mongoose.connect(MONGODB_URI, options).then((mongooseInstance) => {
+    cached.promise = mongoose.connect(MONGODB_URI, options).then(async (mongooseInstance) => {
       console.log('Database connected successfully');
+      
+      // Ensure indexes on first connection
+      if (!global._indexesEnsured) {
+        const ensureIndexes = require('./ensure-indexes');
+        await ensureIndexes();
+        global._indexesEnsured = true;
+      }
+      
       return mongooseInstance;
     }).catch(err => {
       console.error('Database connection failed:', err);

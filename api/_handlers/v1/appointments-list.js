@@ -15,7 +15,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    console.log('Appointments API: Connecting to database...');
+    const dbStartTime = Date.now();
     await connectToDatabase();
+    console.log(`Appointments API: Database connected in ${Date.now() - dbStartTime}ms`);
 
     // GET - 查询预约列表（管理后台用）
     if (req.method === 'GET') {
@@ -44,17 +47,23 @@ module.exports = async function handler(req, res) {
         };
       }
 
-      // 查询总数
-      const total = await Appointment.countDocuments(query);
-
-      // 查询预约列表
-      const appointments = await Appointment.find(query)
-        .populate('firm_id', 'name')
-        .populate('service_id', 'title')
-        .sort({ appointment_time: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
+      // 并行执行计数和查询
+      console.log('Appointments API: Executing parallel queries');
+      const queryStartTime = Date.now();
+      
+      const [total, appointments] = await Promise.all([
+        Appointment.countDocuments(query),
+        Appointment.find(query)
+          .populate('firm_id', 'name')
+          .populate('service_id', 'title')
+          .sort({ appointment_time: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean()
+          .maxTimeMS(5000)
+      ]);
+      
+      console.log(`Appointments API: Queries completed in ${Date.now() - queryStartTime}ms`);
 
       // 格式化响应数据
       const items = appointments.map(appointment => ({
@@ -127,22 +136,29 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      // 检查律所是否存在
-      const firm = await Firm.findById(firm_id)
-        .select('name contact_email email')
-        .lean();
+      // 并行检查律所和服务
+      console.log('Appointments API: Validating firm and service');
+      const validateStartTime = Date.now();
+      
+      const [firm, service] = await Promise.all([
+        Firm.findById(firm_id)
+          .select('name contact_email email')
+          .lean()
+          .maxTimeMS(2000),
+        Service.findOne({ 
+          _id: service_id, 
+          firm_id: firm_id 
+        })
+        .select('title available_times')
+        .lean()
+        .maxTimeMS(2000)
+      ]);
+      
+      console.log(`Appointments API: Validation completed in ${Date.now() - validateStartTime}ms`);
       
       if (!firm) {
         return res.status(404).json({ error: 'Firm not found' });
       }
-
-      // 检查服务是否存在且属于该律所
-      const service = await Service.findOne({ 
-        _id: service_id, 
-        firm_id: firm_id 
-      })
-      .select('title available_times')
-      .lean();
       
       if (!service) {
         return res.status(404).json({ 

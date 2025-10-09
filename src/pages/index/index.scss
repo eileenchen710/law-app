@@ -14,7 +14,14 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   color: $fallback-color;
 
   @supports (-webkit-background-clip: text) {
-    background: linear-gradient(to right, #888888, #aaadb0, #f1f1f1, #aaadb0, #888888);
+    background: linear-gradient(
+      to right,
+      #888888,
+      #aaadb0,
+      #f1f1f1,
+      #aaadb0,
+      #888888
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
@@ -22,7 +29,14 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   }
 
   @supports (background-clip: text) {
-    background: linear-gradient(to right, #888888, #aaadb0, #f1f1f1, #aaadb0, #888888);
+    background: linear-gradient(
+      to right,
+      #888888,
+      #aaadb0,
+      #f1f1f1,
+      #aaadb0,
+      #888888
+    );
     background-clip: text;
     color: transparent;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
@@ -89,8 +103,8 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
     gap: 10px;
 
     .logo-image {
-      height: 18px;
-      width: 18px;
+      height: 48px;
+      width: 32px;
       transition: all 0.3s;
 
       &:hover {
@@ -169,25 +183,22 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
   .mobile-menu-toggle {
     display: none;
-    width: 34px;
-    height: 34px;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    width: 28px;
+    height: 28px;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     gap: 5px;
     cursor: pointer;
-    padding: 8px;
-    transition: all 0.3s ease;
+    padding: 0;
+    transition: opacity 0.3s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.12);
+      opacity: 0.82;
     }
 
     .bar {
-      width: 18px;
+      width: 16px;
       height: 2px;
       background: #ffffff;
       border-radius: 9999px;
@@ -196,7 +207,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
     &.open {
       .bar:nth-child(1) {
-        transform: translateY(7px) rotate(45deg);
+        transform: translateY(6px) rotate(45deg);
       }
 
       .bar:nth-child(2) {
@@ -204,7 +215,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
       }
 
       .bar:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg);
+        transform: translateY(-6px) rotate(-45deg);
       }
     }
   }
@@ -248,8 +259,8 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
     gap: 10px;
 
     .mobile-logo {
-      width: 22px;
-      height: 22px;
+      width: 32px;
+      height: 32px;
     }
 
     .mobile-name {
@@ -372,7 +383,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   justify-content: center;
   align-items: center;
   position: relative;
-  padding: 80px 20px 80px;
+  padding: 80px 32px 80px;
 
   .hero-bg {
     position: absolute;
@@ -405,9 +416,11 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   .hero-content {
     position: relative;
     z-index: 10;
-    max-width: 1024px;
+    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     text-align: center;
+    padding: 0 20px;
 
     .hero-badge {
       display: inline-flex;
@@ -458,14 +471,18 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
     }
 
     .hero-desc {
+      display: block;
       font-size: 18px;
-      max-width: 768px;
+      width: 60vw;
+      max-width: 60vw;
       margin: 0 auto 40px;
-      line-height: 1.6;
+      line-height: 1.5 !important;
       animation: fadeIn 0.8s ease forwards;
       animation-delay: 0.7s;
       opacity: 0;
       color: $text-white-60;
+      white-space: normal;
+      word-wrap: break-word;
     }
 
     .hero-image-container {
@@ -516,10 +533,20 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
         }
 
         .feature-icon {
-          display: block;
-          font-size: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 52px;
+          height: 52px;
+          border-radius: 16px;
+          background: rgba(241, 196, 152, 0.12);
+          border: 1px solid rgba(241, 196, 152, 0.35);
           margin-bottom: 12px;
-          color: $primary-color;
+
+          .feature-icon-image {
+            width: 28px;
+            height: 28px;
+          }
         }
 
         .feature-title {
@@ -618,7 +645,7 @@ button,
 
 // 律所展示部分
 .lawfirms-section {
-  padding: 80px 20px;
+  padding: 80px 32px;
   position: relative;
   overflow: hidden;
 
@@ -829,7 +856,7 @@ button,
 
 // 服务部分
 .services-section {
-  padding: 80px 20px;
+  padding: 80px 32px;
   position: relative;
   overflow: hidden;
 
@@ -973,7 +1000,8 @@ button,
         border: 1px solid rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-        transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+        transition: transform 0.35s ease, box-shadow 0.35s ease,
+          background 0.35s ease;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -983,7 +1011,11 @@ button,
           position: absolute;
           inset: 0;
           border-radius: inherit;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(147, 51, 234, 0.08));
+          background: linear-gradient(
+            135deg,
+            rgba(59, 130, 246, 0.08),
+            rgba(147, 51, 234, 0.08)
+          );
           opacity: 0;
           transition: opacity 0.35s ease;
           pointer-events: none;
@@ -1015,7 +1047,11 @@ button,
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(147, 51, 234, 0.85));
+            background: linear-gradient(
+              135deg,
+              rgba(59, 130, 246, 0.85),
+              rgba(147, 51, 234, 0.85)
+            );
             border: 2px solid rgba(255, 255, 255, 0.12);
             display: flex;
             align-items: center;
@@ -1041,6 +1077,10 @@ button,
               margin-bottom: 6px;
               letter-spacing: 0.3px;
               transition: color 0.35s ease;
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+              white-space: normal;
+              line-height: 1.4;
             }
 
             .service-lawyer {
@@ -1098,7 +1138,8 @@ button,
           align-items: center;
           justify-content: center;
           box-shadow: 0 14px 30px -18px rgba(99, 102, 241, 0.9);
-          transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+          transition: transform 0.3s ease, box-shadow 0.3s ease,
+            filter 0.3s ease;
 
           &:hover {
             transform: translateY(-1px);
@@ -1117,7 +1158,7 @@ button,
 
 // 联系表单部分
 .contact-section {
-  padding: 80px 20px;
+  padding: 80px 32px;
   position: relative;
   overflow: hidden;
 
@@ -1174,8 +1215,14 @@ button,
       }
 
       .form-desc {
+        display: block;
         font-size: 14px;
         color: $text-white-60;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        max-width: 100%;
       }
     }
 
@@ -1244,6 +1291,8 @@ button,
           border: 1px solid $border-white-10;
           border-radius: 8px;
           transition: all 0.3s;
+          font-size: 13px;
+          color: $text-white;
 
           &:focus {
             border-color: $primary-color;
@@ -1252,7 +1301,7 @@ button,
 
           .placeholder {
             color: rgba(255, 255, 255, 0.4);
-            font-size: 14px;
+            font-size: 13px;
 
             &.selected {
               color: rgba(255, 255, 255, 0.85);
@@ -1269,6 +1318,7 @@ button,
         .form-textarea {
           min-height: 100px;
           padding: 12px;
+          font-size: 13px !important;
         }
       }
 
@@ -1315,7 +1365,7 @@ button,
 
 // 页脚
 .footer {
-  padding: 24px 20px;
+  padding: 24px 32px;
   border-top: 1px solid $border-white-10;
 
   .footer-content {
@@ -1331,8 +1381,8 @@ button,
       gap: 8px;
 
       .footer-logo {
-        height: 20px;
-        width: 20px;
+        height: 28px;
+        width: 28px;
       }
 
       .footer-name {
@@ -1376,8 +1426,8 @@ button,
 
     .navbar-logo {
       .logo-image {
-        height: 24px;
-        width: 24px;
+        height: 48px;
+        width: 48px;
       }
 
       .logo-text {
@@ -1394,9 +1444,11 @@ button,
 
   // Hero 区域调整
   .hero-section {
-    padding: 60px 16px 40px;
+    padding: 60px 1rem 40px;
 
     .hero-content {
+      padding: 0 1rem;
+
       .hero-badge {
         padding: 6px 16px;
         margin-bottom: 24px;
@@ -1417,14 +1469,20 @@ button,
       }
 
       .hero-desc {
+        display: block;
         font-size: 14px;
         margin-bottom: 24px;
-        padding: 0 16px;
+        padding: 0;
+        width: 100%;
+        max-width: none;
+        line-height: 1.5 !important;
+        white-space: normal;
+        word-wrap: break-word;
       }
 
       .hero-image-container {
         margin-bottom: 32px;
-        padding: 0 16px;
+        padding: 0;
       }
 
       .features-grid {
@@ -1436,8 +1494,15 @@ button,
           padding: 16px;
 
           .feature-icon {
-            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             margin-bottom: 8px;
+
+            .feature-icon-image {
+              width: 24px;
+              height: 24px;
+            }
           }
 
           .feature-title {
@@ -1453,9 +1518,9 @@ button,
 
       .hero-actions {
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         width: 100%;
-        padding: 0 16px;
+        padding: 0;
 
         .action-btn {
           width: 100%;
@@ -1467,7 +1532,7 @@ button,
 
   // 律所展示调整
   .lawfirms-section {
-    padding: 40px 16px;
+    padding: 40px 1rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1488,7 +1553,7 @@ button,
       margin-bottom: 32px;
 
       .firm-card {
-        padding: 20px;
+        padding: 1rem;
 
         .firm-header {
           .firm-logo-section {
@@ -1555,7 +1620,7 @@ button,
 
   // 服务部分调整
   .services-section {
-    padding: 40px 16px;
+    padding: 40px 1rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1607,7 +1672,7 @@ button,
         }
 
         .service-card {
-          padding: 20px;
+          padding: 1rem;
           gap: 12px;
 
           .service-card-header {
@@ -1625,10 +1690,17 @@ button,
             .service-heading {
               .service-title {
                 font-size: 16px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                line-height: 1.4;
               }
 
               .service-lawyer {
                 font-size: 11px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
               }
             }
           }
@@ -1662,7 +1734,7 @@ button,
 
   // 联系表单调整
   .contact-section {
-    padding: 40px 16px;
+    padding: 40px 1rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1677,7 +1749,7 @@ button,
     }
 
     .contact-form {
-      padding: 20px;
+      padding: 1rem;
 
       .form-header {
         margin-bottom: 20px;
@@ -1688,6 +1760,10 @@ button,
 
         .form-desc {
           font-size: 12px;
+          line-height: 1.5;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
         }
       }
 
@@ -1738,7 +1814,7 @@ button,
 
   // 页脚调整
   .footer {
-    padding: 20px 16px;
+    padding: 20px 1rem;
 
     .footer-content {
       flex-direction: column;
@@ -1747,8 +1823,8 @@ button,
 
       .footer-brand {
         .footer-logo {
-          height: 18px;
-          width: 18px;
+          height: 24px;
+          width: 24px;
         }
 
         .footer-name {

@@ -18,7 +18,10 @@ module.exports = function (merge, { command, mode }) {
     ],
     defineConstants: {},
     copy: {
-      patterns: [],
+      patterns: [
+        { from: 'src/assets/images/favicon.ico', to: 'dist/favicon.ico' },
+        { from: 'src/assets/images/index.png', to: 'dist/index.png' }
+      ],
       options: {}
     },
     framework: 'react',

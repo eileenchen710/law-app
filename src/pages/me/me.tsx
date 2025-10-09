@@ -27,7 +27,8 @@ import {
   getSnapshot,
   onMockDataChange,
   resetMockData,
-} from "../../services/mockDataStore";
+  initializeDataStore,
+} from "../../services/dataStore";
 
 interface FirmFormState {
   name: string;
@@ -111,7 +112,18 @@ export default function Me() {
       });
     };
 
-    applySnapshot(getSnapshot());
+    // 初始化数据存储
+    initializeDataStore().then(() => {
+      applySnapshot(getSnapshot());
+    }).catch((error) => {
+      console.error("Failed to initialize data store:", error);
+      Taro.showToast({
+        title: "数据加载失败",
+        icon: "none",
+        duration: 2000,
+      });
+    });
+
     const unsubscribe = onMockDataChange(applySnapshot);
 
     return () => {

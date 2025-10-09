@@ -9,7 +9,7 @@ import type {
   LegalServiceMock,
   MockDataSnapshot,
 } from "../../mock/types";
-import { getSnapshot, onMockDataChange } from "../../services/mockDataStore";
+import { getSnapshot, onMockDataChange, initializeDataStore } from "../../services/dataStore";
 import AppHeader from "../index/components/AppHeader";
 
 const TABS = [
@@ -47,7 +47,13 @@ export default function Search() {
       setLegalServices(snapshot.legalServices);
     };
 
-    applySnapshot(getSnapshot());
+    // 初始化数据存储
+    initializeDataStore().then(() => {
+      applySnapshot(getSnapshot());
+    }).catch((error) => {
+      console.error("Failed to initialize data store:", error);
+    });
+
     const unsubscribe = onMockDataChange(applySnapshot);
 
     return () => {

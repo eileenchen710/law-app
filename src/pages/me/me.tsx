@@ -226,6 +226,11 @@ export default function Me() {
       cases: firm.cases != null ? String(firm.cases) : "",
       recommended: Boolean(firm.recommended),
     });
+    // 滚动到页面顶部
+    Taro.pageScrollTo({
+      scrollTop: 0,
+      duration: 300
+    }).catch(() => undefined);
   };
 
   const handleFirmCancel = () => {

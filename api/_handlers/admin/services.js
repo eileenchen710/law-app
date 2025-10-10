@@ -91,14 +91,48 @@ async function createService(req, res) {
  */
 async function updateService(req, res) {
   try {
+    console.log('Update service - received ID:', req.query.id);
+    console.log('Update service - request body:', req.body);
+
     const { db } = await connectDB();
     const { id } = req.query;
     const updateData = req.body;
 
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Service ID is required',
+      });
+    }
+
     if (!ObjectId.isValid(id)) {
+      console.log('ObjectId.isValid returned false for:', id);
       return res.status(400).json({
         success: false,
         error: 'Invalid service ID',
+        receivedId: id,
+      });
+    }
+
+    // 尝试两种 ID 格式查找文档
+    let existingService = await db.collection('services').findOne({
+      _id: new ObjectId(id)
+    });
+
+    // 如果 ObjectId 格式找不到，尝试字符串格式
+    if (!existingService) {
+      existingService = await db.collection('services').findOne({
+        _id: id
+      });
+    }
+
+    console.log('Existing service:', existingService);
+
+    if (!existingService) {
+      return res.status(404).json({
+        success: false,
+        error: 'Service not found',
+        searchedId: id,
       });
     }
 
@@ -112,22 +146,37 @@ async function updateService(req, res) {
     delete updateData._id;
     updateData.updatedAt = new Date();
 
-    const result = await db.collection('services').findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: updateData },
-      { returnDocument: 'after' }
+    // 使用找到的文档的实际 _id 进行更新
+    const actualId = existingService._id;
+    const result = await db.collection('services').updateOne(
+      { _id: actualId },
+      { $set: updateData }
     );
 
-    if (!result.value) {
+    console.log('Update result:', result);
+
+    if (result.matchedCount === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Service not found',
+        error: 'Service not found during update',
+      });
+    }
+
+    // 获取更新后的文档
+    const updatedService = await db.collection('services').findOne({
+      _id: actualId
+    });
+
+    if (!updatedService) {
+      return res.status(404).json({
+        success: false,
+        error: 'Could not retrieve updated service',
       });
     }
 
     res.status(200).json({
       success: true,
-      data: result.value,
+      data: updatedService,
     });
   } catch (error) {
     console.error('Error updating service:', error);

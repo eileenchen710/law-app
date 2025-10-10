@@ -307,6 +307,11 @@ export default function Me() {
       lawyerName: service.lawyerName,
       lawyerTitle: service.lawyerTitle,
     });
+    // 滚动到页面顶部
+    Taro.pageScrollTo({
+      scrollTop: 0,
+      duration: 300
+    }).catch(() => undefined);
   };
 
   const handleServiceCancel = () => {
@@ -673,24 +678,19 @@ export default function Me() {
           </View>
 
           <View className="form-actions">
-            {editingServiceId ? (
-              <>
-                <Button className="primary-btn" onClick={handleServiceSubmit}>
-                  保存修改
-                </Button>
-                <Button className="ghost-btn" onClick={handleServiceCancel}>
-                  取消
-                </Button>
-              </>
-            ) : (
-              <Button className="primary-btn" onClick={handleServiceSubmit}>
-                新增服务
+            <Button className="primary-btn" onClick={handleServiceSubmit}>
+              {editingServiceId ? '保存修改' : '新增服务'}
+            </Button>
+            {(editingServiceId || serviceForm.title || serviceForm.description) && (
+              <Button className="ghost-btn" onClick={handleServiceCancel}>
+                取消
               </Button>
             )}
           </View>
         </View>
 
-        <View className="list card-bg-black">
+        {!editingServiceId && (
+          <View className="list card-bg-black">
           {legalServices.map((service) => {
             const lawFirm = lawFirms.find(
               (firm) => firm.id === service.lawFirmId
@@ -759,6 +759,7 @@ export default function Me() {
             </View>
           ) : null}
         </View>
+        )}
       </View>
       )}
       </ScrollView>

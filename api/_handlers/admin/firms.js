@@ -125,7 +125,10 @@ async function updateFirm(req, res) {
 
     console.log('Update result:', result);
 
-    if (!result.value) {
+    // MongoDB driver returns the document in 'value' field (older) or directly (newer)
+    const updatedFirm = result.value || result;
+
+    if (!updatedFirm || !updatedFirm._id) {
       return res.status(404).json({
         success: false,
         error: 'Firm not found',
@@ -134,7 +137,7 @@ async function updateFirm(req, res) {
 
     res.status(200).json({
       success: true,
-      data: result.value,
+      data: updatedFirm,
     });
   } catch (error) {
     console.error('Error updating firm:', error);

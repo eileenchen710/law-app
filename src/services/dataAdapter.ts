@@ -33,8 +33,16 @@ interface ApiService {
 
 // 将 API 律所数据转换为前端格式
 export function adaptFirmFromApi(apiFirm: ApiFirm): LawFirmMock {
+  // 处理 _id 字段（可能是 ObjectId 或字符串）
+  let id = apiFirm.id || (apiFirm as any)._id;
+  if (typeof id === 'object' && id.$oid) {
+    id = id.$oid;
+  } else if (typeof id === 'object' && id.toString) {
+    id = id.toString();
+  }
+
   return {
-    id: apiFirm.id,
+    id: id as string,
     name: apiFirm.name,
     description: apiFirm.description || "",
     price: apiFirm.price || "面议",
@@ -66,8 +74,16 @@ export function adaptFirmToApi(firm: Partial<LawFirmMock>): Partial<ApiFirm> {
 
 // 将 API 服务数据转换为前端格式
 export function adaptServiceFromApi(apiService: ApiService): LegalServiceMock {
+  // 处理 _id 字段（可能是 ObjectId 或字符串）
+  let id = apiService.id || (apiService as any)._id;
+  if (typeof id === 'object' && id.$oid) {
+    id = id.$oid;
+  } else if (typeof id === 'object' && id.toString) {
+    id = id.toString();
+  }
+
   return {
-    id: apiService.id,
+    id: id as string,
     title: apiService.title,
     description: apiService.description || "",
     category: apiService.category,

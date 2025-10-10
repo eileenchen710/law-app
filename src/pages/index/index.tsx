@@ -380,6 +380,10 @@ export default function Index() {
       scrollY
       scrollWithAnimation
       scrollIntoView={scrollTarget}
+      style={{
+        scrollSnapType: 'y mandatory',
+        scrollBehavior: 'smooth',
+      }}
     >
       {/* 导航栏 */}
       <AppHeader

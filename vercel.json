@@ -33,6 +33,10 @@
     {
       "source": "/api/:match*",
       "destination": "/api"
+    },
+    {
+      "source": "/((?!api|_next|static|favicon.ico|.*\\.).*)",
+      "destination": "/index.html"
     }
   ]
 }

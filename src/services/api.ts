@@ -1,7 +1,10 @@
 import Taro from "@tarojs/taro";
 import type {
+  AuthResponse,
   ConsultationPayload,
   ConsultationResult,
+  UserProfile,
+  UserProfileResponse,
 } from "./types";
 
 const runtimeEnv =
@@ -29,7 +32,7 @@ const envPrefix = ensureLeadingSlash(
 const API_BASE_URL = envBase
   ? `${envBase}${envPrefix}`
   : process.env.NODE_ENV === "production"
-    ? `https://law-app-six.vercel.app${envPrefix}`
+    ? `https://www.goldenfirmiana.com.au${envPrefix}`
     : envPrefix;
 
 interface ApiResponse<T> {

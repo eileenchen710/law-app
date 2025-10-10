@@ -116,12 +116,19 @@ async function updateFirm(req, res) {
     delete updateData._id;
     updateData.updatedAt = new Date();
 
-    console.log('Attempting to update firm with ObjectId:', id);
+    console.log('Attempting to update firm with ID:', id);
 
-    // 先查找文档是否存在
-    const existingFirm = await db.collection('firms').findOne({
+    // 尝试两种 ID 格式查找文档
+    let existingFirm = await db.collection('firms').findOne({
       _id: new ObjectId(id)
     });
+
+    // 如果 ObjectId 格式找不到，尝试字符串格式
+    if (!existingFirm) {
+      existingFirm = await db.collection('firms').findOne({
+        _id: id
+      });
+    }
 
     console.log('Existing firm:', existingFirm);
 
@@ -133,9 +140,10 @@ async function updateFirm(req, res) {
       });
     }
 
-    // 执行更新
+    // 使用找到的文档的实际 _id 进行更新
+    const actualId = existingFirm._id;
     const result = await db.collection('firms').updateOne(
-      { _id: new ObjectId(id) },
+      { _id: actualId },
       { $set: updateData }
     );
 
@@ -150,7 +158,7 @@ async function updateFirm(req, res) {
 
     // 获取更新后的文档
     const updatedFirm = await db.collection('firms').findOne({
-      _id: new ObjectId(id)
+      _id: actualId
     });
 
     if (!updatedFirm) {

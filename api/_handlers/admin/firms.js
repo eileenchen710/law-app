@@ -90,25 +90,40 @@ async function createFirm(req, res) {
  */
 async function updateFirm(req, res) {
   try {
+    console.log('Update firm - received ID:', req.query.id);
+    console.log('Update firm - request body:', req.body);
+
     const { db } = await connectDB();
     const { id } = req.query;
     const updateData = req.body;
 
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Firm ID is required',
+      });
+    }
+
     if (!ObjectId.isValid(id)) {
+      console.log('ObjectId.isValid returned false for update:', id);
       return res.status(400).json({
         success: false,
         error: 'Invalid firm ID',
+        receivedId: id,
       });
     }
 
     delete updateData._id;
     updateData.updatedAt = new Date();
 
+    console.log('Attempting to update firm with ObjectId:', id);
     const result = await db.collection('firms').findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
       { returnDocument: 'after' }
     );
+
+    console.log('Update result:', result);
 
     if (!result.value) {
       return res.status(404).json({
@@ -123,9 +138,11 @@ async function updateFirm(req, res) {
     });
   } catch (error) {
     console.error('Error updating firm:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Failed to update firm',
+      message: error.message,
     });
   }
 }

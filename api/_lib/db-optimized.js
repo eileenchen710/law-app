@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
 const { MONGODB_URI, MONGODB_DB } = process.env;
 
@@ -10,45 +10,48 @@ if (!MONGODB_URI) {
  * Global is used here to maintain a cached connection across hot reloads
  * in development and between function calls in production.
  */
-let cached = global.mongoClient;
+let cached = global.mongoose;
 
 if (!cached) {
-  cached = global.mongoClient = { client: null, db: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function connectDB() {
+async function connectToDatabase() {
   // If we have a cached connection, use it
-  if (cached.client && cached.db) {
-    return { client: cached.client, db: cached.db };
+  if (cached.conn) {
+    return cached.conn;
   }
 
   // If a connection promise exists, wait for it
   if (cached.promise) {
     try {
-      await cached.promise;
+      cached.conn = await cached.promise;
     } catch (e) {
       cached.promise = null;
       throw e;
     }
-    return { client: cached.client, db: cached.db };
+    return cached.conn;
   }
 
   // Otherwise, create a new connection
   const opts = {
+    bufferCommands: false,
+    dbName: MONGODB_DB,
+    // Optimize for serverless
     maxPoolSize: 1,  // Serverless functions typically handle one request at a time
     minPoolSize: 0,   // Don't maintain idle connections
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
     connectTimeoutMS: 10000,
+    heartbeatFrequencyMS: 10000,
     retryWrites: true,
+    w: 'majority'
   };
 
-  cached.promise = MongoClient.connect(MONGODB_URI, opts)
-    .then((client) => {
+  cached.promise = mongoose.connect(MONGODB_URI, opts)
+    .then((mongoose) => {
       console.log('MongoDB connected');
-      cached.client = client;
-      cached.db = client.db(MONGODB_DB);
-      return { client: cached.client, db: cached.db };
+      return mongoose;
     })
     .catch((e) => {
       cached.promise = null;
@@ -56,12 +59,20 @@ async function connectDB() {
     });
 
   try {
-    const result = await cached.promise;
-    return result;
+    cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
     throw e;
   }
+
+  return cached.conn;
 }
 
-module.exports = { connectDB };
+// Export both connectToDatabase (for v1.js) and connectDB (for admin handlers)
+async function connectDB() {
+  await connectToDatabase();
+  return { db: mongoose.connection.db };
+}
+
+module.exports = connectToDatabase;
+module.exports.connectDB = connectDB;

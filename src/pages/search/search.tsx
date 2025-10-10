@@ -212,7 +212,7 @@ export default function Search() {
   // Show detail view if firm or service is selected
   if (selectedFirm) {
     return (
-      <ScrollView className="search-page" scrollY>
+      <ScrollView className="search-page search-detail-page" scrollY>
         <AppHeader menuItems={menuItems} showActions={false} scrolled={false} />
 
         <View className="back-button" onClick={handleBackToList}>
@@ -368,7 +368,7 @@ export default function Search() {
     );
 
     return (
-      <ScrollView className="search-page" scrollY>
+      <ScrollView className="search-page search-detail-page" scrollY>
         <AppHeader menuItems={menuItems} showActions={false} scrolled={false} />
 
         <View className="back-button" onClick={handleBackToList}>

@@ -6,6 +6,10 @@
   color: rgba(231, 236, 255, 0.92);
 }
 
+.search-detail-page {
+  padding-top: 100px;
+}
+
 .search-hero {
   text-align: center;
   margin-bottom: 24px;
@@ -324,7 +328,8 @@
   display: inline-flex;
   align-items: center;
   padding: 8px 16px;
-  margin-bottom: 20px;
+  margin-top: 16px;
+  margin-bottom: 24px;
   border-radius: 12px;
   background: rgba(79, 109, 255, 0.16);
   color: rgba(223, 230, 255, 0.9);
@@ -648,6 +653,10 @@
 @media (max-width: 640px) {
   .search-page {
     padding: 24px 1rem 60px;
+  }
+
+  .search-detail-page {
+    padding-top: 100px;
   }
 
   .result-header {

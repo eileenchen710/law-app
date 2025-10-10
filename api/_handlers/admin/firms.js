@@ -13,9 +13,17 @@ async function listFirms(req, res) {
       .sort({ createdAt: -1 })
       .toArray();
 
+    // 确保 _id 转换为字符串
+    const firmsWithStringIds = firms.map(firm => ({
+      ...firm,
+      _id: firm._id.toString()
+    }));
+
+    console.log('Listing firms, sample ID:', firmsWithStringIds[0]?._id);
+
     res.status(200).json({
       success: true,
-      data: firms,
+      data: firmsWithStringIds,
     });
   } catch (error) {
     console.error('Error listing firms:', error);
@@ -130,10 +138,21 @@ async function deleteFirm(req, res) {
     const { db } = await connectDB();
     const { id } = req.query;
 
+    console.log('Delete firm - received ID:', id, 'type:', typeof id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Firm ID is required',
+      });
+    }
+
     if (!ObjectId.isValid(id)) {
+      console.log('ObjectId.isValid returned false for:', id);
       return res.status(400).json({
         success: false,
         error: 'Invalid firm ID',
+        receivedId: id,
       });
     }
 

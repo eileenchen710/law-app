@@ -13,6 +13,7 @@ import "./me.scss";
 import AppHeader from "../index/components/AppHeader";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import Loading from "../../components/Loading";
+import FirmEditForm from "./FirmEditForm";
 import type {
   LawFirmMock,
   LegalServiceMock,
@@ -88,6 +89,7 @@ export default function Me() {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"firms" | "services">("firms");
   const [loading, setLoading] = useState(true);
+  const [showFirmEditForm, setShowFirmEditForm] = useState(false);
 
   useLoad(() => {
     console.log("Me page loaded.");
@@ -226,9 +228,22 @@ export default function Me() {
       cases: firm.cases != null ? String(firm.cases) : "",
       recommended: Boolean(firm.recommended),
     });
+    setShowFirmEditForm(true);
   };
 
-  const handleFirmCancel = () => {
+  const handleFirmCreate = () => {
+    setEditingFirmId(null);
+    setFirmForm(createEmptyFirmForm());
+    setShowFirmEditForm(true);
+  };
+
+  const handleFirmFormSave = async (formData: FirmFormState) => {
+    await handleFirmSubmit();
+    setShowFirmEditForm(false);
+  };
+
+  const handleFirmFormCancel = () => {
+    setShowFirmEditForm(false);
     setEditingFirmId(null);
     setFirmForm(createEmptyFirmForm());
   };
@@ -404,96 +419,11 @@ export default function Me() {
         <View className="section-header">
           <Text className="section-title metallic-gradient-text">律所管理</Text>
           <Text className="section-desc">
-            新增或编辑合作律所信息，数据将同步保存到云端数据库。
+            管理合作律所信息，数据将同步保存到云端数据库。
           </Text>
-        </View>
-
-        <View className="form-card card-bg-black">
-          <View className="form-row">
-            <Text className="form-label">律所名称 *</Text>
-            <Input
-              className="form-input"
-              placeholder="请输入律所名称"
-              value={firmForm.name}
-              onInput={handleFirmInput("name")}
-            />
-          </View>
-
-          <View className="form-row">
-            <Text className="form-label">律所简介</Text>
-            <Textarea
-              className="form-textarea"
-              placeholder="输入律所简介"
-              value={firmForm.description}
-              onInput={handleFirmInput("description")}
-            />
-          </View>
-
-          <View className="form-row">
-            <Text className="form-label">收费区间</Text>
-            <Input
-              className="form-input"
-              placeholder="例如：¥3000起"
-              value={firmForm.price}
-              onInput={handleFirmInput("price")}
-            />
-          </View>
-
-          <View className="form-row">
-            <Text className="form-label">服务亮点（每行一条）</Text>
-            <Textarea
-              className="form-textarea"
-              placeholder="例如：刑事案件无罪辩护"
-              value={firmForm.servicesText}
-              onInput={handleFirmInput("servicesText")}
-            />
-          </View>
-
-          <View className="form-row inline">
-            <View className="form-field">
-              <Text className="form-label">评分</Text>
-              <Input
-                className="form-input"
-                placeholder="例如：4.9"
-                value={firmForm.rating}
-                onInput={handleFirmInput("rating")}
-              />
-            </View>
-            <View className="form-field">
-              <Text className="form-label">成功案例数</Text>
-              <Input
-                className="form-input"
-                placeholder="例如：2500"
-                value={firmForm.cases}
-                onInput={handleFirmInput("cases")}
-              />
-            </View>
-            <View className="form-switch">
-              <Text className="form-label">首页推荐</Text>
-              <Switch
-                className="custom-switch"
-                checked={firmForm.recommended}
-                onChange={handleFirmRecommendedChange}
-              />
-            </View>
-          </View>
-
-          <View className="form-actions">
-            {editingFirmId ? (
-              <>
-                <Button className="primary-btn" onClick={handleFirmSubmit}>
-                  保存修改
-                </Button>
-                <Button className="ghost-btn" onClick={handleFirmCancel}>
-                  取消
-                </Button>
-              </>
-            ) : (
-              <Button className="primary-btn" onClick={handleFirmSubmit}>
-                新增律所
-              </Button>
-            )}
-          </View>
+          <Button className="primary-btn" onClick={handleFirmCreate}>
+            新增律所
+          </Button>
         </View>
 
         <View className="list card-bg-black">
@@ -760,5 +690,16 @@ export default function Me() {
       </View>
       )}
     </ScrollView>
+
+    {/* 律所编辑表单 */}
+    {showFirmEditForm && (
+      <FirmEditForm
+        formData={firmForm}
+        isEditing={!!editingFirmId}
+        onSave={handleFirmFormSave}
+        onCancel={handleFirmFormCancel}
+      />
+    )}
+  </View>
   );
 }

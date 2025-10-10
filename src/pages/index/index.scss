@@ -839,10 +839,7 @@ button,
         font-size: 32px;
         font-weight: 700;
         margin-bottom: 8px;
-        background: linear-gradient(to right, #e0e0e0, #ffffff, #e0e0e0);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        @include metallic-text-gradient();
       }
 
       .stat-label {

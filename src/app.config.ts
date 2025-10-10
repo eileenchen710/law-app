@@ -5,8 +5,6 @@ export default defineAppConfig({
     'pages/me/me',
     'pages/firm-detail/firm-detail',
     'pages/service-detail/service-detail',
-    'pages/admin/firms/firms',
-    'pages/admin/firms/edit/edit',
   ],
   window: {
     backgroundTextStyle: 'light',

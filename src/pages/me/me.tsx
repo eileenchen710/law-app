@@ -485,18 +485,12 @@ export default function Me() {
           </View>
 
           <View className="form-actions">
-            {editingFirmId ? (
-              <>
-                <Button className="primary-btn" onClick={handleFirmSubmit}>
-                  保存修改
-                </Button>
-                <Button className="ghost-btn" onClick={handleFirmCancel}>
-                  取消
-                </Button>
-              </>
-            ) : (
-              <Button className="primary-btn" onClick={handleFirmSubmit}>
-                新增律所
+            <Button className="primary-btn" onClick={handleFirmSubmit}>
+              {editingFirmId ? '保存修改' : '新增律所'}
+            </Button>
+            {(editingFirmId || firmForm.name || firmForm.description) && (
+              <Button className="ghost-btn" onClick={handleFirmCancel}>
+                取消
               </Button>
             )}
           </View>

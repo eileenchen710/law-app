@@ -64,12 +64,6 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   background: $bg-dark;
   min-height: 100vh;
   position: relative;
-  height: 100vh;
-  overflow: hidden;
-
-  // ScrollView 的 scroll-snap 支持
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
 
   // 隐藏滚动条但保持功能
   scrollbar-width: none; // Firefox
@@ -77,12 +71,6 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
   &::-webkit-scrollbar {
     display: none; // Chrome, Safari, Opera
-  }
-
-  // 为 ScrollView 添加 snap 样式
-  ::v-deep .taro-scroll-view__scroll-y {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
   }
 }
 
@@ -405,7 +393,6 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   position: relative;
   padding: 80px 32px 80px;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 
   .hero-bg {
     position: absolute;
@@ -669,14 +656,11 @@ button,
 .lawfirms-section {
   padding: 80px 32px;
   position: relative;
-  overflow: hidden;
   min-height: 100vh;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 
   .section-header {
     text-align: center;
@@ -886,12 +870,10 @@ button,
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 
   &::before,
   &::after {
@@ -1195,12 +1177,10 @@ button,
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 
   .section-header {
     text-align: center;
@@ -1358,7 +1338,8 @@ button,
         .form-textarea {
           min-height: 100px;
           padding: 12px;
-          font-size: 13px !important;
+          font-size: 12px !important;
+          line-height: 1.6;
         }
       }
 

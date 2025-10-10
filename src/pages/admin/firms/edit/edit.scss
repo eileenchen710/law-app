@@ -10,7 +10,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
     .edit-title {
-      font-size: 24px;
+      font-size: 2.4rem; // 24px
       font-weight: 600;
       color: #ffffff;
     }
@@ -24,7 +24,7 @@
 
       .form-label {
         display: block;
-        font-size: 14px;
+        font-size: 1.4rem; // 14px
         font-weight: 500;
         color: rgba(255, 255, 255, 0.9);
         margin-bottom: 8px;
@@ -43,7 +43,7 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         color: #ffffff;
-        font-size: 14px;
+        font-size: 1.4rem; // 14px
 
         &::placeholder {
           color: rgba(255, 255, 255, 0.4);
@@ -74,7 +74,7 @@
           color: #3b82f6;
           border: 1px solid rgba(37, 99, 235, 0.3);
           border-radius: 8px;
-          font-size: 14px;
+          font-size: 1.4rem; // 14px
           cursor: pointer;
 
           &:hover {
@@ -97,12 +97,12 @@
           background: rgba(37, 99, 235, 0.2);
           border: 1px solid rgba(37, 99, 235, 0.3);
           border-radius: 16px;
-          font-size: 12px;
+          font-size: 1.2rem; // 12px
           color: #3b82f6;
 
           .remove-icon {
             cursor: pointer;
-            font-size: 18px;
+            font-size: 1.8rem; // 18px
             line-height: 1;
             color: #ef4444;
 
@@ -124,7 +124,7 @@
 
       button {
         padding: 12px 24px;
-        font-size: 14px;
+        font-size: 1.4rem; // 14px
         border-radius: 8px;
         border: none;
         cursor: pointer;
@@ -164,7 +164,7 @@
 
     .edit-header {
       .edit-title {
-        font-size: 20px;
+        font-size: 2rem; // 20px
       }
     }
 

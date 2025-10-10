@@ -117,21 +117,46 @@ async function updateFirm(req, res) {
     updateData.updatedAt = new Date();
 
     console.log('Attempting to update firm with ObjectId:', id);
-    const result = await db.collection('firms').findOneAndUpdate(
+
+    // 先查找文档是否存在
+    const existingFirm = await db.collection('firms').findOne({
+      _id: new ObjectId(id)
+    });
+
+    console.log('Existing firm:', existingFirm);
+
+    if (!existingFirm) {
+      return res.status(404).json({
+        success: false,
+        error: 'Firm not found',
+        searchedId: id,
+      });
+    }
+
+    // 执行更新
+    const result = await db.collection('firms').updateOne(
       { _id: new ObjectId(id) },
-      { $set: updateData },
-      { returnDocument: 'after' }
+      { $set: updateData }
     );
 
     console.log('Update result:', result);
 
-    // MongoDB driver returns the document in 'value' field (older) or directly (newer)
-    const updatedFirm = result.value || result;
-
-    if (!updatedFirm || !updatedFirm._id) {
+    if (result.matchedCount === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Firm not found',
+        error: 'Firm not found during update',
+      });
+    }
+
+    // 获取更新后的文档
+    const updatedFirm = await db.collection('firms').findOne({
+      _id: new ObjectId(id)
+    });
+
+    if (!updatedFirm) {
+      return res.status(404).json({
+        success: false,
+        error: 'Could not retrieve updated firm',
       });
     }
 

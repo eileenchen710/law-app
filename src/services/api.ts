@@ -1,9 +1,36 @@
 import Taro from "@tarojs/taro";
+import type {
+  ConsultationPayload,
+  ConsultationResult,
+} from "./types";
 
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://law-app-six.vercel.app/api/v1"
-    : "http://localhost:3000/api/v1";
+const runtimeEnv =
+  typeof globalThis !== "undefined" &&
+  (globalThis as any).process &&
+  (globalThis as any).process.env
+    ? ((globalThis as any).process.env as Record<string, string | undefined>)
+    : ({} as Record<string, string | undefined>);
+
+const stripTrailingSlash = (value?: string) => {
+  if (!value) return "";
+  return value.replace(/\/+$/, "");
+};
+
+const ensureLeadingSlash = (value?: string) => {
+  if (!value) return "";
+  return value.startsWith("/") ? value : `/${value}`;
+};
+
+const envBase = stripTrailingSlash(runtimeEnv.TARO_APP_API_BASE_URL || "");
+const envPrefix = ensureLeadingSlash(
+  runtimeEnv.TARO_APP_API_PREFIX || "/api/v1"
+);
+
+const API_BASE_URL = envBase
+  ? `${envBase}${envPrefix}`
+  : process.env.NODE_ENV === "production"
+    ? `https://law-app-six.vercel.app${envPrefix}`
+    : envPrefix;
 
 interface ApiResponse<T> {
   items?: T[];
@@ -101,6 +128,15 @@ class ApiService {
       method: "DELETE",
     });
   }
+
+  async submitConsultation(
+    data: ConsultationPayload
+  ): Promise<ConsultationResult> {
+    return this.request("/consultations", {
+      method: "POST",
+      data,
+    });
+  }
 }
 
 export const apiService = new ApiService();
@@ -122,3 +158,6 @@ export const fetchAppointments = async () => {
   console.warn("fetchAppointments not yet implemented");
   return { items: [], total: 0 };
 };
+
+export const submitConsultationRequest = (payload: ConsultationPayload) =>
+  apiService.submitConsultation(payload);

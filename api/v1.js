@@ -1,5 +1,6 @@
 const connectToDatabase = require('./_lib/db-optimized');
 const mongoose = require('mongoose');
+const consultationsHandler = require('./_handlers/v1/consultations');
 
 // Single entry point for all v1 API routes to reduce cold starts
 module.exports = async function handler(req, res) {
@@ -45,6 +46,8 @@ module.exports = async function handler(req, res) {
           return await handleAppointmentCreate(req, res);
         }
         return await handleAppointmentsList(req, res);
+      case 'consultations':
+        return await consultationsHandler(req, res);
         
       default:
         return res.status(404).json({ error: 'Route not found' });

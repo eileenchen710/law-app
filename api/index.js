@@ -11,6 +11,7 @@ const handlers = {
   v1ServicesList: () => require('./_handlers/v1/services-list'),
   v1ServiceDetail: () => require('./_handlers/v1/services-detail'),
   v1AppointmentsList: () => require('./_handlers/v1/appointments-list'),
+  v1Consultations: () => require('./_handlers/v1/consultations'),
 };
 
 const app = express();
@@ -55,6 +56,7 @@ app.all(['/v1/services', '/api/v1/services'], adapt(() => handlers.v1ServicesLis
 app.all(['/v1/services/:id', '/api/v1/services/:id'], adapt(() => handlers.v1ServiceDetail(), { mapIdParam: true }));
 
 app.all(['/v1/appointments', '/api/v1/appointments'], adapt(() => handlers.v1AppointmentsList()));
+app.all(['/v1/consultations', '/api/v1/consultations'], adapt(() => handlers.v1Consultations()));
 
 app.use((request, response) => {
   response.status(404).json({ error: 'Not found' });

@@ -30,9 +30,13 @@ import {
   fetchFirms,
   fetchServiceById,
   fetchServices,
+  submitConsultationRequest,
 } from "../../services/api";
 import type { ApiError } from "../../services/http";
-import type { AppointmentPayload } from "../../services/types";
+import type {
+  AppointmentPayload,
+  ConsultationPayload,
+} from "../../services/types";
 
 const featureHighlights = [
   {
@@ -81,6 +85,12 @@ export default function Index() {
     null
   );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formService, setFormService] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [submittingConsultation, setSubmittingConsultation] = useState(false);
   const scrollResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -102,6 +112,12 @@ export default function Index() {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (selectedServiceName) {
+      setFormService(selectedServiceName);
+    }
+  }, [selectedServiceName]);
 
   const firmMap = useMemo(() => {
     const map = new Map<string, LawFirmMock>();
@@ -224,6 +240,7 @@ export default function Index() {
   const handleConsultClick = (serviceName?: string) => {
     if (serviceName) {
       setSelectedServiceName(serviceName);
+      setFormService(serviceName);
     }
     triggerScrollTo("contact");
     setMobileMenuOpen(false);
@@ -236,6 +253,7 @@ export default function Index() {
 
   const handleServiceConsult = (serviceTitle: string) => {
     setSelectedServiceName(serviceTitle);
+    setFormService(serviceTitle);
     triggerScrollTo("contact");
     setMobileMenuOpen(false);
   };
@@ -245,16 +263,91 @@ export default function Index() {
     handleConsultClick(`${firmName} 咨询`);
   };
 
-  const handleSubmitConsult = () => {
-    Taro.showToast({
-      title: "已提交，我们将尽快联系您",
-      icon: "none",
-      duration: 2000,
-    });
+  const handleSubmitConsult = async () => {
+    if (submittingConsultation) {
+      return;
+    }
+
+    const trimmedName = formName.trim();
+    const trimmedEmail = formEmail.trim();
+    const trimmedPhone = formPhone.trim();
+    const trimmedService = formService.trim();
+    const trimmedMessage = formMessage.trim();
+
+    if (!trimmedName) {
+      Taro.showToast({ title: "请填写姓名", icon: "none", duration: 2000 });
+      return;
+    }
+
+    if (!trimmedEmail) {
+      Taro.showToast({ title: "请填写邮箱", icon: "none", duration: 2000 });
+      return;
+    }
+
+    if (!trimmedPhone) {
+      Taro.showToast({ title: "请填写联系电话", icon: "none", duration: 2000 });
+      return;
+    }
+
+    if (!trimmedService) {
+      Taro.showToast({ title: "请选择咨询服务", icon: "none", duration: 2000 });
+      return;
+    }
+
+    if (!trimmedMessage) {
+      Taro.showToast({ title: "请填写问题描述", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Taro.showToast({ title: "请输入正确的邮箱地址", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const phoneRegex = /^\+?[0-9\-\s]{6,16}$/;
+    if (!phoneRegex.test(trimmedPhone)) {
+      Taro.showToast({ title: "请输入正确的联系电话", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const payload: ConsultationPayload = {
+      name: trimmedName,
+      email: trimmedEmail,
+      phone: trimmedPhone,
+      serviceName: trimmedService,
+      message: trimmedMessage,
+    };
+
+    try {
+      setSubmittingConsultation(true);
+      await submitConsultationRequest(payload);
+      Taro.showToast({
+        title: "提交成功，我们将尽快联系您",
+        icon: "success",
+        duration: 2000,
+      });
+      setFormName("");
+      setFormEmail("");
+      setFormPhone("");
+      setFormService("");
+      setFormMessage("");
+      setSelectedServiceName(null);
+    } catch (error) {
+      console.error("提交咨询失败", error);
+      Taro.showToast({
+        title: "提交失败，请稍后再试",
+        icon: "none",
+        duration: 2000,
+      });
+    } finally {
+      setSubmittingConsultation(false);
+    }
   };
 
   const clearSelectedService = () => {
     setSelectedServiceName(null);
+    setFormService("");
   };
 
   const toggleMobileMenu = () => {
@@ -570,6 +663,8 @@ export default function Index() {
                   className="form-input"
                   type="text"
                   placeholder="请输入您的姓名"
+                  value={formName}
+                  onInput={(e) => setFormName(e.detail.value)}
                   style={{ color: "#fff", fontSize: "13px" }}
                 />
               </View>
@@ -581,6 +676,8 @@ export default function Index() {
                   className="form-input"
                   type="text"
                   placeholder="请输入您的邮箱"
+                  value={formEmail}
+                  onInput={(e) => setFormEmail(e.detail.value)}
                   style={{ color: "#fff", fontSize: "13px" }}
                 />
               </View>
@@ -594,6 +691,8 @@ export default function Index() {
                 className="form-input"
                 type="number"
                 placeholder="请输入您的手机号码"
+                value={formPhone}
+                onInput={(e) => setFormPhone(e.detail.value)}
                 style={{ color: "#fff", fontSize: "13px" }}
               />
             </View>
@@ -606,8 +705,13 @@ export default function Index() {
                 className="form-input"
                 type="text"
                 placeholder="请选择您需要咨询的法律服务"
-                value={selectedServiceName || ""}
-                disabled
+                value={formService}
+                onInput={(e) => {
+                  setFormService(e.detail.value);
+                  if (selectedServiceName) {
+                    setSelectedServiceName(null);
+                  }
+                }}
                 style={{ color: "#fff", fontSize: "13px" }}
               />
             </View>
@@ -619,6 +723,8 @@ export default function Index() {
               <Textarea
                 className="form-textarea"
                 placeholder="请详细描述您遇到的法律问题，以便律师更好地为您提供帮助..."
+                value={formMessage}
+                onInput={(e) => setFormMessage(e.detail.value)}
                 style={{
                   color: "#fff",
                   fontSize: "13px",
@@ -627,7 +733,12 @@ export default function Index() {
               />
             </View>
 
-            <Button className="submit-btn" onClick={handleSubmitConsult}>
+            <Button
+              className="submit-btn"
+              onClick={handleSubmitConsult}
+              loading={submittingConsultation}
+              disabled={submittingConsultation}
+            >
               提交咨询申请
             </Button>
 

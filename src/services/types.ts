@@ -67,3 +67,18 @@ export interface AppointmentResult {
   message: string;
   appointment_id: string;
 }
+
+export interface ConsultationPayload {
+  name: string;
+  email: string;
+  phone: string;
+  serviceName?: string;
+  message: string;
+  preferredTime?: string;
+}
+
+export interface ConsultationResult {
+  status: string;
+  message: string;
+  emailSummary?: unknown;
+}

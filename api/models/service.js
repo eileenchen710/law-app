@@ -2,10 +2,15 @@
 
 const ServiceSchema = new Schema(
   {
+    firm_ids: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Firm',
+      default: [],
+    },
+    // 保留旧字段以支持向后兼容
     firm_id: {
       type: Schema.Types.ObjectId,
       ref: 'Firm',
-      required: true,
     },
     title: {
       type: String,

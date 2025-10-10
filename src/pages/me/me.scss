@@ -386,22 +386,43 @@ $accent-strong: #e0e0e0;
   background: transparent;
   color: $text-primary;
   line-height: 1.55;
+  -webkit-text-fill-color: $text-primary;
+  opacity: 1;
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
   font-size: 13px;
   color: rgba(170, 180, 210, 0.45);
+  -webkit-text-fill-color: rgba(170, 180, 210, 0.45);
 }
 
 .form-textarea {
   min-height: 96px;
   font-size: 14px !important;
+  color: $text-primary !important;
 }
 
-// 确保 Taro Textarea 组件内部文本大小一致
-.me-page .taro-textarea {
-  font-size: 14px !important;
+// 确保 Taro Input 和 Textarea 组件内部文本颜色正确
+.me-page {
+  input,
+  textarea {
+    color: $text-primary !important;
+    -webkit-text-fill-color: $text-primary !important;
+  }
+
+  .taro-input,
+  .taro-textarea {
+    font-size: 14px !important;
+    color: $text-primary !important;
+    -webkit-text-fill-color: $text-primary !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(170, 180, 210, 0.45) !important;
+    -webkit-text-fill-color: rgba(170, 180, 210, 0.45) !important;
+  }
 }
 
 .form-switch {
@@ -431,12 +452,13 @@ $accent-strong: #e0e0e0;
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  padding: 0 24px;
+  padding: 0 28px;
   font-size: 14px;
   box-shadow: none;
   height: 38px;
   line-height: 38px;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .ghost-btn {
@@ -445,17 +467,22 @@ $accent-strong: #e0e0e0;
   color: $accent-strong;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  padding: 0 24px;
+  padding: 0 28px;
   font-size: 14px;
   height: 38px;
   line-height: 38px;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 14px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .list-item {
@@ -464,6 +491,7 @@ $accent-strong: #e0e0e0;
   padding: 18px;
   box-shadow: 0 22px 48px -24px rgba(0, 0, 0, 0.6);
   border: 1px solid $panel-border;
+  position: relative;
 }
 
 .item-header {
@@ -534,6 +562,8 @@ $accent-strong: #e0e0e0;
   gap: 10px;
   margin-top: 10px;
   align-items: center;
+  position: relative;
+  z-index: 10;
 
   button {
     font-size: 13px;
@@ -544,6 +574,33 @@ $accent-strong: #e0e0e0;
     align-items: center;
     justify-content: center;
     margin: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &::after {
+      border: none;
+    }
+
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+  }
+
+  .edit-btn {
+    background: rgba(79, 109, 255, 0.2);
+    color: rgba(239, 242, 255, 0.92);
+    border: 1px solid rgba(79, 109, 255, 0.3);
+  }
+
+  .delete-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: rgba(254, 202, 202, 0.95);
+    border: 1px solid rgba(239, 68, 68, 0.3);
   }
 }
 

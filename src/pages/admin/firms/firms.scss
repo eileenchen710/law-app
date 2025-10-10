@@ -1,0 +1,275 @@
+.admin-firms {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #ffffff;
+  padding: 24px;
+
+  .loading {
+    display: block;
+    text-align: center;
+    padding: 48px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .admin-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .create-btn {
+      padding: 8px 16px;
+      background: linear-gradient(to right, #2563eb, #9333ea);
+      color: #ffffff;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .admin-content {
+    display: flex;
+    gap: 24px;
+    height: calc(100vh - 120px);
+
+    .firms-list {
+      flex: 0 0 300px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-y: auto;
+
+      .firm-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        &.active {
+          background: rgba(37, 99, 235, 0.2);
+          border-color: #2563eb;
+        }
+
+        .firm-info {
+          margin-bottom: 8px;
+
+          .firm-name {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+          }
+
+          .firm-city {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+          }
+        }
+
+        .firm-actions {
+          display: flex;
+          gap: 8px;
+
+          button {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+          }
+
+          .edit-btn {
+            background: rgba(37, 99, 235, 0.2);
+            color: #3b82f6;
+
+            &:hover {
+              background: rgba(37, 99, 235, 0.3);
+            }
+          }
+
+          .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+
+            &:hover {
+              background: rgba(239, 68, 68, 0.3);
+            }
+          }
+        }
+      }
+    }
+
+    .services-management {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+
+      .section-title {
+        display: block;
+        font-size: 20px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .services-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 24px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .services-label {
+          display: block;
+          font-size: 14px;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 12px;
+        }
+
+        .services-list {
+          flex: 1;
+          min-height: 200px;
+          max-height: 300px;
+          overflow-y: auto;
+
+          .empty-text {
+            display: block;
+            text-align: center;
+            padding: 32px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+          }
+
+          .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            transition: all 0.3s;
+
+            &:hover {
+              background: rgba(255, 255, 255, 0.08);
+            }
+
+            .service-info {
+              flex: 1;
+
+              .service-title {
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                color: #ffffff;
+                margin-bottom: 4px;
+              }
+
+              .service-category {
+                display: block;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.6);
+              }
+            }
+
+            button {
+              padding: 6px 12px;
+              font-size: 12px;
+              border-radius: 4px;
+              border: none;
+              cursor: pointer;
+              transition: all 0.3s;
+            }
+
+            .add-btn {
+              background: rgba(34, 197, 94, 0.2);
+              color: #22c55e;
+
+              &:hover {
+                background: rgba(34, 197, 94, 0.3);
+              }
+            }
+
+            .remove-btn {
+              background: rgba(239, 68, 68, 0.2);
+              color: #ef4444;
+
+              &:hover {
+                background: rgba(239, 68, 68, 0.3);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-firms {
+    padding: 16px;
+
+    .admin-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      .admin-title {
+        font-size: 20px;
+      }
+    }
+
+    .admin-content {
+      flex-direction: column;
+      height: auto;
+
+      .firms-list {
+        flex: none;
+        max-height: 300px;
+      }
+
+      .services-management {
+        .services-section {
+          .services-list {
+            max-height: 200px;
+          }
+        }
+      }
+    }
+  }
+}

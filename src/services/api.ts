@@ -105,3 +105,20 @@ class ApiService {
 
 export const apiService = new ApiService();
 export default apiService;
+
+// Export wrapper functions for backward compatibility
+export const fetchFirms = (params?: { page?: number; size?: number }) =>
+  apiService.getFirms(params?.page, params?.size);
+
+export const fetchFirmById = (id: string) => apiService.getFirm(id);
+
+export const fetchServices = (params?: { page?: number; size?: number }) =>
+  apiService.getServices(params?.page, params?.size);
+
+export const fetchServiceById = (id: string) => apiService.getService(id);
+
+// Placeholder for appointments (not implemented in ApiService yet)
+export const fetchAppointments = async () => {
+  console.warn("fetchAppointments not yet implemented");
+  return { items: [], total: 0 };
+};

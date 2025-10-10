@@ -76,15 +76,36 @@ class DataStore {
   // 创建律所
   async createLawFirm(data: Omit<LawFirmMock, "id">): Promise<LawFirmMock> {
     try {
+      console.log("Creating firm with data:", data);
       const apiData = adaptFirmToApi(data);
+      console.log("Adapted API data:", apiData);
       const response = await apiClient.createFirm(apiData);
+      console.log("API response:", response);
+
+      // 检查响应格式，如果是列表响应说明创建失败，需要重新加载
+      if (response.items) {
+        console.warn("API returned list instead of created item, reloading data...");
+        await this.loadFirms();
+        this.notifyListeners();
+
+        // 尝试找到新创建的律所（通常是最后一个）
+        const newFirm = this.lawFirms[this.lawFirms.length - 1];
+        if (newFirm) {
+          return newFirm;
+        }
+        throw new Error("Failed to find newly created firm");
+      }
+
+      // 正常情况：API 返回创建的对象
       const newFirm = adaptFirmFromApi(response.data || response);
-      
+      console.log("New firm after adaptation:", newFirm);
+
       this.lawFirms.push(newFirm);
       this.notifyListeners();
       return newFirm;
     } catch (error) {
       console.error("Failed to create firm:", error);
+      console.error("Error details:", JSON.stringify(error));
       throw error;
     }
   }
@@ -124,15 +145,36 @@ class DataStore {
   // 创建服务
   async createLegalService(data: Omit<LegalServiceMock, "id">): Promise<LegalServiceMock> {
     try {
+      console.log("Creating service with data:", data);
       const apiData = adaptServiceToApi(data);
+      console.log("Adapted API data:", apiData);
       const response = await apiClient.createService(apiData);
+      console.log("API response:", response);
+
+      // 检查响应格式，如果是列表响应说明创建失败，需要重新加载
+      if (response.items) {
+        console.warn("API returned list instead of created item, reloading data...");
+        await this.loadServices();
+        this.notifyListeners();
+
+        // 尝试找到新创建的服务（通常是最后一个）
+        const newService = this.legalServices[this.legalServices.length - 1];
+        if (newService) {
+          return newService;
+        }
+        throw new Error("Failed to find newly created service");
+      }
+
+      // 正常情况：API 返回创建的对象
       const newService = adaptServiceFromApi(response.data || response);
-      
+      console.log("New service after adaptation:", newService);
+
       this.legalServices.push(newService);
       this.notifyListeners();
       return newService;
     } catch (error) {
       console.error("Failed to create service:", error);
+      console.error("Error details:", JSON.stringify(error));
       throw error;
     }
   }

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import "./me.scss";
 import AppHeader from "../index/components/AppHeader";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
+import Loading from "../../components/Loading";
 import type {
   LawFirmMock,
   LegalServiceMock,
@@ -86,6 +87,7 @@ export default function Me() {
   const [editingFirmId, setEditingFirmId] = useState<string | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"firms" | "services">("firms");
+  const [loading, setLoading] = useState(true);
 
   useLoad(() => {
     console.log("Me page loaded.");
@@ -110,19 +112,24 @@ export default function Me() {
         }
         return { ...prev, lawFirmId: snapshot.lawFirms[0].id };
       });
+      setLoading(false);
     };
 
     // 初始化数据存储
-    initializeDataStore().then(() => {
-      applySnapshot(getSnapshot());
-    }).catch((error) => {
-      console.error("Failed to initialize data store:", error);
-      Taro.showToast({
-        title: "数据加载失败",
-        icon: "none",
-        duration: 2000,
+    setLoading(true);
+    initializeDataStore()
+      .then(() => {
+        applySnapshot(getSnapshot());
+      })
+      .catch((error) => {
+        console.error("Failed to initialize data store:", error);
+        setLoading(false);
+        Taro.showToast({
+          title: "数据加载失败",
+          icon: "none",
+          duration: 2000,
+        });
       });
-    });
 
     const unsubscribe = onMockDataChange(applySnapshot);
 
@@ -148,7 +155,7 @@ export default function Me() {
     Taro.showToast({ title, icon, duration: 1400 }).catch(() => undefined);
   };
 
-  const handleFirmSubmit = () => {
+  const handleFirmSubmit = async () => {
     if (!firmForm.name.trim()) {
       showToast("请输入律所名称", "none");
       return;
@@ -191,10 +198,10 @@ export default function Me() {
 
     try {
       if (editingFirmId) {
-        updateLawFirm(editingFirmId, payload);
+        await updateLawFirm(editingFirmId, payload);
         showToast("律所信息已更新");
       } else {
-        const createdFirm = createLawFirm(payload);
+        const createdFirm = await createLawFirm(payload);
         showToast("律所已创建");
         if (lawFirms.length === 0) {
           setServiceForm((prev) => ({ ...prev, lawFirmId: createdFirm.id }));
@@ -332,9 +339,9 @@ export default function Me() {
 
   const handleResetData = async () => {
     const result = await Taro.showModal({
-      title: "恢复默认数据",
-      content: "确定将所有管理数据恢复为默认值吗？该操作不可撤销。",
-      confirmText: "恢复",
+      title: "重置数据",
+      content: "确定将所有数据重置为初始状态吗？该操作不可撤销。",
+      confirmText: "重置",
       cancelText: "取消",
     });
 
@@ -350,10 +357,10 @@ export default function Me() {
       setServiceForm(createEmptyServiceForm(defaultLawFirmId));
       setEditingFirmId(null);
       setEditingServiceId(null);
-      showToast("已恢复默认数据");
+      showToast("数据已重置");
     } catch (error) {
-      console.error("Failed to reset mock data", error);
-      showToast("恢复失败", "none");
+      console.error("Failed to reset data", error);
+      showToast("重置失败", "none");
     }
   };
 
@@ -364,14 +371,14 @@ export default function Me() {
       <View className="admin-header">
         <View className="admin-header-texts">
           <Text className="admin-title metallic-gradient-text">
-            Mock 数据管理后台
+            数据管理后台
           </Text>
           <Text className="admin-subtitle">
-            维护律所、服务与推荐配置，实时同步到前台页面
+            管理律所、服务与推荐配置，数据将保存到云端数据库
           </Text>
         </View>
         <Button className="reset-btn" size="mini" onClick={handleResetData}>
-          恢复默认
+          重置数据
         </Button>
       </View>
 
@@ -390,12 +397,14 @@ export default function Me() {
         </View>
       </View>
 
-      {activeTab === "firms" && (
+      {loading ? (
+        <Loading text="加载数据中..." size="medium" />
+      ) : activeTab === "firms" ? (
         <View className="section card-bg-black">
         <View className="section-header">
           <Text className="section-title metallic-gradient-text">律所管理</Text>
           <Text className="section-desc">
-            新增或编辑合作律所信息，支持维护简介、服务亮点等内容。
+            新增或编辑合作律所信息，数据将同步保存到云端数据库。
           </Text>
         </View>
 
@@ -414,7 +423,7 @@ export default function Me() {
             <Text className="form-label">律所简介</Text>
             <Textarea
               className="form-textarea"
-              placeholder="用于首页展示的律所简介"
+              placeholder="输入律所简介"
               value={firmForm.description}
               onInput={handleFirmInput("description")}
             />
@@ -516,13 +525,24 @@ export default function Me() {
                 ))}
               </View>
               <View className="item-actions">
-                <Button size="mini" onClick={() => handleFirmEdit(firm)}>
+                <Button
+                  className="edit-btn"
+                  size="mini"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFirmEdit(firm);
+                  }}
+                >
                   编辑
                 </Button>
                 <Button
+                  className="delete-btn"
                   size="mini"
                   type="warn"
-                  onClick={() => handleFirmDelete(firm)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFirmDelete(firm);
+                  }}
                 >
                   删除
                 </Button>
@@ -537,16 +557,14 @@ export default function Me() {
           ) : null}
         </View>
       </View>
-      )}
-
-      {activeTab === "services" && (
+      ) : (
         <View className="section card-bg-black">
           <View className="section-header">
             <Text className="section-title metallic-gradient-text">
               法律服务管理
             </Text>
             <Text className="section-desc">
-              维护首页展示的法律服务项目与律师信息。
+              管理法律服务项目与律师信息，数据将同步保存到云端数据库。
             </Text>
           </View>
 
@@ -565,7 +583,7 @@ export default function Me() {
             <Text className="form-label">服务描述</Text>
             <Textarea
               className="form-textarea"
-              placeholder="用于首页展示的服务简介"
+              placeholder="输入服务描述"
               value={serviceForm.description}
               onInput={handleServiceInput("description")}
             />
@@ -708,15 +726,23 @@ export default function Me() {
                 </Text>
                 <View className="item-actions">
                   <Button
+                    className="edit-btn"
                     size="mini"
-                    onClick={() => handleServiceEdit(service)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleServiceEdit(service);
+                    }}
                   >
                     编辑
                   </Button>
                   <Button
+                    className="delete-btn"
                     size="mini"
                     type="warn"
-                    onClick={() => handleServiceDelete(service)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleServiceDelete(service);
+                    }}
                   >
                     删除
                   </Button>

@@ -72,6 +72,12 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   &::-webkit-scrollbar {
     display: none; // Chrome, Safari, Opera
   }
+
+  // H5 环境下的 scroll-snap
+  ::v-deep .taro-scroll-view {
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+  }
 }
 
 // 导航栏样式
@@ -392,7 +398,8 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   align-items: center;
   position: relative;
   padding: 80px 32px 80px;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 
   .hero-bg {
     position: absolute;
@@ -660,7 +667,8 @@ button,
   display: flex;
   flex-direction: column;
   justify-content: center;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 
   .section-header {
     text-align: center;
@@ -873,7 +881,8 @@ button,
   display: flex;
   flex-direction: column;
   justify-content: center;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 
   &::before,
   &::after {
@@ -1180,7 +1189,8 @@ button,
   display: flex;
   flex-direction: column;
   justify-content: center;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 
   .section-header {
     text-align: center;

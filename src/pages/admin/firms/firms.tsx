@@ -1,6 +1,7 @@
 import { View, Text, Button, ScrollView } from '@tarojs/components';
 import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
+import FirmEditForm from './FirmEditForm';
 import './firms.scss';
 
 interface Firm {
@@ -31,6 +32,8 @@ export default function FirmsAdmin() {
   const [selectedFirm, setSelectedFirm] = useState<Firm | null>(null);
   const [firmServices, setFirmServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingFirm, setEditingFirm] = useState<Firm | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -142,15 +145,70 @@ export default function FirmsAdmin() {
   };
 
   const handleCreateFirm = () => {
-    Taro.navigateTo({
-      url: '/pages/admin/firms/edit/edit',
+    setIsCreating(true);
+    setEditingFirm({
+      _id: '',
+      name: '',
+      city: '',
+      address: '',
+      description: '',
+      phone: '',
+      email: '',
+      website: '',
+      practiceAreas: [],
+      tags: [],
     });
   };
 
   const handleEditFirm = (firm: Firm) => {
-    Taro.navigateTo({
-      url: `/pages/admin/firms/edit/edit?id=${firm._id}`,
-    });
+    setIsCreating(false);
+    setEditingFirm(firm);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingFirm(null);
+    setIsCreating(false);
+  };
+
+  const handleSaveFirm = async (firmData: Firm) => {
+    try {
+      const url = isCreating
+        ? '/api/admin/firms'
+        : `/api/admin/firms/${firmData._id}`;
+      const method = isCreating ? 'POST' : 'PUT';
+
+      const res = await Taro.request({
+        url,
+        method,
+        data: {
+          name: firmData.name,
+          city: firmData.city,
+          address: firmData.address,
+          description: firmData.description,
+          contact_phone: firmData.phone,
+          contact_email: firmData.email,
+          website: firmData.website,
+          practiceAreas: firmData.practiceAreas,
+          tags: firmData.tags,
+        },
+      });
+
+      if (res.data.success) {
+        Taro.showToast({
+          title: isCreating ? '创建成功' : '更新成功',
+          icon: 'success',
+        });
+        setEditingFirm(null);
+        setIsCreating(false);
+        await loadData();
+      }
+    } catch (error) {
+      console.error('Failed to save firm:', error);
+      Taro.showToast({
+        title: '保存失败',
+        icon: 'none',
+      });
+    }
   };
 
   const handleDeleteFirm = async (firmId: string) => {
@@ -302,6 +360,16 @@ export default function FirmsAdmin() {
           </View>
         )}
       </View>
+
+      {/* 编辑表单遮罩层 */}
+      {editingFirm && (
+        <FirmEditForm
+          firm={editingFirm}
+          isCreating={isCreating}
+          onSave={handleSaveFirm}
+          onCancel={handleCancelEdit}
+        />
+      )}
     </View>
   );
 }

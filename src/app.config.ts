@@ -13,28 +13,28 @@ export default defineAppConfig({
     navigationBarTextStyle: 'black'
   },
   tabBar: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: '#999999',
     selectedColor: '#FFFFFF',
-    backgroundColor: '#0f1016',
+    backgroundColor: '#000000',
     borderStyle: 'black',
     list: [
       {
         pagePath: 'pages/index/index',
         text: '首页',
-        iconPath: './assets/images/home.svg',
-        selectedIconPath: './assets/images/home-active.svg'
+        iconPath: './assets/images/home.png',
+        selectedIconPath: './assets/images/home-active.png'
       },
       {
         pagePath: 'pages/search/search',
         text: '搜索',
-        iconPath: './assets/images/search.svg',
-        selectedIconPath: './assets/images/search-active.svg'
+        iconPath: './assets/images/search.png',
+        selectedIconPath: './assets/images/search-active.png'
       },
       {
         pagePath: 'pages/me/me',
         text: '我的',
-        iconPath: './assets/images/me.svg',
-        selectedIconPath: './assets/images/me-active.svg'
+        iconPath: './assets/images/me.png',
+        selectedIconPath: './assets/images/me-active.png'
       }
     ]
   }

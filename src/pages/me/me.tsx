@@ -380,8 +380,9 @@ export default function Me() {
   };
 
   return (
-    <ScrollView className="me-page" scrollY>
-      <AppHeader menuItems={menuItems} showActions={false} />
+    <View className="me-page-container">
+      <ScrollView className="me-page" scrollY>
+        <AppHeader menuItems={menuItems} showActions={false} />
 
       <View className="admin-header">
         <View className="admin-header-texts">
@@ -689,17 +690,17 @@ export default function Me() {
         </View>
       </View>
       )}
-    </ScrollView>
+      </ScrollView>
 
-    {/* 律所编辑表单 */}
-    {showFirmEditForm && (
-      <FirmEditForm
-        formData={firmForm}
-        isEditing={!!editingFirmId}
-        onSave={handleFirmFormSave}
-        onCancel={handleFirmFormCancel}
-      />
-    )}
-  </View>
+      {/* 律所编辑表单 */}
+      {showFirmEditForm && (
+        <FirmEditForm
+          formData={firmForm}
+          isEditing={!!editingFirmId}
+          onSave={handleFirmFormSave}
+          onCancel={handleFirmFormCancel}
+        />
+      )}
+    </View>
   );
 }

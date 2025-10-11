@@ -32,7 +32,7 @@ const envPrefix = ensureLeadingSlash(
 const API_BASE_URL = envBase
   ? `${envBase}${envPrefix}`
   : process.env.NODE_ENV === "production"
-    ? `https://www.goldenfirmiana.com.au${envPrefix}`
+    ? `https://law-app-six.vercel.app${envPrefix}`
     : envPrefix;
 
 interface ApiResponse<T> {

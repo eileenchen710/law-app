@@ -47,17 +47,33 @@ interface ApiResponse<T> {
 }
 
 class ApiService {
+  private getAuthToken(): string | null {
+    try {
+      return Taro.getStorageSync("auth_token") || null;
+    } catch (error) {
+      console.warn("Failed to get auth token", error);
+      return null;
+    }
+  }
+
   private async request<T>(
     url: string,
     options: Taro.request.Option = {}
   ): Promise<T> {
     try {
+      const token = this.getAuthToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(options.header as Record<string, string>),
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await Taro.request({
         url: `${API_BASE_URL}${url}`,
-        header: {
-          "Content-Type": "application/json",
-          ...options.header,
-        },
+        header: headers,
         ...options,
       });
 

@@ -6,6 +6,7 @@ const {
   resolveUserRole
 } = require('../../_lib/auth');
 const User = require('../../models/user');
+const bcrypt = require('bcryptjs');
 
 const setCorsHeaders = (res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -162,6 +163,73 @@ const handleAnonymousLogin = async (req, res) => {
   return respond(res, 200, buildUserPayload(user, token));
 };
 
+const handlePasswordLogin = async (req, res) => {
+  const { username, password } = req.body || {};
+
+  if (!username || !password) {
+    return respond(res, 400, { error: 'Missing username or password' });
+  }
+
+  await connectToDatabase();
+
+  const user = await User.findOne({ username: username.trim() }).select('+password_hash');
+
+  if (!user || !user.password_hash) {
+    return respond(res, 401, { error: 'Invalid username or password' });
+  }
+
+  const isValid = await bcrypt.compare(password, user.password_hash);
+
+  if (!isValid) {
+    return respond(res, 401, { error: 'Invalid username or password' });
+  }
+
+  user.last_login_at = new Date();
+  user.last_login_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  await user.save();
+
+  const token = createToken(user);
+  return respond(res, 200, buildUserPayload(user, token));
+};
+
+const handlePasswordRegister = async (req, res) => {
+  const { username, password, email, phone } = req.body || {};
+
+  if (!username || !password || !email) {
+    return respond(res, 400, { error: 'Missing required fields: username, password, email' });
+  }
+
+  await connectToDatabase();
+
+  const existingUser = await User.findOne({
+    $or: [
+      { username: username.trim() },
+      { email: email.trim().toLowerCase() }
+    ]
+  });
+
+  if (existingUser) {
+    return respond(res, 409, { error: 'Username or email already exists' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const newUser = await User.create({
+    username: username.trim(),
+    password_hash: passwordHash,
+    display_name: username.trim(),
+    email: email.trim().toLowerCase(),
+    phone: phone?.trim(),
+    provider: 'password',
+    role: 'user',
+    last_login_at: new Date(),
+    last_login_ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+  });
+
+  const token = createToken(newUser);
+  return respond(res, 200, buildUserPayload(newUser, token));
+};
+
 module.exports = async function handler(req, res) {
   setCorsHeaders(res);
 
@@ -177,6 +245,14 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'POST' && (action === 'anonymous' || action === 'basic')) {
     return handleAnonymousLogin(req, res);
+  }
+
+  if (req.method === 'POST' && action === 'login') {
+    return handlePasswordLogin(req, res);
+  }
+
+  if (req.method === 'POST' && action === 'register') {
+    return handlePasswordRegister(req, res);
   }
 
   return respond(res, 404, { error: 'Auth route not found' });

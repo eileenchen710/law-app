@@ -63,6 +63,7 @@
     "@vercel/kv": "^3.0.0",
     "axios": "^1.6.0",
     "babel-preset-taro": "^4.1.7",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dayjs": "^1.11.10",
     "dotenv": "^16.4.5",

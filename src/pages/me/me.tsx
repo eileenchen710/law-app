@@ -136,7 +136,7 @@ export default function Me() {
     }
   }, []);
 
-  const performWechatLogin = useCallback(async (withUserInfo = false): Promise<AuthResponse | null> => {
+  const performWechatLogin = useCallback(async (withUserInfo = false, autoPrompt = false): Promise<AuthResponse | null> => {
     try {
       setAuthenticating(true);
       const loginRes = await Taro.login();
@@ -146,8 +146,8 @@ export default function Me() {
 
       let userProfile: Record<string, unknown> | undefined;
 
-      // 只有在用户点击按钮时才尝试获取 getUserProfile
-      if (withUserInfo) {
+      // 如果需要获取用户信息（手动点击或自动提示）
+      if (withUserInfo || autoPrompt) {
         try {
           const profile = await Taro.getUserProfile({
             desc: "用于完善个人资料",
@@ -187,6 +187,12 @@ export default function Me() {
   }, []);
 
   const performAnonymousLogin = useCallback(async () => {
+    // 非微信环境，跳转到登录页面
+    if (!isWeappEnv()) {
+      Taro.navigateTo({ url: "/pages/login/login" }).catch(() => undefined);
+      return null;
+    }
+
     try {
       setAuthenticating(true);
       const draft = getStoredProfileDraft();

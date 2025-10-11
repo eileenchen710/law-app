@@ -189,6 +189,28 @@ class ApiService {
       data: payload,
     });
   }
+
+  async loginWithPassword(payload: {
+    username: string;
+    password: string;
+  }): Promise<AuthResponse> {
+    return this.request("/auth/login", {
+      method: "POST",
+      data: payload,
+    });
+  }
+
+  async registerWithPassword(payload: {
+    username: string;
+    password: string;
+    email: string;
+    phone?: string;
+  }): Promise<AuthResponse> {
+    return this.request("/auth/register", {
+      method: "POST",
+      data: payload,
+    });
+  }
 }
 
 export const apiService = new ApiService();
@@ -230,3 +252,15 @@ export const fetchCurrentUser = () => apiService.getCurrentUser();
 
 export const updateCurrentUser = (payload: Partial<UserProfile>) =>
   apiService.updateCurrentUser(payload);
+
+export const loginWithPassword = (payload: {
+  username: string;
+  password: string;
+}) => apiService.loginWithPassword(payload);
+
+export const registerWithPassword = (payload: {
+  username: string;
+  password: string;
+  email: string;
+  phone?: string;
+}) => apiService.registerWithPassword(payload);

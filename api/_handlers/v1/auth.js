@@ -46,6 +46,12 @@ const handleWechatLogin = async (req, res) => {
     return respond(res, 400, { error: 'Missing WeChat login code' });
   }
 
+  console.log('[auth] Received WeChat login request:', {
+    hasCode: !!code,
+    hasUserInfo: !!userInfo,
+    userInfoKeys: userInfo ? Object.keys(userInfo) : []
+  });
+
   let session;
   try {
     session = await exchangeCodeForSession(code);
@@ -53,6 +59,11 @@ const handleWechatLogin = async (req, res) => {
     console.error('[auth] WeChat exchange failed:', error);
     return respond(res, 502, { error: 'WeChat authentication failed', details: error.message });
   }
+
+  console.log('[auth] WeChat session:', {
+    openId: session.openId,
+    hasUnionId: !!session.unionId
+  });
 
   await connectToDatabase();
 

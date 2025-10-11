@@ -150,15 +150,23 @@ export default function Me() {
           desc: "用于完善个人资料",
         });
         userProfile = profile?.userInfo;
+        console.log("获取到的微信用户信息:", userProfile);
       } catch (profileError) {
-        console.warn("User declined profile authorization", profileError);
+        console.warn("用户拒绝授权获取个人信息", profileError);
+        // 即使用户拒绝授权，也继续登录流程
       }
 
+      console.log("准备发送登录请求，userInfo:", userProfile);
       const authRes = await loginWithWechat({
         code: loginRes.code,
         userInfo: userProfile,
       });
       storeAuthToken(authRes.token);
+      console.log("微信登录成功:", authRes.user);
+      Taro.showToast({
+        title: `登录成功！欢迎 ${authRes.user?.displayName || "用户"}`,
+        icon: "success"
+      }).catch(() => undefined);
       return authRes;
     } catch (error) {
       console.error("WeChat login failed", error);

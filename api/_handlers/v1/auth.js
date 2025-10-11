@@ -42,24 +42,25 @@ const ensureDisplayName = (source) => {
 };
 
 const handleWechatLogin = async (req, res) => {
-  const { code, userInfo, ip } = req.body || {};
-  if (!code) {
-    return respond(res, 400, { error: 'Missing WeChat login code' });
-  }
-
-  console.log('[auth] Received WeChat login request:', {
-    hasCode: !!code,
-    hasUserInfo: !!userInfo,
-    userInfoKeys: userInfo ? Object.keys(userInfo) : []
-  });
-
-  let session;
   try {
-    session = await exchangeCodeForSession(code);
-  } catch (error) {
-    console.error('[auth] WeChat exchange failed:', error);
-    return respond(res, 502, { error: 'WeChat authentication failed', details: error.message });
-  }
+    const { code, userInfo, ip } = req.body || {};
+    if (!code) {
+      return respond(res, 400, { error: 'Missing WeChat login code' });
+    }
+
+    console.log('[auth] Received WeChat login request:', {
+      hasCode: !!code,
+      hasUserInfo: !!userInfo,
+      userInfoKeys: userInfo ? Object.keys(userInfo) : []
+    });
+
+    let session;
+    try {
+      session = await exchangeCodeForSession(code);
+    } catch (error) {
+      console.error('[auth] WeChat exchange failed:', error);
+      return respond(res, 502, { error: 'WeChat authentication failed', details: error.message });
+    }
 
   console.log('[auth] WeChat session:', {
     openId: session.openId,
@@ -67,8 +68,10 @@ const handleWechatLogin = async (req, res) => {
   });
 
   await connectToDatabase();
+  console.log('[auth] Connected to database');
 
   const existingUser = await User.findOne({ 'wechat.openid': session.openId });
+  console.log('[auth] Existing user found:', !!existingUser, existingUser?._id);
 
   const baseProfile = {
     display_name: ensureDisplayName(userInfo),
@@ -86,6 +89,7 @@ const handleWechatLogin = async (req, res) => {
   };
 
   if (existingUser) {
+    console.log('[auth] Updating existing user');
     existingUser.display_name = baseProfile.display_name || existingUser.display_name;
     existingUser.avatar_url = baseProfile.avatar_url || existingUser.avatar_url;
     existingUser.email = baseProfile.email || existingUser.email;
@@ -97,10 +101,12 @@ const handleWechatLogin = async (req, res) => {
     existingUser.role = determineRole(existingUser, req.body);
 
     await existingUser.save();
+    console.log('[auth] User updated successfully:', existingUser._id);
     const token = createToken(existingUser);
     return respond(res, 200, buildUserPayload(existingUser, token));
   }
 
+  console.log('[auth] Creating new user with profile:', baseProfile);
   const role = determineRole({
     email: baseProfile.email,
     wechat: { openid: session.openId }
@@ -112,8 +118,13 @@ const handleWechatLogin = async (req, res) => {
     metadata: userInfo?.metadata || {}
   });
 
+  console.log('[auth] New user created successfully:', newUser._id);
   const token = createToken(newUser);
   return respond(res, 200, buildUserPayload(newUser, token));
+  } catch (error) {
+    console.error('[auth] WeChat login handler error:', error);
+    return respond(res, 500, { error: 'Internal server error', details: error.message });
+  }
 };
 
 const handleAnonymousLogin = async (req, res) => {

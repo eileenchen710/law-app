@@ -329,12 +329,12 @@ export default function Me() {
         </Text>
       </View>
 
-      {isWeappEnv() && (
+      {isWeappEnv() && !user?.displayName && (
         <View className="action-card" style={{ marginBottom: "18px" }}>
           <View className="action-texts">
-            <Text className="action-title">同步微信头像与昵称</Text>
+            <Text className="action-title">完善个人资料</Text>
             <Text className="action-desc">
-              获取微信公开资料，并同步到当前账户。
+              点击下方按钮，授权获取微信头像与昵称。
             </Text>
           </View>
           <Button
@@ -343,7 +343,7 @@ export default function Me() {
             loading={authenticating}
             disabled={authenticating}
           >
-            重新授权
+            授权获取微信信息
           </Button>
         </View>
       )}

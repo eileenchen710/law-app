@@ -26,6 +26,11 @@ const AppointmentSchema = new Schema(
       ref: 'Service',
       required: true,
     },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true
+    },
     appointment_time: {
       type: Date,
       required: true,

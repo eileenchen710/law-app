@@ -140,6 +140,39 @@ class ApiService {
       data,
     });
   }
+
+  async loginWithWechat(payload: {
+    code: string;
+    userInfo?: Record<string, unknown>;
+  }): Promise<AuthResponse> {
+    return this.request("/auth/wechat", {
+      method: "POST",
+      data: payload,
+    });
+  }
+
+  async loginAnonymously(payload: {
+    email?: string;
+    phone?: string;
+    name?: string;
+    avatarUrl?: string;
+  }): Promise<AuthResponse> {
+    return this.request("/auth/anonymous", {
+      method: "POST",
+      data: payload,
+    });
+  }
+
+  async getCurrentUser(): Promise<UserProfileResponse> {
+    return this.request("/users/me", { method: "GET" });
+  }
+
+  async updateCurrentUser(payload: Partial<UserProfile>): Promise<UserProfileResponse> {
+    return this.request("/users/me", {
+      method: "PUT",
+      data: payload,
+    });
+  }
 }
 
 export const apiService = new ApiService();
@@ -164,3 +197,20 @@ export const fetchAppointments = async () => {
 
 export const submitConsultationRequest = (payload: ConsultationPayload) =>
   apiService.submitConsultation(payload);
+
+export const loginWithWechat = (payload: {
+  code: string;
+  userInfo?: Record<string, unknown>;
+}) => apiService.loginWithWechat(payload);
+
+export const loginAnonymously = (payload: {
+  email?: string;
+  phone?: string;
+  name?: string;
+  avatarUrl?: string;
+}) => apiService.loginAnonymously(payload);
+
+export const fetchCurrentUser = () => apiService.getCurrentUser();
+
+export const updateCurrentUser = (payload: Partial<UserProfile>) =>
+  apiService.updateCurrentUser(payload);

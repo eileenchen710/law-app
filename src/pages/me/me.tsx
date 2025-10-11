@@ -300,13 +300,48 @@ export default function Me() {
     await initialize();
   };
 
-  const handleWechatProfileSync = async () => {
+  const handleGetUserProfile = async () => {
     if (!isWeappEnv()) {
       return;
     }
-    const result = await performWechatLogin(true); // 传入 true 以获取用户信息
-    if (result?.token) {
+
+    try {
+      setAuthenticating(true);
+
+      // 直接调用 getUserProfile
+      const profile = await Taro.getUserProfile({
+        desc: "用于完善个人资料",
+      });
+
+      console.log("获取到的微信用户信息:", profile.userInfo);
+
+      // 获取到用户信息后，重新登录并更新
+      const loginRes = await Taro.login();
+      if (!loginRes.code) {
+        throw new Error("未获取到微信登录凭证");
+      }
+
+      const authRes = await loginWithWechat({
+        code: loginRes.code,
+        userInfo: profile.userInfo,
+      });
+
+      storeAuthToken(authRes.token);
+
+      Taro.showToast({
+        title: `更新成功！欢迎 ${authRes.user?.displayName || "用户"}`,
+        icon: "success"
+      }).catch(() => undefined);
+
+      // 刷新用户信息
       await refreshProfile();
+
+    } catch (error) {
+      console.error("获取用户信息失败", error);
+      const message = (error as Error).message || "授权失败";
+      Taro.showToast({ title: message, icon: "none" }).catch(() => undefined);
+    } finally {
+      setAuthenticating(false);
     }
   };
 
@@ -339,7 +374,7 @@ export default function Me() {
           </View>
           <Button
             className="action-button"
-            onClick={handleWechatProfileSync}
+            onClick={handleGetUserProfile}
             loading={authenticating}
             disabled={authenticating}
           >

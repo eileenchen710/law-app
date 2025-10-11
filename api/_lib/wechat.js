@@ -6,6 +6,13 @@ const getConfig = () => {
   const appId = process.env.WECHAT_APP_ID;
   const appSecret = process.env.WECHAT_APP_SECRET;
 
+  console.log('[wechat] Config check:', {
+    hasAppId: !!appId,
+    appIdPrefix: appId ? appId.substring(0, 4) : 'missing',
+    hasAppSecret: !!appSecret,
+    appSecretLength: appSecret ? appSecret.length : 0
+  });
+
   if (!appId || !appSecret) {
     throw new Error('WECHAT_APP_ID or WECHAT_APP_SECRET is not configured');
   }

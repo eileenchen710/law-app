@@ -5,12 +5,10 @@ const serverless = require('serverless-http');
 const handlers = {
   firms: () => require('./_handlers/firms'),
   services: () => require('./_handlers/services'),
-  appointments: () => require('./_handlers/appointments'),
   v1FirmsList: () => require('./_handlers/v1/firms-list'),
   v1FirmDetail: () => require('./_handlers/v1/firms-detail'),
   v1ServicesList: () => require('./_handlers/v1/services-list'),
   v1ServiceDetail: () => require('./_handlers/v1/services-detail'),
-  v1AppointmentsList: () => require('./_handlers/v1/appointments-list'),
   v1Consultations: () => require('./_handlers/v1/consultations'),
   v1Auth: () => require('./_handlers/v1/auth'),
   v1UsersMe: () => require('./_handlers/v1/users-me'),
@@ -47,9 +45,6 @@ app.all(['/firms/:id', '/api/firms/:id'], adapt(() => handlers.firms(), { mapIdP
 app.all(['/services', '/api/services'], adapt(() => handlers.services()));
 app.all(['/services/:id', '/api/services/:id'], adapt(() => handlers.services(), { mapIdParam: true }));
 
-app.all(['/appointments', '/api/appointments'], adapt(() => handlers.appointments()));
-app.all(['/appointments/:id', '/api/appointments/:id'], adapt(() => handlers.appointments(), { mapIdParam: true }));
-
 // Public v1 endpoints
 app.all(['/v1/firms', '/api/v1/firms'], adapt(() => handlers.v1FirmsList()));
 app.all(['/v1/firms/:id', '/api/v1/firms/:id'], adapt(() => handlers.v1FirmDetail(), { mapIdParam: true }));
@@ -57,7 +52,6 @@ app.all(['/v1/firms/:id', '/api/v1/firms/:id'], adapt(() => handlers.v1FirmDetai
 app.all(['/v1/services', '/api/v1/services'], adapt(() => handlers.v1ServicesList()));
 app.all(['/v1/services/:id', '/api/v1/services/:id'], adapt(() => handlers.v1ServiceDetail(), { mapIdParam: true }));
 
-app.all(['/v1/appointments', '/api/v1/appointments'], adapt(() => handlers.v1AppointmentsList()));
 app.all(['/v1/consultations', '/api/v1/consultations'], adapt(() => handlers.v1Consultations()));
 app.all(
   ['/v1/auth', '/api/v1/auth', '/v1/auth/:action', '/api/v1/auth/:action'],

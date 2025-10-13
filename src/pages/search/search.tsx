@@ -12,6 +12,8 @@ import type {
 import { getSnapshot, onMockDataChange, initializeDataStore } from "../../services/dataStore";
 import AppHeader from "../index/components/AppHeader";
 import Loading from "../../components/Loading";
+import { fetchCurrentUser, submitConsultationRequest } from "../../services/api";
+import type { UserProfile, ConsultationPayload } from "../../services/types";
 
 const TABS = [
   { id: "firms", label: "律所" },
@@ -41,15 +43,38 @@ export default function Search() {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
     description: "",
   });
+  const [submittingBooking, setSubmittingBooking] = useState(false);
+
+  const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
   useLoad(() => {
     console.log("Search page loaded.");
   });
+
+  // 获取当前用户信息
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const token = Taro.getStorageSync("auth_token");
+        if (token) {
+          const response = await fetchCurrentUser();
+          setUser(response.user);
+        }
+      } catch (error) {
+        console.log("User not logged in or session expired");
+        setUser(null);
+      }
+    };
+
+    loadUser();
+  }, []);
 
   useEffect(() => {
     const applySnapshot = (snapshot: MockDataSnapshot) => {
@@ -163,25 +188,86 @@ export default function Search() {
     setSelectedFirmId(null);
     setSelectedServiceId(null);
     setShowBookingForm(false);
-    setFormData({ name: "", phone: "", description: "" });
+    setFormData({ name: "", phone: "", email: "", description: "" });
   };
 
-  const handleSubmitBooking = () => {
-    if (!formData.name || !formData.phone) {
-      Taro.showToast({
-        title: "请填写姓名和电话",
-        icon: "none",
-      });
+  const handleSubmitBooking = async () => {
+    if (submittingBooking) return;
+
+    const trimmedName = formData.name.trim();
+    const trimmedPhone = formData.phone.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedDescription = formData.description.trim();
+
+    if (!trimmedName) {
+      Taro.showToast({ title: "请填写姓名", icon: "none", duration: 2000 });
       return;
     }
 
-    Taro.showToast({
-      title: "预约成功！我们会尽快联系您",
-      icon: "success",
-    });
+    if (!trimmedEmail) {
+      Taro.showToast({ title: "请填写邮箱", icon: "none", duration: 2000 });
+      return;
+    }
 
-    setShowBookingForm(false);
-    setFormData({ name: "", phone: "", description: "" });
+    if (!trimmedPhone) {
+      Taro.showToast({ title: "请填写联系电话", icon: "none", duration: 2000 });
+      return;
+    }
+
+    if (!trimmedDescription) {
+      Taro.showToast({ title: "请填写问题描述", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Taro.showToast({ title: "请输入正确的邮箱地址", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const phoneRegex = /^\+?[0-9\-\s]{6,16}$/;
+    if (!phoneRegex.test(trimmedPhone)) {
+      Taro.showToast({ title: "请输入正确的联系电话", icon: "none", duration: 2000 });
+      return;
+    }
+
+    const selectedService = selectedServiceId
+      ? legalServices.find((s) => s.id === selectedServiceId)
+      : null;
+    const selectedFirm = selectedFirmId
+      ? lawFirms.find((f) => f.id === selectedFirmId)
+      : null;
+
+    const payload: ConsultationPayload = {
+      name: trimmedName,
+      email: trimmedEmail,
+      phone: trimmedPhone,
+      serviceName: selectedService?.title || "咨询",
+      message: trimmedDescription,
+      firmId: selectedFirmId || undefined,
+      serviceId: selectedServiceId || undefined,
+    };
+
+    try {
+      setSubmittingBooking(true);
+      await submitConsultationRequest(payload);
+      Taro.showToast({
+        title: "预约成功！我们会尽快联系您",
+        icon: "success",
+        duration: 2000,
+      });
+      setShowBookingForm(false);
+      setFormData({ name: "", phone: "", email: "", description: "" });
+    } catch (error) {
+      console.error("提交预约失败", error);
+      Taro.showToast({
+        title: "提交失败，请稍后再试",
+        icon: "error",
+        duration: 2000,
+      });
+    } finally {
+      setSubmittingBooking(false);
+    }
   };
 
   const menuItems = [
@@ -240,6 +326,42 @@ export default function Search() {
         </View>
 
         <View className="detail-section">
+          <Text className="section-title">联系信息</Text>
+          <View className="info-grid">
+            {selectedFirm.city && (
+              <View className="info-item">
+                <Text className="info-label">城市</Text>
+                <Text className="info-value">{selectedFirm.city}</Text>
+              </View>
+            )}
+            {selectedFirm.address && (
+              <View className="info-item">
+                <Text className="info-label">地址</Text>
+                <Text className="info-value">{selectedFirm.address}</Text>
+              </View>
+            )}
+            {selectedFirm.phone && (
+              <View className="info-item">
+                <Text className="info-label">电话</Text>
+                <Text className="info-value">{selectedFirm.phone}</Text>
+              </View>
+            )}
+            {selectedFirm.email && (
+              <View className="info-item">
+                <Text className="info-label">邮箱</Text>
+                <Text className="info-value">{selectedFirm.email}</Text>
+              </View>
+            )}
+            {selectedFirm.website && (
+              <View className="info-item">
+                <Text className="info-label">网站</Text>
+                <Text className="info-value">{selectedFirm.website}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <View className="detail-section">
           <Text className="section-title">服务信息</Text>
           <View className="info-grid">
             <View className="info-item">
@@ -254,6 +376,64 @@ export default function Search() {
             )}
           </View>
         </View>
+
+        {selectedFirm.practiceAreas && selectedFirm.practiceAreas.length > 0 && (
+          <View className="detail-section">
+            <Text className="section-title">执业领域</Text>
+            <View className="service-tags">
+              {selectedFirm.practiceAreas.map((area, index) => (
+                <Text key={index} className="service-tag">
+                  {area}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {selectedFirm.tags && selectedFirm.tags.length > 0 && (
+          <View className="detail-section">
+            <Text className="section-title">特色标签</Text>
+            <View className="service-tags">
+              {selectedFirm.tags.map((tag, index) => (
+                <Text key={index} className="service-tag">
+                  {tag}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {selectedFirm.lawyers && selectedFirm.lawyers.length > 0 && (
+          <View className="detail-section">
+            <Text className="section-title">专业律师团队</Text>
+            {selectedFirm.lawyers.map((lawyer, index) => (
+              <View key={index} className="lawyer-card">
+                <View className="lawyer-header">
+                  <Text className="lawyer-name">{lawyer.name}</Text>
+                  <Text className="lawyer-title">{lawyer.title}</Text>
+                </View>
+                {lawyer.phone && (
+                  <Text className="lawyer-info">电话：{lawyer.phone}</Text>
+                )}
+                {lawyer.email && (
+                  <Text className="lawyer-info">邮箱：{lawyer.email}</Text>
+                )}
+                {lawyer.specialties && lawyer.specialties.length > 0 && (
+                  <View className="lawyer-specialties">
+                    <Text className="specialties-label">专长：</Text>
+                    <View className="service-tags">
+                      {lawyer.specialties.map((specialty, idx) => (
+                        <Text key={idx} className="service-tag">
+                          {specialty}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
 
         {selectedFirm.services && selectedFirm.services.length > 0 && (
           <View className="detail-section">
@@ -325,6 +505,15 @@ export default function Search() {
                 value={formData.name}
                 onInput={(e) =>
                   setFormData({ ...formData, name: e.detail.value })
+                }
+              />
+              <Input
+                className="form-input"
+                placeholder="您的邮箱"
+                type="text"
+                value={formData.email}
+                onInput={(e) =>
+                  setFormData({ ...formData, email: e.detail.value })
                 }
               />
               <Input
@@ -471,6 +660,15 @@ export default function Search() {
                 value={formData.name}
                 onInput={(e) =>
                   setFormData({ ...formData, name: e.detail.value })
+                }
+              />
+              <Input
+                className="form-input"
+                placeholder="您的邮箱"
+                type="text"
+                value={formData.email}
+                onInput={(e) =>
+                  setFormData({ ...formData, email: e.detail.value })
                 }
               />
               <Input
@@ -684,15 +882,17 @@ export default function Search() {
           <View className="empty-state">
             <Text className="empty-title">未找到匹配内容</Text>
             <Text className="empty-desc">
-              尝试换个关键词或在后台新增相关数据
+              {isAdmin ? "尝试换个关键词或在后台新增相关数据" : "尝试换个关键词"}
             </Text>
-            <Button
-              className="empty-btn"
-              size="mini"
-              onClick={() => Taro.navigateTo({ url: "/pages/admin/index" })}
-            >
-              前往后台
-            </Button>
+            {isAdmin && (
+              <Button
+                className="empty-btn"
+                size="mini"
+                onClick={() => Taro.switchTab({ url: "/pages/me/me" })}
+              >
+                前往后台
+              </Button>
+            )}
           </View>
         ) : null}
       </View>

@@ -1,13 +1,29 @@
+export interface LawyerInfo {
+  name: string;
+  title: string;
+  phone?: string;
+  email?: string;
+  specialties?: string[];
+}
+
 export interface LawFirmMock {
   id: string;
   name: string;
+  slug?: string;
   description: string;
-  price: string;
-  services: string[];
+  city?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  price?: string;
+  services?: string[];
+  practiceAreas?: string[];
+  tags?: string[];
+  lawyers?: LawyerInfo[];
   rating?: number;
   cases?: number;
   recommended?: boolean;
-  city?: string;
   contactPhone?: string;
   contactEmail?: string;
 }

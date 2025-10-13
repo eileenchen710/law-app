@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const connectToDatabase = require('../api/_lib/db');
 const Firm = require('../api/models/firm');
 const Service = require('../api/models/service');
-const Appointment = require('../api/models/appointment');
+const Consultation = require('../api/models/consultation');
 
 async function seedDatabase() {
   try {
@@ -12,7 +12,7 @@ async function seedDatabase() {
     console.log('清理现有数据...');
     await Firm.deleteMany({});
     await Service.deleteMany({});
-    await Appointment.deleteMany({});
+    await Consultation.deleteMany({});
 
     console.log('插入示例律所数据...');
     
@@ -113,39 +113,37 @@ async function seedDatabase() {
       console.log(`为 ${firm.name} 插入了 ${createdServices.length} 个服务`);
     }
 
-    // 插入几个示例预约
-    const sampleAppointments = [
+    // 插入几个示例咨询记录
+    const sampleConsultations = [
       {
         name: '张先生',
         phone: '13800138001',
         email: 'zhang@example.com',
-        firm_id: firms[0]._id,
-        service_id: services[0]._id,
-        appointment_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3天后
-        remark: '想咨询离婚财产分割问题',
+        service_name: '婚姻家事咨询',
+        message: '想咨询离婚财产分割问题',
+        preferred_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3天后
         status: 'pending'
       },
       {
         name: '李女士',
         phone: '13900139002',
         email: 'li@example.com',
-        firm_id: firms[1]._id,
-        service_id: services[5]._id,
-        appointment_time: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5天后
-        remark: '劳动合同纠纷，需要法律援助',
-        status: 'confirmed'
+        service_name: '劳动仲裁咨询',
+        message: '劳动合同纠纷，需要法律援助',
+        preferred_time: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5天后
+        status: 'contacted'
       }
     ];
 
-    const appointments = await Appointment.create(sampleAppointments);
-    console.log(`插入了 ${appointments.length} 个示例预约`);
+    const consultations = await Consultation.create(sampleConsultations);
+    console.log(`插入了 ${consultations.length} 个示例咨询记录`);
 
     console.log('\n数据库初始化完成！');
     console.log('========================');
     console.log('总计:');
     console.log(`- ${firms.length} 个律所`);
     console.log(`- ${services.length} 个服务`);
-    console.log(`- ${appointments.length} 个预约`);
+    console.log(`- ${consultations.length} 个咨询记录`);
     
     process.exit(0);
   } catch (error) {

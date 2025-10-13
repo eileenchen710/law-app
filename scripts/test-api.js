@@ -68,32 +68,6 @@ async function testServices() {
   await request("DELETE", `/api/services/${created.id}`);
 }
 
-async function testAppointments() {
-  logStep("Testing /api/appointments");
-
-  await request("GET", "/api/appointments");
-
-  const uniqueSuffix = Date.now();
-  const createPayload = {
-    name: `Test Appointment ${uniqueSuffix}`,
-    contact: "15500001111",
-    description: "Automated test payload for appointment creation.",
-  };
-
-  const created = await request("POST", "/api/appointments", createPayload);
-
-  await request("GET", `/api/appointments/${created.id}`);
-
-  const updatePayload = {
-    name: `${createPayload.name} Updated`,
-    contact: "16600002222",
-    description: "Automated test payload updated.",
-  };
-
-  await request("PUT", `/api/appointments/${created.id}`, updatePayload);
-  await request("DELETE", `/api/appointments/${created.id}`);
-}
-
 async function testFirms() {
   logStep("Testing /api/firms");
 
@@ -146,11 +120,10 @@ async function testFirms() {
 (async function main() {
   try {
     await testServices();
-    await testAppointments();
     await testFirms();
-    console.log("\nAll API tests passed ?");
+    console.log("\nAll API tests passed ✅");
   } catch (error) {
-    console.error("\nAPI tests failed ?", error);
+    console.error("\nAPI tests failed ❌", error);
     if (error.details) {
       console.error("Details:", error.details);
     }

@@ -1,6 +1,7 @@
 import {
   Button,
   Input,
+  Picker,
   ScrollView,
   Switch,
   Text,
@@ -36,9 +37,18 @@ import { adaptFirmFromApi, adaptServiceFromApi } from "../../services/dataAdapte
 
 interface FirmFormState {
   name: string;
+  slug: string;
   description: string;
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
   price: string;
   servicesText: string;
+  practiceAreasText: string;
+  tagsText: string;
+  lawyersText: string;
   rating: string;
   cases: string;
   recommended: boolean;
@@ -61,9 +71,18 @@ const DEFAULT_CATEGORY_ID = SERVICE_CATEGORIES[0]?.id ?? "criminal";
 
 const createEmptyFirmForm = (): FirmFormState => ({
   name: "",
+  slug: "",
   description: "",
+  city: "",
+  address: "",
+  phone: "",
+  email: "",
+  website: "",
   price: "",
   servicesText: "",
+  practiceAreasText: "",
+  tagsText: "",
+  lawyersText: "",
   rating: "",
   cases: "",
   recommended: false,
@@ -418,13 +437,47 @@ export default function Me() {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const practiceAreas = firm.practiceAreasText
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const tags = firm.tagsText
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // Parse lawyers JSON
+    let lawyers: any[] | undefined;
+    if (firm.lawyersText.trim()) {
+      try {
+        const parsed = JSON.parse(firm.lawyersText);
+        if (!Array.isArray(parsed)) {
+          throw new Error("律师信息必须是数组格式");
+        }
+        lawyers = parsed;
+      } catch (error) {
+        Taro.showToast({ title: "律师信息格式错误", icon: "none" });
+        return;
+      }
+    }
+
     try {
       if (editingFirmId) {
         await apiClient.updateFirm(editingFirmId, {
           name: firm.name.trim(),
+          slug: firm.slug.trim() || undefined,
           description: firm.description.trim() || undefined,
+          city: firm.city.trim() || undefined,
+          address: firm.address.trim() || undefined,
+          phone: firm.phone.trim() || undefined,
+          email: firm.email.trim() || undefined,
+          website: firm.website.trim() || undefined,
           price: firm.price.trim() || undefined,
           services: services.length > 0 ? services : undefined,
+          practice_areas: practiceAreas.length > 0 ? practiceAreas : undefined,
+          tags: tags.length > 0 ? tags : undefined,
+          lawyers: lawyers || undefined,
           rating: firm.rating ? parseFloat(firm.rating) : undefined,
           cases: firm.cases ? parseInt(firm.cases, 10) : undefined,
           recommended: firm.recommended,
@@ -435,9 +488,18 @@ export default function Me() {
       } else {
         const newData = {
           name: firm.name.trim(),
+          slug: firm.slug.trim() || undefined,
           description: firm.description.trim() || undefined,
+          city: firm.city.trim() || undefined,
+          address: firm.address.trim() || undefined,
+          phone: firm.phone.trim() || undefined,
+          email: firm.email.trim() || undefined,
+          website: firm.website.trim() || undefined,
           price: firm.price.trim() || undefined,
           services: services.length > 0 ? services : ["初步咨询"],
+          practice_areas: practiceAreas.length > 0 ? practiceAreas : undefined,
+          tags: tags.length > 0 ? tags : undefined,
+          lawyers: lawyers || undefined,
           rating: firm.rating ? parseFloat(firm.rating) : 4.8,
           cases: firm.cases ? parseInt(firm.cases, 10) : 0,
           recommended: firm.recommended,
@@ -465,9 +527,18 @@ export default function Me() {
     setEditingFirmId(firm.id);
     setFirmForm({
       name: firm.name,
+      slug: firm.slug || "",
       description: firm.description || "",
+      city: firm.city || "",
+      address: firm.address || "",
+      phone: firm.phone || "",
+      email: firm.email || "",
+      website: firm.website || "",
       price: firm.price || "",
       servicesText: firm.services?.join("\n") || "",
+      practiceAreasText: firm.practiceAreas?.join("\n") || "",
+      tagsText: firm.tags?.join(", ") || "",
+      lawyersText: firm.lawyers ? JSON.stringify(firm.lawyers, null, 2) : "",
       rating: firm.rating?.toString() || "",
       cases: firm.cases?.toString() || "",
       recommended: firm.recommended || false,
@@ -645,12 +716,74 @@ export default function Me() {
         </View>
 
         <View className="form-row">
+          <Text className="form-label">URL友好名称 (slug)</Text>
+          <Input
+            className="form-input"
+            placeholder="例如：huaxia-law-firm"
+            value={firmForm.slug}
+            onInput={handleFirmInput("slug")}
+          />
+        </View>
+
+        <View className="form-row">
           <Text className="form-label">律所简介</Text>
           <Textarea
             className="form-textarea"
             placeholder="请输入律所简介"
             value={firmForm.description}
             onInput={handleFirmInput("description")}
+          />
+        </View>
+
+        <View className="form-row inline">
+          <View className="form-field">
+            <Text className="form-label">城市</Text>
+            <Input
+              className="form-input"
+              placeholder="例如：北京"
+              value={firmForm.city}
+              onInput={handleFirmInput("city")}
+            />
+          </View>
+          <View className="form-field">
+            <Text className="form-label">地址</Text>
+            <Input
+              className="form-input"
+              placeholder="详细地址"
+              value={firmForm.address}
+              onInput={handleFirmInput("address")}
+            />
+          </View>
+        </View>
+
+        <View className="form-row inline">
+          <View className="form-field">
+            <Text className="form-label">电话</Text>
+            <Input
+              className="form-input"
+              placeholder="+86-10-1234-5678"
+              value={firmForm.phone}
+              onInput={handleFirmInput("phone")}
+            />
+          </View>
+          <View className="form-field">
+            <Text className="form-label">邮箱</Text>
+            <Input
+              className="form-input"
+              placeholder="contact@firm.com"
+              value={firmForm.email}
+              onInput={handleFirmInput("email")}
+            />
+          </View>
+        </View>
+
+        <View className="form-row">
+          <Text className="form-label">网站</Text>
+          <Input
+            className="form-input"
+            placeholder="https://www.firm.com"
+            value={firmForm.website}
+            onInput={handleFirmInput("website")}
           />
         </View>
 
@@ -703,6 +836,37 @@ export default function Me() {
             placeholder={`初步法律咨询\n案件代理\n法律文书审查`}
             value={firmForm.servicesText}
             onInput={handleFirmInput("servicesText")}
+          />
+        </View>
+
+        <View className="form-row">
+          <Text className="form-label">执业领域（一行一项）</Text>
+          <Textarea
+            className="form-textarea"
+            placeholder={`公司治理\n并购重组\n资本市场\n合规管理`}
+            value={firmForm.practiceAreasText}
+            onInput={handleFirmInput("practiceAreasText")}
+          />
+        </View>
+
+        <View className="form-row">
+          <Text className="form-label">特色标签（逗号分隔）</Text>
+          <Input
+            className="form-input"
+            placeholder="头部律所, 跨境业务, 资本运营"
+            value={firmForm.tagsText}
+            onInput={handleFirmInput("tagsText")}
+          />
+        </View>
+
+        <View className="form-row">
+          <Text className="form-label">律师团队（JSON格式）</Text>
+          <Textarea
+            className="form-textarea"
+            placeholder={`[\n  {\n    "name": "张律师",\n    "title": "高级合伙人",\n    "phone": "+86-138-0000-1234",\n    "email": "zhang@firm.com",\n    "specialties": ["上市合规", "股权激励"]\n  }\n]`}
+            value={firmForm.lawyersText}
+            onInput={handleFirmInput("lawyersText")}
+            style={{ minHeight: "150px" }}
           />
         </View>
 
@@ -804,37 +968,45 @@ export default function Me() {
         <View className="form-row inline">
           <View className="form-field">
             <Text className="form-label">所属律所 *</Text>
-            <View className="form-select">
-              {lawFirms.map((firm) => (
-                <View
-                  key={firm.id}
-                  className={`select-option ${serviceForm.lawFirmId === firm.id ? "selected" : ""}`}
-                  onClick={() =>
-                    setServiceForm((prev) => ({ ...prev, lawFirmId: firm.id }))
-                  }
-                >
-                  <Text>{firm.name}</Text>
-                </View>
-              ))}
-            </View>
+            <Picker
+              mode="selector"
+              range={lawFirms}
+              rangeKey="name"
+              value={lawFirms.findIndex(f => f.id === serviceForm.lawFirmId)}
+              onChange={(e) => {
+                const index = Number(e.detail.value);
+                if (lawFirms[index]) {
+                  setServiceForm((prev) => ({ ...prev, lawFirmId: lawFirms[index].id }));
+                }
+              }}
+            >
+              <View className="picker-display">
+                <Text className="picker-text">
+                  {lawFirms.find(f => f.id === serviceForm.lawFirmId)?.name || "请选择律所"}
+                </Text>
+              </View>
+            </Picker>
           </View>
           <View className="form-field">
             <Text className="form-label">服务分类</Text>
-            <View className="form-select">
-              {SERVICE_CATEGORIES.map((cat) => (
-                <View
-                  key={cat.id}
-                  className={`select-option ${serviceForm.category === cat.id ? "selected" : ""}`}
-                  onClick={() =>
-                    setServiceForm((prev) => ({ ...prev, category: cat.id }))
-                  }
-                >
-                  <Text>
-                    {cat.icon} {cat.name}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <Picker
+              mode="selector"
+              range={SERVICE_CATEGORIES}
+              rangeKey="name"
+              value={SERVICE_CATEGORIES.findIndex(c => c.id === serviceForm.category)}
+              onChange={(e) => {
+                const index = Number(e.detail.value);
+                if (SERVICE_CATEGORIES[index]) {
+                  setServiceForm((prev) => ({ ...prev, category: SERVICE_CATEGORIES[index].id }));
+                }
+              }}
+            >
+              <View className="picker-display">
+                <Text className="picker-text">
+                  {SERVICE_CATEGORIES.find(c => c.id === serviceForm.category)?.icon} {SERVICE_CATEGORIES.find(c => c.id === serviceForm.category)?.name || "请选择分类"}
+                </Text>
+              </View>
+            </Picker>
           </View>
         </View>
 

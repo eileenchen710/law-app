@@ -650,6 +650,58 @@
   }
 }
 
+// Lawyer card styles
+.lawyer-card {
+  padding: 16px;
+  background: rgba(17, 25, 48, 0.6);
+  border: 1px solid rgba(99, 110, 255, 0.18);
+  border-radius: 14px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.lawyer-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.lawyer-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(226, 232, 255, 0.88);
+}
+
+.lawyer-title {
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(79, 109, 255, 0.18);
+  color: rgba(214, 222, 255, 0.9);
+}
+
+.lawyer-info {
+  font-size: 13px;
+  color: rgba(195, 204, 255, 0.72);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+.lawyer-specialties {
+  margin-top: 10px;
+}
+
+.specialties-label {
+  font-size: 13px;
+  color: rgba(194, 204, 255, 0.65);
+  margin-bottom: 8px;
+  display: block;
+}
+
 @media (max-width: 640px) {
   .search-detail-page {
     padding-top: 100px;

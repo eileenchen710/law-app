@@ -90,23 +90,83 @@ export default function Index() {
   const scrollResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const applySnapshot = (snapshot: MockDataSnapshot) => {
-      setLawFirms(snapshot.lawFirms);
-      setLegalServices(snapshot.legalServices);
-      setActiveFirm((current) => {
-        if (current && snapshot.lawFirms.some((firm) => firm.id === current)) {
-          return current;
+    const loadData = async () => {
+      try {
+        // 获取真实的律所和服务数据
+        const [firmsRes, servicesRes] = await Promise.all([
+          fetchFirms({ page: 1, size: 100 }),
+          fetchServices({ page: 1, size: 100 })
+        ]);
+
+        // 转换律所数据
+        let firms = (firmsRes.items || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description || "",
+          price: item.price || "面议",
+          services: item.services || [],
+          rating: item.rating || 4.8,
+          cases: item.cases || 0,
+          recommended: item.recommended || false,
+          city: item.city,
+          address: item.address,
+          phone: item.phone,
+          email: item.email,
+          website: item.website,
+          practiceAreas: item.practice_areas,
+          tags: item.tags,
+          lawyers: item.lawyers,
+          contactEmail: item.contact_email,
+          contactPhone: item.contact_phone,
+          slug: item.slug
+        } as LawFirmMock));
+
+        // 如果超过3个，按评分排序并取前3名
+        if (firms.length > 3) {
+          firms = firms
+            .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+            .slice(0, 3);
         }
-        return snapshot.lawFirms[0]?.id ?? null;
-      });
+
+        // 转换服务数据
+        const services = (servicesRes.items || []).map(item => ({
+          id: item.id,
+          title: item.title,
+          description: item.description || "",
+          category: item.category,
+          lawFirmId: item.law_firm_id || "",
+          price: item.price || "面议",
+          duration: item.duration || "1-2小时",
+          lawyerName: item.lawyer_name || "专业律师",
+          lawyerTitle: item.lawyer_title || "资深律师"
+        } as LegalServiceMock));
+
+        setLawFirms(firms);
+        setLegalServices(services);
+        setActiveFirm((current) => {
+          if (current && firms.some((firm) => firm.id === current)) {
+            return current;
+          }
+          return firms[0]?.id ?? null;
+        });
+
+        console.log("✅ 首页数据加载成功:", {
+          律所数量: firms.length,
+          服务数量: services.length
+        });
+      } catch (error) {
+        console.error("❌ 首页数据加载失败:", error);
+        logApiFailure("首页数据加载", error);
+
+        // 失败时使用 mock 数据作为备用
+        const snapshot = getSnapshot();
+        setLawFirms(snapshot.lawFirms);
+        setLegalServices(snapshot.legalServices);
+        setActiveFirm(snapshot.lawFirms[0]?.id ?? null);
+      }
     };
 
-    applySnapshot(getSnapshot());
-    const unsubscribe = onMockDataChange(applySnapshot);
-
-    return () => {
-      unsubscribe();
-    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -521,20 +581,60 @@ export default function Index() {
                     className="firm-logo"
                     mode="aspectFit"
                   />
-                  <Text className="firm-name">{firm.name}</Text>
+                  <View className="firm-name-section">
+                    <Text className="firm-name">{firm.name}</Text>
+                    {(firm.rating || firm.cases) && (
+                      <View className="firm-stats">
+                        {firm.rating && (
+                          <Text className="firm-rating">⭐ {firm.rating}</Text>
+                        )}
+                        {firm.cases && (
+                          <Text className="firm-cases">{firm.cases}+ 案例</Text>
+                        )}
+                      </View>
+                    )}
+                  </View>
                 </View>
                 <Text className="firm-price">{firm.price}</Text>
                 <Text className="firm-desc">{firm.description}</Text>
               </View>
 
-              <View className="firm-services">
-                {firm.services.map((service, idx) => (
-                  <View key={idx} className="service-item">
-                    <Text className="service-check">✓</Text>
-                    <Text className="service-text">{service}</Text>
+              {firm.practiceAreas && firm.practiceAreas.length > 0 && (
+                <View className="firm-practice-areas">
+                  {firm.practiceAreas.map((area, idx) => (
+                    <View key={idx} className="practice-area-tag">
+                      <Text className="practice-area-text">{area}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {firm.services && firm.services.length > 0 && (
+                <View className="firm-services">
+                  {firm.services.map((service, idx) => (
+                    <View key={idx} className="service-item">
+                      <Text className="service-check">✓</Text>
+                      <Text className="service-text">{service}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {firm.lawyers && firm.lawyers.length > 0 && (
+                <View className="firm-lawyers">
+                  <Text className="firm-lawyers-title">律师团队：</Text>
+                  <View className="lawyers-list">
+                    {firm.lawyers.slice(0, 2).map((lawyer, idx) => (
+                      <Text key={idx} className="lawyer-item">
+                        {lawyer.name} ({lawyer.title})
+                      </Text>
+                    ))}
+                    {firm.lawyers.length > 2 && (
+                      <Text className="lawyer-more">等 {firm.lawyers.length} 位律师</Text>
+                    )}
                   </View>
-                ))}
-              </View>
+                </View>
+              )}
 
               <Button
                 className="firm-btn"

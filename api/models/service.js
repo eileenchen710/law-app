@@ -28,8 +28,24 @@ const ServiceSchema = new Schema(
       trim: true,
     },
     price: {
-      type: Number,
-      min: 0,
+      type: String,
+      trim: true,
+    },
+    duration: {
+      type: String,
+      trim: true,
+    },
+    lawyer_name: {
+      type: String,
+      trim: true,
+    },
+    lawyer_title: {
+      type: String,
+      trim: true,
+    },
+    law_firm_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Firm',
     },
     lawyerInfo: {
       type: Schema.Types.Mixed,

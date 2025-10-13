@@ -18,12 +18,27 @@ export interface ServiceSummary {
   available_times?: string[];
 }
 
+export interface LawyerInfo {
+  name: string;
+  title: string;
+  phone?: string;
+  email?: string;
+  specialties?: string[];
+}
+
 export interface FirmSummary {
   id: string;
   name: string;
+  slug?: string;
   description: string;
-  address: string;
-  city: string;
+  city?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  practice_areas?: string[];
+  tags?: string[];
+  lawyers?: LawyerInfo[];
   contact_email?: string | null;
   contact_phone?: string | null;
   available_times?: string[];
@@ -85,6 +100,8 @@ export interface ConsultationPayload {
   serviceName?: string;
   message: string;
   preferredTime?: string;
+  firmId?: string;
+  serviceId?: string;
 }
 
 export interface ConsultationResult {

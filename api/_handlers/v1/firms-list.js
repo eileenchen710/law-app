@@ -51,7 +51,7 @@ module.exports = async function handler(req, res) {
     const [total, firms] = await Promise.all([
       Firm.countDocuments(query),
       Firm.find(query)
-        .select('name description address city contact_email contact_phone email phone available_times')
+        .select('name slug description address city contact_email contact_phone email phone website services practice_areas tags lawyers price rating cases recommended available_times')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -65,11 +65,23 @@ module.exports = async function handler(req, res) {
     const items = firms.map(firm => ({
       id: firm._id.toString(),
       name: firm.name,
+      slug: firm.slug,
       description: firm.description,
       address: firm.address,
       city: firm.city,
+      phone: firm.phone,
+      email: firm.email,
+      website: firm.website,
       contact_email: firm.contact_email || firm.email,
       contact_phone: firm.contact_phone || firm.phone,
+      services: firm.services || [],
+      practice_areas: firm.practice_areas || firm.practiceAreas || [],
+      tags: firm.tags || [],
+      lawyers: firm.lawyers || [],
+      price: firm.price,
+      rating: firm.rating,
+      cases: firm.cases,
+      recommended: firm.recommended || false,
       available_times: (firm.available_times || [])
         .filter(time => new Date(time) > new Date())
         .map(time => new Date(time).toISOString())

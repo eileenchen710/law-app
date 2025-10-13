@@ -4,7 +4,6 @@ const { parse } = require('url');
 
 const handlers = {
   services: require('../api/_handlers/services.js'),
-  appointments: require('../api/_handlers/appointments.js'),
   firms: require('../api/_handlers/firms.js'),
 };
 

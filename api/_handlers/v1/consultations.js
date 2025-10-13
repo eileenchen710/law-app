@@ -1,6 +1,8 @@
 const { sendNotificationEmails, __private__ } = require('../../_lib/mailer');
 const connectToDatabase = require('../../_lib/db-optimized');
 const Consultation = require('../../models/consultation');
+const Firm = require('../../models/firm');
+const Service = require('../../models/service');
 
 const { escapeHtml, formatAppointmentTime } = __private__;
 
@@ -9,6 +11,7 @@ const buildAdminHtml = ({
   email,
   phone,
   serviceName,
+  firmName,
   message,
   preferredTime
 }) => {
@@ -29,11 +32,48 @@ const buildAdminHtml = ({
 
     <h3>咨询详情</h3>
     <ul>
+      <li>指定律所：${escapeHtml(firmName || '未指定')}</li>
       <li>咨询服务：${escapeHtml(serviceName || '在线咨询')}</li>
       <li>期望沟通时间：${escapeHtml(formattedTime)}</li>
       <li>问题描述：</li>
     </ul>
     <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
+  `;
+};
+
+const buildFirmHtml = ({
+  firmName,
+  name,
+  email,
+  phone,
+  serviceName,
+  message,
+  preferredTime
+}) => {
+  const formattedTime = preferredTime
+    ? formatAppointmentTime(preferredTime)
+    : '未提供';
+
+  return `
+    <h2>新客户咨询通知 - ${escapeHtml(firmName)}</h2>
+    <p>您收到一条来自法律咨询平台的客户咨询请求。</p>
+
+    <h3>客户信息</h3>
+    <ul>
+      <li>姓名：${escapeHtml(name)}</li>
+      <li>邮箱：${escapeHtml(email)}</li>
+      <li>电话：${escapeHtml(phone)}</li>
+    </ul>
+
+    <h3>咨询详情</h3>
+    <ul>
+      <li>咨询服务：${escapeHtml(serviceName || '在线咨询')}</li>
+      <li>期望沟通时间：${escapeHtml(formattedTime)}</li>
+      <li>问题描述：</li>
+    </ul>
+    <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
+
+    <p style="margin-top: 20px; color: #666;">请尽快联系客户，提供专业的法律服务。</p>
   `;
 };
 
@@ -81,6 +121,8 @@ module.exports = async function handler(req, res) {
     serviceName,
     message,
     preferredTime,
+    firmId,
+    serviceId,
   } = req.body || {};
 
   const trimmedName = typeof name === 'string' ? name.trim() : '';
@@ -125,12 +167,38 @@ module.exports = async function handler(req, res) {
     // 连接数据库
     await connectToDatabase();
 
+    // 查询律所和服务信息
+    let firm = null;
+    let service = null;
+    let firmEmail = null;
+
+    if (firmId) {
+      firm = await Firm.findById(firmId).lean();
+      if (firm) {
+        firmEmail = firm.contact_email || firm.email;
+      }
+    }
+
+    if (serviceId) {
+      service = await Service.findById(serviceId).lean();
+      if (service && service.firm_id && !firm) {
+        // 如果通过服务找到律所，也获取律所信息
+        firm = await Firm.findById(service.firm_id).lean();
+        if (firm) {
+          firmEmail = firm.contact_email || firm.email;
+        }
+      }
+    }
+
+    const firmName = firm ? firm.name : null;
+    const actualServiceName = service ? service.title : (trimmedService || '在线咨询');
+
     // 创建咨询记录
     const consultation = await Consultation.create({
       name: trimmedName,
       email: trimmedEmail,
       phone: trimmedPhone,
-      service_name: trimmedService || '在线咨询',
+      service_name: actualServiceName,
       message: trimmedMessage,
       preferred_time: preferredTime ? appointmentTime : null,
       status: 'pending'
@@ -138,34 +206,50 @@ module.exports = async function handler(req, res) {
 
     console.log('[consultations] Created consultation record:', consultation._id);
 
-    // 发送邮件通知
-    const summary = await sendNotificationEmails(
-      {
-        admin: {
-          subject: `新在线咨询 - ${trimmedName}`,
-          html: buildAdminHtml({
-            name: trimmedName,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            serviceName: trimmedService,
-            message: trimmedMessage,
-            preferredTime: appointmentTime
-          })
-        },
-        client: {
-          to: trimmedEmail,
-          subject: `咨询确认 - ${trimmedService || '在线咨询'}`,
-          html: buildClientHtml({
-            name: trimmedName,
-            serviceName: trimmedService,
-            preferredTime: preferredTime ? appointmentTime : null
-          })
-        }
+    // 准备邮件配置
+    const emailConfig = {
+      admin: {
+        subject: `新在线咨询 - ${trimmedName}`,
+        html: buildAdminHtml({
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          serviceName: actualServiceName,
+          firmName: firmName,
+          message: trimmedMessage,
+          preferredTime: appointmentTime
+        })
       },
-      {
-        silent: false
+      client: {
+        to: trimmedEmail,
+        subject: `咨询确认 - ${actualServiceName}`,
+        html: buildClientHtml({
+          name: trimmedName,
+          serviceName: actualServiceName,
+          preferredTime: preferredTime ? appointmentTime : null
+        })
       }
-    );
+    };
+
+    // 如果有律所邮箱，添加律所邮件
+    if (firmEmail && firmName) {
+      emailConfig.firm = {
+        to: firmEmail,
+        subject: `新客户咨询 - ${trimmedName}`,
+        html: buildFirmHtml({
+          firmName: firmName,
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          serviceName: actualServiceName,
+          message: trimmedMessage,
+          preferredTime: appointmentTime
+        })
+      };
+    }
+
+    // 发送邮件通知
+    const summary = await sendNotificationEmails(emailConfig, { silent: false });
 
     return res.status(200).json({
       status: 'ok',

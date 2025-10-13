@@ -80,12 +80,14 @@ html {
 }
 
 .taro-textarea {
-  background: transparent !important;
-  width: 100% !important;
-  font-size: 13px !important;
-  line-height: 1.6 !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  width: 100%;
+  font-size: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  height: 1.47059em;
+  line-height: 1.47059;
 }
 
 .taro-input {

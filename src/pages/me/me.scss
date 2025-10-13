@@ -403,6 +403,36 @@ $accent-strong: #e0e0e0;
   color: $text-primary !important;
 }
 
+.picker-display {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid $panel-border;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: transparent;
+  color: $text-primary;
+  line-height: 1.55;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+
+  &::after {
+    content: "▼";
+    position: absolute;
+    right: 14px;
+    font-size: 12px;
+    color: rgba(170, 180, 210, 0.6);
+  }
+}
+
+.picker-text {
+  color: $text-primary;
+  font-size: 14px;
+}
+
 .empty-state {
   background: $panel-bg;
   border: 1px solid $panel-border;
@@ -532,6 +562,14 @@ $accent-strong: #e0e0e0;
   // 针对 Switch 组件的样式，调整大小
   .custom-switch {
     transform: scale(0.75);
+    transform-origin: left center;
+  }
+}
+
+// 全局调整 Switch 组件大小
+.me-page {
+  switch {
+    transform: scale(0.7);
     transform-origin: left center;
   }
 }

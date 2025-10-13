@@ -54,7 +54,7 @@ module.exports = async function handler(req, res) {
       Service.countDocuments(query),
       Service.find(query)
         .populate('firm_id', 'name address')
-        .select('title description category price firm_id available_times')
+        .select('title description category price duration lawyer_name lawyer_title firm_id law_firm_id available_times status')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -71,9 +71,14 @@ module.exports = async function handler(req, res) {
       description: service.description,
       category: service.category,
       price: service.price || null,
+      duration: service.duration || '1-2小时',
+      lawyer_name: service.lawyer_name || '专业律师',
+      lawyer_title: service.lawyer_title || '资深律师',
       firm_id: service.firm_id?._id?.toString() || service.firm_id,
+      law_firm_id: service.law_firm_id?.toString() || service.law_firm_id,
       firm_name: service.firm_id?.name || null,
       firm_address: service.firm_id?.address || null,
+      status: service.status || 'active',
       available_times: (service.available_times || [])
         .filter(time => new Date(time) > new Date())
         .map(time => new Date(time).toISOString())

@@ -91,6 +91,33 @@ const FirmSchema = new Schema(
       type: [Date],
       default: [],
     },
+    services: {
+      type: [String],
+      default: [],
+    },
+    practice_areas: {
+      type: [String],
+      default: [],
+    },
+    price: {
+      type: String,
+      trim: true,
+    },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 4.8,
+    },
+    cases: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    recommended: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     collection: "firms",

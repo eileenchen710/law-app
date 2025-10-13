@@ -12,7 +12,7 @@ async function ensureIndexes() {
       { 'name': 'text', 'description': 'text' }
     ];
     
-    // Services collection indexes  
+    // Services collection indexes
     const serviceIndexes = [
       { firm_id: 1 },
       { category: 1 },
@@ -20,15 +20,15 @@ async function ensureIndexes() {
       { firm_id: 1, category: 1 },
       { 'title': 'text', 'description': 'text' }
     ];
-    
-    // Appointments collection indexes
-    const appointmentIndexes = [
-      { firm_id: 1 },
-      { service_id: 1 },
-      { appointment_time: -1 },
+
+    // Consultations collection indexes
+    const consultationIndexes = [
+      { user_id: 1 },
+      { email: 1 },
+      { phone: 1 },
       { status: 1 },
-      { firm_id: 1, appointment_time: -1 },
-      { createdAt: -1 }
+      { createdAt: -1 },
+      { preferred_time: -1 }
     ];
     
     // Create indexes if collections exist
@@ -46,12 +46,12 @@ async function ensureIndexes() {
       await db.collection('services').createIndexes(serviceIndexes);
       console.log('Services indexes created');
     }
-    
-    if (collectionNames.includes('appointments')) {
-      await db.collection('appointments').createIndexes(appointmentIndexes);
-      console.log('Appointments indexes created');
+
+    if (collectionNames.includes('consultations')) {
+      await db.collection('consultations').createIndexes(consultationIndexes);
+      console.log('Consultations indexes created');
     }
-    
+
     console.log('All indexes ensured successfully');
   } catch (error) {
     console.error('Error ensuring indexes:', error);

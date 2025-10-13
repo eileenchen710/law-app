@@ -855,7 +855,7 @@ button,
 
         .firm-logo-section {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 12px;
           margin-bottom: 16px;
 
@@ -865,13 +865,36 @@ button,
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             padding: 4px;
+            flex-shrink: 0;
           }
-        }
 
-        .firm-name {
-          font-size: 18px;
-          font-weight: 600;
-          color: $text-white;
+          .firm-name-section {
+            flex: 1;
+
+            .firm-name {
+              font-size: 18px;
+              font-weight: 600;
+              color: $text-white;
+              margin-bottom: 6px;
+            }
+
+            .firm-stats {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              font-size: 12px;
+
+              .firm-rating {
+                color: $primary-color;
+                font-weight: 500;
+              }
+
+              .firm-cases {
+                color: $text-white-60;
+                font-weight: 400;
+              }
+            }
+          }
         }
 
         .firm-price {
@@ -890,8 +913,29 @@ button,
         }
       }
 
+      .firm-practice-areas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        .practice-area-tag {
+          display: inline-block;
+          padding: 4px 12px;
+          background: rgba(241, 196, 152, 0.15);
+          border: 1px solid rgba(241, 196, 152, 0.3);
+          border-radius: 12px;
+
+          .practice-area-text {
+            color: $primary-color;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+      }
+
       .firm-services {
-        margin-bottom: 32px;
+        margin-bottom: 16px;
 
         .service-item {
           display: flex;
@@ -910,6 +954,39 @@ button,
             color: $text-white-80;
             font-size: 14px;
             line-height: 1.4;
+          }
+        }
+      }
+
+      .firm-lawyers {
+        margin-bottom: 24px;
+        padding-top: 16px;
+        border-top: 1px solid $border-white-10;
+
+        .firm-lawyers-title {
+          color: $text-white-80;
+          font-size: 13px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          display: block;
+        }
+
+        .lawyers-list {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+
+          .lawyer-item {
+            color: $text-white-60;
+            font-size: 13px;
+            line-height: 1.4;
+          }
+
+          .lawyer-more {
+            color: $primary-color;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 2px;
           }
         }
       }

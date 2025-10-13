@@ -100,7 +100,7 @@ module.exports = function (merge, { command, mode }) {
         port: 10086,
         proxy: {
           '/api': {
-            target: 'https://law-app-six.vercel.app',
+            target: 'https://www.goldenfirmiana.com.au',
             changeOrigin: true,
             secure: true,
             pathRewrite: {

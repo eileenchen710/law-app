@@ -94,11 +94,26 @@ async function handleFirmsList(req, res) {
   const items = firms.map(firm => ({
     id: firm._id.toString(),
     name: firm.name,
+    slug: firm.slug,
     description: firm.description,
     address: firm.address,
     city: firm.city,
+    phone: firm.phone,
+    email: firm.email,
+    website: firm.website,
     contact_email: firm.contact_email || firm.email,
-    contact_phone: firm.contact_phone || firm.phone
+    contact_phone: firm.contact_phone || firm.phone,
+    services: firm.services || [],
+    practice_areas: firm.practice_areas || firm.practiceAreas || [],
+    tags: firm.tags || [],
+    lawyers: firm.lawyers || [],
+    price: firm.price,
+    rating: firm.rating,
+    cases: firm.cases,
+    recommended: firm.recommended || false,
+    available_times: (firm.available_times || [])
+      .filter(time => new Date(time) > new Date())
+      .map(time => new Date(time).toISOString())
   }));
   
   res.json({
@@ -133,11 +148,26 @@ async function handleFirmDetail(req, res, id) {
   res.json({
     id: firm._id.toString(),
     name: firm.name,
+    slug: firm.slug,
     description: firm.description,
     address: firm.address,
     city: firm.city,
+    phone: firm.phone,
+    email: firm.email,
+    website: firm.website,
     contact_email: firm.contact_email || firm.email,
-    contact_phone: firm.contact_phone || firm.phone
+    contact_phone: firm.contact_phone || firm.phone,
+    services: firm.services || [],
+    practice_areas: firm.practice_areas || firm.practiceAreas || [],
+    tags: firm.tags || [],
+    lawyers: firm.lawyers || [],
+    price: firm.price,
+    rating: firm.rating,
+    cases: firm.cases,
+    recommended: firm.recommended || false,
+    available_times: (firm.available_times || [])
+      .filter(time => new Date(time) > new Date())
+      .map(time => new Date(time).toISOString())
   });
 }
 
@@ -183,9 +213,17 @@ async function handleServicesList(req, res) {
     description: service.description,
     category: service.category,
     price: service.price || null,
+    duration: service.duration || '1-2小时',
+    lawyer_name: service.lawyer_name || '专业律师',
+    lawyer_title: service.lawyer_title || '资深律师',
     firm_id: service.firm_id,
+    law_firm_id: service.law_firm_id,
     firm_name: service.firm?.name || null,
-    firm_address: service.firm?.address || null
+    firm_address: service.firm?.address || null,
+    status: service.status || 'active',
+    available_times: (service.available_times || [])
+      .filter(time => new Date(time) > new Date())
+      .map(time => new Date(time).toISOString())
   }));
   
   res.json({
@@ -229,7 +267,15 @@ async function handleServiceDetail(req, res, id) {
     description: service.description,
     category: service.category,
     price: service.price || null,
+    duration: service.duration || '1-2小时',
+    lawyer_name: service.lawyer_name || '专业律师',
+    lawyer_title: service.lawyer_title || '资深律师',
     firm_id: service.firm_id,
+    law_firm_id: service.law_firm_id,
     firm_name: firm?.name || null,
-    firm_address: firm?.address || null
+    firm_address: firm?.address || null,
+    status: service.status || 'active',
+    available_times: (service.available_times || [])
+      .filter(time => new Date(time) > new Date())
+      .map(time => new Date(time).toISOString())
   });

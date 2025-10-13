@@ -25,7 +25,6 @@ import type {
 import { getSnapshot, onMockDataChange } from "../../services/mockDataStore";
 
 import {
-  fetchAppointments,
   fetchFirmById,
   fetchFirms,
   fetchServiceById,
@@ -33,10 +32,7 @@ import {
   submitConsultationRequest,
 } from "../../services/api";
 import type { ApiError } from "../../services/http";
-import type {
-  AppointmentPayload,
-  ConsultationPayload,
-} from "../../services/types";
+import type { ConsultationPayload } from "../../services/types";
 
 const featureHighlights = [
   {
@@ -178,32 +174,11 @@ export default function Index() {
         logApiFailure("服务", error);
       }
 
-      try {
-        const appointments = await fetchAppointments({ page: 1, size: 5 });
-        console.log("✅ 预约列表 API 测试成功:", appointments);
-        console.log(`  - 获取到 ${appointments.items?.length || 0} 个预约`);
-      } catch (error) {
-        logApiFailure("预约", error);
-      }
     };
 
     runTests().catch((error) => {
       logApiFailure("API 调试", error);
     });
-
-    const testAppointment: AppointmentPayload = {
-      name: "测试用户",
-      phone: "13800138000",
-      email: "test@example.com",
-      firm_id: "test_firm_id",
-      service_id: "test_service_id",
-      time: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      remark: "这是一个测试预约",
-    };
-
-    console.log("📝 准备测试提交预约（POST 请求）...");
-    console.log("  测试数据:", testAppointment);
-    console.log("  注意: 需要替换为实际的 firm_id 和 service_id 才能成功提交");
   });
 
   usePageScroll((res) => {

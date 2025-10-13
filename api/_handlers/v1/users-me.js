@@ -3,7 +3,7 @@ const {
   authenticateRequest,
   sanitizeUser
 } = require('../../_lib/auth');
-const Appointment = require('../../models/appointment');
+const Consultation = require('../../models/consultation');
 const User = require('../../models/user');
 
 const setCorsHeaders = (res) => {
@@ -36,22 +36,24 @@ const loadAppointmentsForUser = async (user) => {
 
   const query = criteria.length === 1 ? criteria[0] : { $or: criteria };
 
-  const appointments = await Appointment.find(query)
-    .sort({ appointment_time: -1 })
+  const consultations = await Consultation.find(query)
+    .sort({ createdAt: -1 })
     .limit(100)
     .lean();
 
-  return appointments.map((appointment) => ({
-    id: appointment._id.toString(),
-    name: appointment.name,
-    phone: appointment.phone,
-    email: appointment.email,
-    firmId: appointment.firm_id?.toString?.() || appointment.firm_id,
-    serviceId: appointment.service_id?.toString?.() || appointment.service_id,
-    time: appointment.appointment_time,
-    remark: appointment.remark,
-    status: appointment.status,
-    createdAt: appointment.createdAt
+  return consultations.map((consultation) => ({
+    id: consultation._id.toString(),
+    name: consultation.name,
+    phone: consultation.phone,
+    email: consultation.email,
+    firm_id: null,
+    firm_name: null,
+    service_id: null,
+    service_name: consultation.service_name || '在线咨询',
+    time: consultation.preferred_time || consultation.createdAt,
+    remark: consultation.message,
+    status: consultation.status,
+    created_at: consultation.createdAt
   }));
 };
 

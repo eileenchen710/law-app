@@ -194,6 +194,9 @@ export default function Me() {
   const refreshProfile = useCallback(async () => {
     try {
       const response = await fetchCurrentUser();
+      console.log("Current user data:", response.user);
+      console.log("User role:", response.user?.role);
+      console.log("Is admin?", response.user?.role === "admin");
       setUser(response.user);
       setAppointments(response.appointments || []);
     } catch (error) {
@@ -872,6 +875,18 @@ export default function Me() {
           {activeTab === "services" && isAdmin && renderServicesManagement()}
 
           <View className="section" style={{ marginBottom: "48px" }}>
+            <Button
+              className="action-button"
+              onClick={async () => {
+                setLoading(true);
+                await refreshProfile();
+                setLoading(false);
+                Taro.showToast({ title: "已刷新用户信息", icon: "success" });
+              }}
+              style={{ marginBottom: "12px" }}
+            >
+              刷新用户信息
+            </Button>
             <Button className="reset-btn" onClick={handleLogout}>
               退出当前登录
             </Button>

@@ -37,7 +37,7 @@ export interface ServiceDetail extends ServiceSummary {
   firm?: FirmSummary;
 }
 
-export interface AppointmentSummary {
+export interface ConsultationSummary {
   id: string;
   name: string;
   phone: string;
@@ -52,21 +52,8 @@ export interface AppointmentSummary {
   created_at: string;
 }
 
-export interface AppointmentPayload {
-  name: string;
-  phone: string;
-  email?: string;
-  firm_id: string;
-  service_id: string;
-  time: string;
-  remark?: string;
-}
-
-export interface AppointmentResult {
-  status: string;
-  message: string;
-  appointment_id: string;
-}
+// Deprecated: Use ConsultationSummary instead
+export interface AppointmentSummary extends ConsultationSummary {}
 
 export interface UserProfile {
   id: string;
@@ -88,7 +75,7 @@ export interface AuthResponse {
 
 export interface UserProfileResponse {
   user: UserProfile;
-  appointments: AppointmentSummary[];
+  appointments: ConsultationSummary[];
 }
 
 export interface ConsultationPayload {

@@ -1,11 +1,17 @@
-import { Button, Form, Input, Text, View } from "@tarojs/components";
+import { Button, Input, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useState } from "react";
-import "./login.scss";
-import { loginWithPassword, registerWithPassword } from "../../services/api";
-import type { ApiError } from "../../services/http";
+import "./LoginForm.scss";
+import { loginWithPassword, registerWithPassword } from "../services/api";
+import type { ApiError } from "../services/http";
 
-export default function Login() {
+export interface LoginFormProps {
+  onSuccess?: (token: string) => void;
+  onClose?: () => void;
+  closable?: boolean;
+}
+
+export default function LoginForm({ onSuccess, onClose, closable = true }: LoginFormProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,14 +27,6 @@ export default function Login() {
       ...prev,
       [field]: e.detail.value,
     }));
-  };
-
-  const storeAuthToken = (token: string) => {
-    try {
-      Taro.setStorageSync("auth_token", token);
-    } catch (error) {
-      console.warn("Failed to store auth token", error);
-    }
   };
 
   const handleLogin = async () => {
@@ -47,16 +45,14 @@ export default function Login() {
         password: formData.password,
       });
 
-      storeAuthToken(response.token);
-
       Taro.showToast({
         title: "登录成功",
         icon: "success",
       });
 
-      setTimeout(() => {
-        Taro.switchTab({ url: "/pages/me/me" }).catch(() => undefined);
-      }, 1000);
+      if (onSuccess) {
+        onSuccess(response.token);
+      }
     } catch (error) {
       const apiError = error as ApiError;
       Taro.showToast({
@@ -116,17 +112,15 @@ export default function Login() {
         phone: formData.phone || undefined,
       });
 
-      storeAuthToken(response.token);
-
       Taro.showToast({
         title: `注册成功！欢迎 ${response.user.displayName}`,
         icon: "success",
         duration: 2000,
       });
 
-      setTimeout(() => {
-        Taro.switchTab({ url: "/pages/me/me" }).catch(() => undefined);
-      }, 1500);
+      if (onSuccess) {
+        onSuccess(response.token);
+      }
     } catch (error) {
       const apiError = error as ApiError;
       Taro.showToast({
@@ -140,8 +134,15 @@ export default function Login() {
   };
 
   return (
-    <View className="login-page">
+    <View className="login-overlay">
+      <View className="login-backdrop" onClick={closable ? onClose : undefined} />
       <View className="login-container">
+        {closable && (
+          <View className="login-close" onClick={onClose}>
+            <Text className="close-icon">✕</Text>
+          </View>
+        )}
+
         <View className="login-header">
           <Text className="login-title">{isLogin ? "用户登录" : "用户注册"}</Text>
           <Text className="login-subtitle">

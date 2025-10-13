@@ -11,6 +11,9 @@ import Taro, { useLoad } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./me.scss";
 import Loading from "../../components/Loading";
+import TabBar, { type TabItem } from "../../components/TabBar";
+import LoginForm from "../../components/LoginForm";
+import AppHeader from "../index/components/AppHeader";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import type { ApiError } from "../../services/http";
 import type {
@@ -27,7 +30,6 @@ import {
   fetchCurrentUser,
   loginAnonymously,
   loginWithWechat,
-  updateCurrentUser,
 } from "../../services/api";
 import {
   createLawFirm,
@@ -39,13 +41,6 @@ import {
   getSnapshot,
   onMockDataChange,
 } from "../../services/dataStore";
-
-interface ProfileFormState {
-  displayName: string;
-  email: string;
-  phone: string;
-  avatarUrl: string;
-}
 
 interface FirmFormState {
   name: string;
@@ -69,13 +64,6 @@ interface ServiceFormState {
 }
 
 const DEFAULT_CATEGORY_ID = SERVICE_CATEGORIES[0]?.id ?? "criminal";
-
-const createEmptyProfileForm = (user?: UserProfile | null): ProfileFormState => ({
-  displayName: user?.displayName || "",
-  email: user?.email || "",
-  phone: user?.phone || "",
-  avatarUrl: user?.avatarUrl || "",
-});
 
 const createEmptyFirmForm = (): FirmFormState => ({
   name: "",
@@ -116,26 +104,6 @@ const clearAuthToken = () => {
   }
 };
 
-const getStoredProfileDraft = (): ProfileFormState | null => {
-  try {
-    const raw = Taro.getStorageSync("profile_form_draft");
-    if (raw) {
-      return JSON.parse(raw);
-    }
-  } catch (error) {
-    console.warn("Failed to deserialize profile draft", error);
-  }
-  return null;
-};
-
-const persistProfileDraft = (draft: ProfileFormState) => {
-  try {
-    Taro.setStorageSync("profile_form_draft", JSON.stringify(draft));
-  } catch (error) {
-    console.warn("Failed to persist profile draft", error);
-  }
-};
-
 const isWeappEnv = () => {
   const env = Taro.getEnv();
   return env === "WEAPP";
@@ -161,13 +129,11 @@ export default function Me() {
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [authenticating, setAuthenticating] = useState(false);
-  const [profileForm, setProfileForm] = useState<ProfileFormState>(
-    createEmptyProfileForm()
-  );
   const [activeTab, setActiveTab] = useState<
-    "profile" | "appointments" | "firms" | "services"
-  >("profile");
+    "appointments" | "firms" | "services"
+  >("appointments");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showLoginForm, setShowLoginForm] = useState(false);
 
   // 管理员状态
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
@@ -186,8 +152,17 @@ export default function Me() {
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
   useEffect(() => {
-    setActiveTab(isAdmin ? "firms" : "profile");
+    setActiveTab("appointments");
   }, [isAdmin]);
+
+  const tabs = useMemo<TabItem<typeof activeTab>[]>(
+    () => [
+      { key: "appointments", label: "我的预约", visible: true },
+      { key: "firms", label: "律所管理", visible: isAdmin },
+      { key: "services", label: "服务管理", visible: isAdmin },
+    ],
+    [isAdmin]
+  );
 
   // 加载律所和服务数据（管理员功能）
   useEffect(() => {
@@ -221,8 +196,6 @@ export default function Me() {
       const response = await fetchCurrentUser();
       setUser(response.user);
       setAppointments(response.appointments || []);
-      setProfileForm(createEmptyProfileForm(response.user));
-      persistProfileDraft(createEmptyProfileForm(response.user));
     } catch (error) {
       const apiError = error as ApiError;
       if (apiError?.status === 401) {
@@ -251,7 +224,7 @@ export default function Me() {
           const profile = await Taro.getUserProfile({
             desc: "用于完善个人资料",
           });
-          userProfile = profile?.userInfo;
+          userProfile = profile?.userInfo as Record<string, unknown>;
           console.log("获取到的微信用户信息:", userProfile);
         } catch (profileError) {
           console.warn("用户拒绝授权获取个人信息", profileError);
@@ -286,21 +259,15 @@ export default function Me() {
   }, []);
 
   const performAnonymousLogin = useCallback(async () => {
-    // 非微信环境，跳转到登录页面
+    // 非微信环境，显示登录表单
     if (!isWeappEnv()) {
-      Taro.navigateTo({ url: "/pages/login/login" }).catch(() => undefined);
+      setShowLoginForm(true);
       return null;
     }
 
     try {
       setAuthenticating(true);
-      const draft = getStoredProfileDraft();
-      const authRes = await loginAnonymously({
-        email: draft?.email,
-        phone: draft?.phone,
-        name: draft?.displayName,
-        avatarUrl: draft?.avatarUrl,
-      });
+      const authRes = await loginAnonymously({});
       storeAuthToken(authRes.token);
       return authRes;
     } catch (error) {
@@ -366,38 +333,6 @@ export default function Me() {
     });
   }, [initialize]);
 
-  const handleProfileChange = (field: keyof ProfileFormState) => (event: any) => {
-    const value = event?.detail?.value ?? "";
-    setProfileForm((prev) => {
-      const next = { ...prev, [field]: value };
-      persistProfileDraft(next);
-      return next;
-    });
-  };
-
-  const handleProfileSave = async () => {
-    try {
-      setLoading(true);
-      await updateCurrentUser({
-        displayName: profileForm.displayName,
-        email: profileForm.email,
-        phone: profileForm.phone,
-        avatarUrl: profileForm.avatarUrl,
-      });
-      await refreshProfile();
-      Taro.showToast({ title: "保存成功", icon: "success" }).catch(() => undefined);
-    } catch (error) {
-      console.error("Failed to save profile", error);
-      const apiError = error as ApiError;
-      Taro.showToast({
-        title: apiError?.message || "保存失败",
-        icon: "none",
-      }).catch(() => undefined);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = async () => {
     clearAuthToken();
     setUser(null);
@@ -405,53 +340,18 @@ export default function Me() {
     await initialize();
   };
 
-  const handleGetUserProfile = async () => {
-    if (!isWeappEnv()) {
-      return;
-    }
-
-    try {
-      setAuthenticating(true);
-
-      // 直接调用 getUserProfile
-      const profile = await Taro.getUserProfile({
-        desc: "用于完善个人资料",
-      });
-
-      console.log("获取到的微信用户信息:", profile.userInfo);
-
-      // 获取到用户信息后，重新登录并更新
-      const loginRes = await Taro.login();
-      if (!loginRes.code) {
-        throw new Error("未获取到微信登录凭证");
-      }
-
-      const authRes = await loginWithWechat({
-        code: loginRes.code,
-        userInfo: profile.userInfo,
-      });
-
-      storeAuthToken(authRes.token);
-
-      Taro.showToast({
-        title: `更新成功！欢迎 ${authRes.user?.displayName || "用户"}`,
-        icon: "success"
-      }).catch(() => undefined);
-
-      // 刷新用户信息
-      await refreshProfile();
-
-    } catch (error) {
-      console.error("获取用户信息失败", error);
-      const message = (error as Error).message || "授权失败";
-      Taro.showToast({ title: message, icon: "none" }).catch(() => undefined);
-    } finally {
-      setAuthenticating(false);
-    }
-  };
-
   const goToHome = () => {
     Taro.switchTab({ url: "/pages/index/index" }).catch(() => undefined);
+  };
+
+  const handleLoginSuccess = async (token: string) => {
+    storeAuthToken(token);
+    setShowLoginForm(false);
+    await initialize();
+  };
+
+  const handleLoginClose = () => {
+    setShowLoginForm(false);
   };
 
   // 律所管理处理函数
@@ -601,87 +501,6 @@ export default function Me() {
       createEmptyServiceForm(lawFirms.length > 0 ? lawFirms[0].id : "")
     );
   };
-
-  const renderProfileSection = () => (
-    <View className="section">
-      <View className="section-header">
-        <Text className="section-title">个人资料</Text>
-        <Text className="section-desc">
-          管理您的基础信息，我们会根据这些信息为您提供个性化服务。
-        </Text>
-      </View>
-
-      {isWeappEnv() && !user?.displayName && (
-        <View className="action-card" style={{ marginBottom: "18px" }}>
-          <View className="action-texts">
-            <Text className="action-title">完善个人资料</Text>
-            <Text className="action-desc">
-              点击下方按钮，授权获取微信头像与昵称。
-            </Text>
-          </View>
-          <Button
-            className="action-button"
-            onClick={handleGetUserProfile}
-            loading={authenticating}
-            disabled={authenticating}
-          >
-            授权获取微信信息
-          </Button>
-        </View>
-      )}
-
-      <View className="form-card">
-        <View className="form-row">
-          <View className="form-field">
-            <Text className="form-label">昵称</Text>
-            <Input
-              className="form-input"
-              value={profileForm.displayName}
-              placeholder="请输入您的称呼"
-              onInput={handleProfileChange("displayName")}
-            />
-          </View>
-        </View>
-
-        <View className="form-row inline">
-          <View className="form-field">
-            <Text className="form-label">邮箱</Text>
-            <Input
-              className="form-input"
-              value={profileForm.email}
-              placeholder="用于接收通知"
-              onInput={handleProfileChange("email")}
-            />
-          </View>
-          <View className="form-field">
-            <Text className="form-label">手机号</Text>
-            <Input
-              className="form-input"
-              value={profileForm.phone}
-              placeholder="用于预约联系"
-              onInput={handleProfileChange("phone")}
-            />
-          </View>
-        </View>
-
-        <View className="form-row">
-          <View className="form-field">
-            <Text className="form-label">头像地址</Text>
-            <Input
-              className="form-input"
-              value={profileForm.avatarUrl}
-              placeholder="可选，自定义头像 URL"
-              onInput={handleProfileChange("avatarUrl")}
-            />
-          </View>
-        </View>
-
-        <Button className="submit-btn" onClick={handleProfileSave}>
-          保存资料
-        </Button>
-      </View>
-    </View>
-  );
 
   const renderAppointments = () => (
     <View className="section">
@@ -1028,42 +847,16 @@ export default function Me() {
 
   return (
     <ScrollView className="me-page" scrollY>
+      <AppHeader showActions={false} scrolled={false} />
       {(loading || authenticating) && !user ? (
         <Loading text={authenticating ? "正在登录..." : "加载中..."} />
       ) : (
         <View>
-          <View className="tab-bar">
-            <View
-              className={`tab-item ${activeTab === "profile" ? "active" : ""}`}
-              onClick={() => setActiveTab("profile")}
-            >
-              <Text className="tab-label">个人资料</Text>
-            </View>
-            <View
-              className={`tab-item ${
-                activeTab === "appointments" ? "active" : ""
-              }`}
-              onClick={() => setActiveTab("appointments")}
-            >
-              <Text className="tab-label">我的预约</Text>
-            </View>
-            {isAdmin && (
-              <>
-                <View
-                  className={`tab-item ${activeTab === "firms" ? "active" : ""}`}
-                  onClick={() => setActiveTab("firms")}
-                >
-                  <Text className="tab-label">律所管理</Text>
-                </View>
-                <View
-                  className={`tab-item ${activeTab === "services" ? "active" : ""}`}
-                  onClick={() => setActiveTab("services")}
-                >
-                  <Text className="tab-label">服务管理</Text>
-                </View>
-              </>
-            )}
-          </View>
+          <TabBar
+            activeTab={activeTab}
+            tabs={tabs}
+            onChange={(tab) => setActiveTab(tab as typeof activeTab)}
+          />
 
           {errorMessage ? (
             <View className="empty-state">
@@ -1074,7 +867,6 @@ export default function Me() {
             </View>
           ) : null}
 
-          {activeTab === "profile" && renderProfileSection()}
           {activeTab === "appointments" && renderAppointments()}
           {activeTab === "firms" && isAdmin && renderFirmsManagement()}
           {activeTab === "services" && isAdmin && renderServicesManagement()}
@@ -1085,6 +877,14 @@ export default function Me() {
             </Button>
           </View>
         </View>
+      )}
+
+      {showLoginForm && (
+        <LoginForm
+          onSuccess={handleLoginSuccess}
+          onClose={handleLoginClose}
+          closable={false}
+        />
       )}
     </ScrollView>
   );

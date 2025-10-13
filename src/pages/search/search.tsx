@@ -213,7 +213,7 @@ export default function Search() {
   if (selectedFirm) {
     return (
       <ScrollView className="search-page search-detail-page" scrollY>
-        <AppHeader menuItems={menuItems} showActions={false} scrolled={false} />
+        <AppHeader showActions={false} scrolled={false} />
 
         <View className="back-button" onClick={handleBackToList}>
           <Text>← 返回搜索</Text>
@@ -369,7 +369,7 @@ export default function Search() {
 
     return (
       <ScrollView className="search-page search-detail-page" scrollY>
-        <AppHeader menuItems={menuItems} showActions={false} scrolled={false} />
+        <AppHeader showActions={false} scrolled={false} />
 
         <View className="back-button" onClick={handleBackToList}>
           <Text>← 返回搜索</Text>
@@ -511,7 +511,7 @@ export default function Search() {
   // Show list view
   return (
     <ScrollView className="search-page" scrollY>
-      <AppHeader menuItems={menuItems} showActions={false} scrolled={false} />
+      <AppHeader showActions={false} scrolled={false} />
 
       <View className="search-hero">
         <Text className="hero-title metallic-gradient-text">智能检索</Text>

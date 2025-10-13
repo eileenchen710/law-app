@@ -35,7 +35,7 @@ export default function AppHeader({
   return (
     <>
       <View
-        className={`app-header glass-header fixed-header${
+        className={`app-header${
           scrolled ? " scrolled" : ""
         }`}
       >

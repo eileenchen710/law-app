@@ -1437,7 +1437,7 @@ button,
           border: 1px solid $border-white-10;
           border-radius: 8px;
           transition: all 0.3s;
-          font-size: 14px;
+          font-size: 13px;
           color: $text-white;
 
           &:focus {
@@ -1462,10 +1462,12 @@ button,
         }
 
         .form-textarea {
+          width: 100%;
           min-height: 100px;
           padding: 12px;
-          font-size: 14px !important;
+          font-size: 13px !important;
           line-height: 1.6;
+          box-sizing: border-box;
         }
       }
 
@@ -1591,10 +1593,10 @@ button,
 
   // Hero 区域调整
   .hero-section {
-    padding: 80px 10px 40px;
+    padding: 80px 0.5rem 40px;
 
     .hero-content {
-      padding: 0 10px;
+      padding: 0;
 
       .hero-text-section {
         .hero-badge {
@@ -1649,25 +1651,33 @@ button,
       }
 
       .features-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 12px;
         margin-bottom: 32px;
 
         .feature-card {
-          padding: 16px;
+          flex: 1;
+          padding: 12px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
 
           .feature-icon {
             font-size: 32px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
           }
 
           .feature-title {
-            font-size: 8.5px;
+            font-size: 12px;
             margin-bottom: 4px;
           }
 
           .feature-desc {
-            font-size: 12px;
+            font-size: 10px;
           }
         }
       }
@@ -1676,7 +1686,7 @@ button,
 
   // 律所展示调整
   .lawfirms-section {
-    padding: 40px 10px;
+    padding: 40px 0.5rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1764,7 +1774,7 @@ button,
 
   // 服务部分调整
   .services-section {
-    padding: 40px 10px;
+    padding: 40px 0.5rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1878,7 +1888,7 @@ button,
 
   // 联系表单调整
   .contact-section {
-    padding: 40px 10px;
+    padding: 40px 0.5rem;
 
     .section-header {
       margin-bottom: 24px;
@@ -1958,7 +1968,7 @@ button,
 
   // 页脚调整
   .footer {
-    padding: 20px 10px;
+    padding: 20px 0.5rem;
 
     .footer-content {
       flex-direction: column;

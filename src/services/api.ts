@@ -238,12 +238,6 @@ export const fetchServices = (params?: { page?: number; size?: number }) =>
 
 export const fetchServiceById = (id: string) => apiService.getService(id);
 
-// Placeholder for appointments (not implemented in ApiService yet)
-export const fetchAppointments = async () => {
-  console.warn("fetchAppointments not yet implemented");
-  return { items: [], total: 0 };
-};
-
 export const submitConsultationRequest = (payload: ConsultationPayload) =>
   apiService.submitConsultation(payload);
 

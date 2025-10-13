@@ -43,12 +43,14 @@ module.exports = async function handler(req, res) {
           return await handleServiceDetail(req, res, id);
         }
         return await handleServicesList(req, res);
-        
-      case 'appointments':
-        if (req.method === 'POST') {
-          return await handleAppointmentCreate(req, res);
-        }
-        return await handleAppointmentsList(req, res);
+
+      // Deprecated: appointments endpoint is not used by frontend
+      // The application now uses consultations instead
+      // case 'appointments':
+      //   if (req.method === 'POST') {
+      //     return await handleAppointmentCreate(req, res);
+      //   }
+      //   return await handleAppointmentsList(req, res);
       case 'consultations':
         return await consultationsHandler(req, res);
       case 'auth':
@@ -240,6 +242,11 @@ async function handleServiceDetail(req, res, id) {
   });
 }
 
+// Deprecated: Appointments handlers are no longer used
+// The application now uses consultations instead
+// These functions are kept for reference but are not accessible via routing
+
+/*
 // Appointments list handler
 async function handleAppointmentsList(req, res) {
   const { firm_id, date, page = 1, size = 20 } = req.query;
@@ -345,3 +352,4 @@ async function handleAppointmentCreate(req, res) {
     appointment_id: `apt-${result.insertedId.toString()}`
   });
 }
+*/

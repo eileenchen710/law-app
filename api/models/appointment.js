@@ -1,4 +1,7 @@
-﻿const { Schema, model, models } = require("mongoose");
+﻿// DEPRECATED: This model is no longer used by the application
+// The application now uses the Consultation model instead
+// This file is kept for backward compatibility with existing data
+const { Schema, model, models } = require("mongoose");
 
 const AppointmentSchema = new Schema(
   {

@@ -31,16 +31,8 @@ import {
   loginAnonymously,
   loginWithWechat,
 } from "../../services/api";
-import {
-  createLawFirm,
-  updateLawFirm,
-  deleteLawFirm,
-  createLegalService,
-  updateLegalService,
-  deleteLegalService,
-  getSnapshot,
-  onMockDataChange,
-} from "../../services/dataStore";
+import { apiClient } from "../../services/apiClient";
+import { adaptFirmFromApi, adaptServiceFromApi } from "../../services/dataAdapter";
 
 interface FirmFormState {
   name: string;
@@ -165,31 +157,42 @@ export default function Me() {
   );
 
   // 加载律所和服务数据（管理员功能）
-  useEffect(() => {
+  // 加载律所和服务数据（仅管理员）
+  const loadAdminData = useCallback(async () => {
     if (!isAdmin) return;
 
-    const applySnapshot = (snapshot: MockDataSnapshot) => {
-      setLawFirms(snapshot.lawFirms);
-      setLegalServices(snapshot.legalServices);
+    try {
+      const [firmsRes, servicesRes] = await Promise.all([
+        apiClient.getFirms(),
+        apiClient.getServices(),
+      ]);
+
+      const firms = (firmsRes.items || firmsRes.data || []).map(adaptFirmFromApi);
+      const services = (servicesRes.items || servicesRes.data || []).map(adaptServiceFromApi);
+
+      setLawFirms(firms);
+      setLegalServices(services);
+
+      // 更新服务表单的默认律所ID
       setServiceForm((prev) => {
-        if (snapshot.lawFirms.length === 0) {
+        if (firms.length === 0) {
           return { ...prev, lawFirmId: "" };
         }
         if (prev.lawFirmId) {
-          const exists = snapshot.lawFirms.some((f) => f.id === prev.lawFirmId);
+          const exists = firms.some((f) => f.id === prev.lawFirmId);
           if (exists) return prev;
         }
-        return { ...prev, lawFirmId: snapshot.lawFirms[0].id };
+        return { ...prev, lawFirmId: firms[0].id };
       });
-    };
-
-    applySnapshot(getSnapshot());
-    const unsubscribe = onMockDataChange(applySnapshot);
-
-    return () => {
-      unsubscribe();
-    };
+    } catch (error) {
+      console.error("Failed to load admin data:", error);
+      Taro.showToast({ title: "加载数据失败", icon: "none" });
+    }
   }, [isAdmin]);
+
+  useEffect(() => {
+    loadAdminData();
+  }, [loadAdminData]);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -380,37 +383,43 @@ export default function Me() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    if (editingFirmId) {
-      await updateLawFirm(editingFirmId, {
-        name: firm.name.trim(),
-        description: firm.description.trim() || undefined,
-        price: firm.price.trim() || undefined,
-        services: services.length > 0 ? services : undefined,
-        rating: firm.rating ? parseFloat(firm.rating) : undefined,
-        cases: firm.cases ? parseInt(firm.cases, 10) : undefined,
-        recommended: firm.recommended,
-      });
-      Taro.showToast({ title: "律所已更新", icon: "success" });
-    } else {
-      const newData = {
-        name: firm.name.trim(),
-        description: firm.description.trim() || undefined,
-        price: firm.price.trim() || undefined,
-        services: services.length > 0 ? services : ["初步咨询"],
-        rating: firm.rating ? parseFloat(firm.rating) : 4.8,
-        cases: firm.cases ? parseInt(firm.cases, 10) : 0,
-        recommended: firm.recommended,
-      };
-      // 过滤掉 undefined 值
-      const filteredData = Object.fromEntries(
-        Object.entries(newData).filter(([_, v]) => v !== undefined)
-      ) as Omit<LawFirmMock, "id">;
-      await createLawFirm(filteredData);
-      Taro.showToast({ title: "律所已创建", icon: "success" });
-    }
+    try {
+      if (editingFirmId) {
+        await apiClient.updateFirm(editingFirmId, {
+          name: firm.name.trim(),
+          description: firm.description.trim() || undefined,
+          price: firm.price.trim() || undefined,
+          services: services.length > 0 ? services : undefined,
+          rating: firm.rating ? parseFloat(firm.rating) : undefined,
+          cases: firm.cases ? parseInt(firm.cases, 10) : undefined,
+          recommended: firm.recommended,
+        });
+        Taro.showToast({ title: "律所已更新", icon: "success" });
+      } else {
+        const newData = {
+          name: firm.name.trim(),
+          description: firm.description.trim() || undefined,
+          price: firm.price.trim() || undefined,
+          services: services.length > 0 ? services : ["初步咨询"],
+          rating: firm.rating ? parseFloat(firm.rating) : 4.8,
+          cases: firm.cases ? parseInt(firm.cases, 10) : 0,
+          recommended: firm.recommended,
+        };
+        // 过滤掉 undefined 值
+        const filteredData = Object.fromEntries(
+          Object.entries(newData).filter(([_, v]) => v !== undefined)
+        );
+        await apiClient.createFirm(filteredData);
+        Taro.showToast({ title: "律所已创建", icon: "success" });
+      }
 
-    setFirmForm(createEmptyFirmForm());
-    setEditingFirmId(null);
+      setFirmForm(createEmptyFirmForm());
+      setEditingFirmId(null);
+      await loadAdminData(); // 重新加载数据
+    } catch (error) {
+      console.error("Failed to submit firm:", error);
+      Taro.showToast({ title: "操作失败", icon: "none" });
+    }
   };
 
   const handleFirmEdit = (firm: LawFirmMock) => {
@@ -427,8 +436,14 @@ export default function Me() {
   };
 
   const handleFirmDelete = async (id: string) => {
-    await deleteLawFirm(id);
-    Taro.showToast({ title: "律所已删除", icon: "success" });
+    try {
+      await apiClient.deleteFirm(id);
+      Taro.showToast({ title: "律所已删除", icon: "success" });
+      await loadAdminData(); // 重新加载数据
+    } catch (error) {
+      console.error("Failed to delete firm:", error);
+      Taro.showToast({ title: "删除失败", icon: "none" });
+    }
   };
 
   const handleFirmCancel = () => {
@@ -449,34 +464,40 @@ export default function Me() {
       return;
     }
 
-    if (editingServiceId) {
-      await updateLegalService(editingServiceId, {
-        title: svc.title.trim(),
-        description: svc.description.trim() || undefined,
-        category: svc.category || DEFAULT_CATEGORY_ID,
-        lawFirmId: svc.lawFirmId,
-        price: svc.price.trim() || undefined,
-        duration: svc.duration.trim() || undefined,
-        lawyerName: svc.lawyerName.trim() || undefined,
-        lawyerTitle: svc.lawyerTitle.trim() || undefined,
-      });
-      Taro.showToast({ title: "服务已更新", icon: "success" });
-    } else {
-      await createLegalService({
-        title: svc.title.trim(),
-        description: svc.description.trim() || "专业法律服务",
-        category: svc.category || DEFAULT_CATEGORY_ID,
-        lawFirmId: svc.lawFirmId,
-        price: svc.price.trim() || "面议",
-        duration: svc.duration.trim() || "1-2小时",
-        lawyerName: svc.lawyerName.trim() || "专业律师",
-        lawyerTitle: svc.lawyerTitle.trim() || "资深律师",
-      });
-      Taro.showToast({ title: "服务已创建", icon: "success" });
-    }
+    try {
+      if (editingServiceId) {
+        await apiClient.updateService(editingServiceId, {
+          title: svc.title.trim(),
+          description: svc.description.trim() || undefined,
+          category: svc.category || DEFAULT_CATEGORY_ID,
+          law_firm_id: svc.lawFirmId,
+          price: svc.price.trim() || undefined,
+          duration: svc.duration.trim() || undefined,
+          lawyer_name: svc.lawyerName.trim() || undefined,
+          lawyer_title: svc.lawyerTitle.trim() || undefined,
+        });
+        Taro.showToast({ title: "服务已更新", icon: "success" });
+      } else {
+        await apiClient.createService({
+          title: svc.title.trim(),
+          description: svc.description.trim() || "专业法律服务",
+          category: svc.category || DEFAULT_CATEGORY_ID,
+          law_firm_id: svc.lawFirmId,
+          price: svc.price.trim() || "面议",
+          duration: svc.duration.trim() || "1-2小时",
+          lawyer_name: svc.lawyerName.trim() || "专业律师",
+          lawyer_title: svc.lawyerTitle.trim() || "资深律师",
+        });
+        Taro.showToast({ title: "服务已创建", icon: "success" });
+      }
 
-    setServiceForm(createEmptyServiceForm(svc.lawFirmId));
-    setEditingServiceId(null);
+      setServiceForm(createEmptyServiceForm(svc.lawFirmId));
+      setEditingServiceId(null);
+      await loadAdminData(); // 重新加载数据
+    } catch (error) {
+      console.error("Failed to submit service:", error);
+      Taro.showToast({ title: "操作失败", icon: "none" });
+    }
   };
 
   const handleServiceEdit = (service: LegalServiceMock) => {
@@ -494,8 +515,14 @@ export default function Me() {
   };
 
   const handleServiceDelete = async (id: string) => {
-    await deleteLegalService(id);
-    Taro.showToast({ title: "服务已删除", icon: "success" });
+    try {
+      await apiClient.deleteService(id);
+      Taro.showToast({ title: "服务已删除", icon: "success" });
+      await loadAdminData(); // 重新加载数据
+    } catch (error) {
+      console.error("Failed to delete service:", error);
+      Taro.showToast({ title: "删除失败", icon: "none" });
+    }
   };
 
   const handleServiceCancel = () => {

@@ -29,11 +29,22 @@ const envPrefix = ensureLeadingSlash(
   runtimeEnv.TARO_APP_API_PREFIX || "/api/v1"
 );
 
-const API_BASE_URL = envBase
-  ? `${envBase}${envPrefix}`
-  : process.env.NODE_ENV === "production"
-    ? `https://law-app-six.vercel.app${envPrefix}`
-    : envPrefix;
+// 微信小程序环境需要完整的 URL
+const getApiBaseUrl = () => {
+  if (envBase) {
+    return `${envBase}${envPrefix}`;
+  }
+
+  // 生产环境或微信小程序环境都使用完整 URL
+  if (process.env.NODE_ENV === "production" || process.env.TARO_ENV === "weapp") {
+    return `https://law-app-six.vercel.app${envPrefix}`;
+  }
+
+  // H5 开发环境可以使用相对路径
+  return envPrefix;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 interface ApiResponse<T> {
   items?: T[];

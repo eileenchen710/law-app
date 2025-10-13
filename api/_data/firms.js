@@ -1,4 +1,4 @@
-﻿module.exports = [
+module.exports = [
   {
     name: "华夏律师事务所",
     slug: "huaxia-law-firm",

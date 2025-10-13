@@ -224,7 +224,7 @@ export default function Me() {
           const profile = await Taro.getUserProfile({
             desc: "用于完善个人资料",
           });
-          userProfile = profile?.userInfo as Record<string, unknown>;
+          userProfile = profile?.userInfo as unknown as Record<string, unknown>;
           console.log("获取到的微信用户信息:", userProfile);
         } catch (profileError) {
           console.warn("用户拒绝授权获取个人信息", profileError);

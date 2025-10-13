@@ -1704,7 +1704,8 @@ button,
     .lawfirms-grid {
       grid-template-columns: 1fr;
       gap: 16px;
-      margin-bottom: 32px;
+      margin: 0 0 32px 0;
+      max-width: 100%;
 
       .firm-card {
         padding: 10px;
@@ -1759,6 +1760,8 @@ button,
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
+      margin: 0;
+      max-width: 100%;
 
       .stat-item {
         .stat-number {
@@ -1808,6 +1811,8 @@ button,
     .services-grid {
       grid-template-columns: 1fr;
       gap: 20px;
+      margin: 0;
+      max-width: 100%;
 
       .service-card-wrapper {
         gap: 10px;
@@ -1904,6 +1909,8 @@ button,
 
     .contact-form {
       padding: 10px;
+      margin: 0;
+      max-width: 100%;
 
       .form-header {
         margin-bottom: 20px;

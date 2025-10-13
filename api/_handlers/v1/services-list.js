@@ -53,6 +53,7 @@ module.exports = async function handler(req, res) {
     const [total, services] = await Promise.all([
       Service.countDocuments(query),
       Service.find(query)
+        .populate('law_firm_id', 'name address')
         .populate('firm_id', 'name address')
         .select('title description category price duration lawyer_name lawyer_title firm_id law_firm_id available_times status')
         .sort({ createdAt: -1 })
@@ -65,24 +66,27 @@ module.exports = async function handler(req, res) {
     console.log(`Services API: Queries completed in ${Date.now() - queryStartTime}ms`);
 
     // 格式化响应数据
-    const items = services.map(service => ({
-      id: service._id.toString(),
-      title: service.title,
-      description: service.description,
-      category: service.category,
-      price: service.price || null,
-      duration: service.duration || '1-2小时',
-      lawyer_name: service.lawyer_name || '专业律师',
-      lawyer_title: service.lawyer_title || '资深律师',
-      firm_id: service.firm_id?._id?.toString() || service.firm_id,
-      law_firm_id: service.law_firm_id?.toString() || service.law_firm_id,
-      firm_name: service.firm_id?.name || null,
-      firm_address: service.firm_id?.address || null,
-      status: service.status || 'active',
-      available_times: (service.available_times || [])
-        .filter(time => new Date(time) > new Date())
-        .map(time => new Date(time).toISOString())
-    }));
+    const items = services.map(service => {
+      const firmData = service.law_firm_id || service.firm_id;
+      return {
+        id: service._id.toString(),
+        title: service.title,
+        description: service.description,
+        category: service.category,
+        price: service.price || null,
+        duration: service.duration || '1-2小时',
+        lawyer_name: service.lawyer_name || '专业律师',
+        lawyer_title: service.lawyer_title || '资深律师',
+        firm_id: service.firm_id?._id?.toString() || service.firm_id,
+        law_firm_id: service.law_firm_id?._id?.toString() || service.law_firm_id,
+        firm_name: firmData?.name || null,
+        firm_address: firmData?.address || null,
+        status: service.status || 'active',
+        available_times: (service.available_times || [])
+          .filter(time => new Date(time) > new Date())
+          .map(time => new Date(time).toISOString())
+      };
+    });
 
     res.status(200).json({
       items,

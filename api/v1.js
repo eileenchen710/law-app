@@ -202,8 +202,9 @@ async function handleServicesList(req, res) {
   
   // Manually populate firm info
   for (const service of services) {
-    if (service.firm_id) {
-      service.firm = await firmsCollection.findOne({ _id: service.firm_id });
+    const firmId = service.law_firm_id || service.firm_id;
+    if (firmId) {
+      service.firm = await firmsCollection.findOne({ _id: firmId });
     }
   }
   
@@ -256,9 +257,9 @@ async function handleServiceDetail(req, res, id) {
   
   // Get firm info if available
   let firm = null;
-  if (service.firm_id) {
-    const firmsCollection = db.collection('firms');
-    firm = await firmsCollection.findOne({ _id: service.firm_id });
+  const firmId = service.law_firm_id || service.firm_id;
+  if (firmId) {
+    firm = await firmsCollection.findOne({ _id: firmId });
   }
   
   res.json({

@@ -1947,6 +1947,7 @@ button,
           .form-select,
           .form-textarea {
             padding: 8px 12px;
+            font-size: 0.45rem !important;
 
             .placeholder {
               font-size: 12px;
@@ -1955,6 +1956,7 @@ button,
 
           .form-textarea {
             min-height: 80px;
+            font-size: 0.45rem !important;
           }
         }
 

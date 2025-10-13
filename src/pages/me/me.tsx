@@ -42,6 +42,8 @@ interface FirmFormState {
   rating: string;
   cases: string;
   recommended: boolean;
+  contactEmail: string;
+  contactPhone: string;
 }
 
 interface ServiceFormState {
@@ -65,6 +67,8 @@ const createEmptyFirmForm = (): FirmFormState => ({
   rating: "",
   cases: "",
   recommended: false,
+  contactEmail: "",
+  contactPhone: "",
 });
 
 const createEmptyServiceForm = (lawFirmId?: string): ServiceFormState => ({
@@ -243,8 +247,24 @@ export default function Me() {
         code: loginRes.code,
         userInfo: userProfile,
       });
+
+      console.log("微信登录API响应:", authRes);
+
+      if (!authRes?.token) {
+        throw new Error("登录响应中缺少 token");
+      }
+
+      if (!authRes?.user) {
+        throw new Error("登录响应中缺少用户信息");
+      }
+
       storeAuthToken(authRes.token);
-      console.log("微信登录成功:", authRes.user);
+      console.log("微信登录成功:", {
+        userId: authRes.user.id,
+        displayName: authRes.user.displayName,
+        role: authRes.user.role,
+        provider: authRes.user.provider
+      });
 
       if (userProfile) {
         Taro.showToast({
@@ -256,8 +276,23 @@ export default function Me() {
       return authRes;
     } catch (error) {
       console.error("WeChat login failed", error);
-      const message = (error as Error).message || "微信登录失败";
-      Taro.showToast({ title: message, icon: "none" }).catch(() => undefined);
+
+      // 获取详细的错误信息
+      let message = "微信登录失败";
+      if (error && typeof error === 'object') {
+        const apiError = error as any;
+        message = apiError.message || apiError.error || apiError.details || message;
+
+        // 记录完整的错误对象以便调试
+        console.error("完整错误对象:", JSON.stringify(error, null, 2));
+      }
+
+      Taro.showToast({
+        title: message.length > 30 ? message.substring(0, 30) + "..." : message,
+        icon: "none",
+        duration: 3000
+      }).catch(() => undefined);
+
       return null;
     } finally {
       setAuthenticating(false);
@@ -393,6 +428,8 @@ export default function Me() {
           rating: firm.rating ? parseFloat(firm.rating) : undefined,
           cases: firm.cases ? parseInt(firm.cases, 10) : undefined,
           recommended: firm.recommended,
+          contact_email: firm.contactEmail.trim() || undefined,
+          contact_phone: firm.contactPhone.trim() || undefined,
         });
         Taro.showToast({ title: "律所已更新", icon: "success" });
       } else {
@@ -404,6 +441,8 @@ export default function Me() {
           rating: firm.rating ? parseFloat(firm.rating) : 4.8,
           cases: firm.cases ? parseInt(firm.cases, 10) : 0,
           recommended: firm.recommended,
+          contact_email: firm.contactEmail.trim() || undefined,
+          contact_phone: firm.contactPhone.trim() || undefined,
         };
         // 过滤掉 undefined 值
         const filteredData = Object.fromEntries(
@@ -432,6 +471,8 @@ export default function Me() {
       rating: firm.rating?.toString() || "",
       cases: firm.cases?.toString() || "",
       recommended: firm.recommended || false,
+      contactEmail: firm.contactEmail || "",
+      contactPhone: firm.contactPhone || "",
     });
   };
 
@@ -663,6 +704,27 @@ export default function Me() {
             value={firmForm.servicesText}
             onInput={handleFirmInput("servicesText")}
           />
+        </View>
+
+        <View className="form-row inline">
+          <View className="form-field">
+            <Text className="form-label">联系邮箱</Text>
+            <Input
+              className="form-input"
+              placeholder="example@firm.com"
+              value={firmForm.contactEmail}
+              onInput={handleFirmInput("contactEmail")}
+            />
+          </View>
+          <View className="form-field">
+            <Text className="form-label">联系电话</Text>
+            <Input
+              className="form-input"
+              placeholder="+61 2 1234 5678"
+              value={firmForm.contactPhone}
+              onInput={handleFirmInput("contactPhone")}
+            />
+          </View>
         </View>
 
         <View className="form-row">

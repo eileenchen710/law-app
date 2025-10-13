@@ -1,4 +1,6 @@
 const { sendNotificationEmails, __private__ } = require('../../_lib/mailer');
+const connectToDatabase = require('../../_lib/db-optimized');
+const Consultation = require('../../models/consultation');
 
 const { escapeHtml, formatAppointmentTime } = __private__;
 
@@ -120,6 +122,23 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // 连接数据库
+    await connectToDatabase();
+
+    // 创建咨询记录
+    const consultation = await Consultation.create({
+      name: trimmedName,
+      email: trimmedEmail,
+      phone: trimmedPhone,
+      service_name: trimmedService || '在线咨询',
+      message: trimmedMessage,
+      preferred_time: preferredTime ? appointmentTime : null,
+      status: 'pending'
+    });
+
+    console.log('[consultations] Created consultation record:', consultation._id);
+
+    // 发送邮件通知
     const summary = await sendNotificationEmails(
       {
         admin: {
@@ -151,10 +170,11 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       status: 'ok',
       message: '咨询已提交，我们会尽快与您联系',
+      consultationId: consultation._id,
       emailSummary: summary,
     });
   } catch (error) {
-    console.error('[consultations] Failed to send consultation email', error);
+    console.error('[consultations] Failed to process consultation', error);
     return res.status(500).json({
       error: 'Failed to submit consultation',
       details: error.message,

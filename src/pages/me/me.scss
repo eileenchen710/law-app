@@ -10,7 +10,7 @@ $accent-strong: #e0e0e0;
 .me-page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 80px 1rem 120px;
+  padding: 80px 10px 120px;
   background: $admin-bg;
   color: $text-primary;
 }
@@ -252,7 +252,7 @@ $accent-strong: #e0e0e0;
 
 @media (max-width: 640px) {
   .me-page {
-    padding: 0 1rem 60px;
+    padding: 0 10px 60px;
   }
 
   .action-card {
@@ -657,7 +657,7 @@ $accent-strong: #e0e0e0;
     padding: 10px;
 
     .me-navbar-container {
-      padding: 0 1rem;
+      padding: 0 10px;
     }
   }
 
@@ -675,7 +675,7 @@ $accent-strong: #e0e0e0;
   }
 
   .me-page {
-    padding: 80px 1rem 100px;
+    padding: 80px 10px 100px;
   }
 
   .form-row.inline {

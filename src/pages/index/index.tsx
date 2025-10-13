@@ -351,38 +351,49 @@ export default function Index() {
         </View>
 
         <View className="hero-content">
-          <View className="hero-badge">
-            <Text className="badge-text">汇聚顶尖律所 · 专业法律服务平台</Text>
-          </View>
+          {/* 左侧文字内容 */}
+          <View className="hero-text-section">
+            <View className="hero-badge">
+              <Text className="badge-text">汇聚顶尖律所 · 专业法律服务平台</Text>
+            </View>
 
-          <View className="hero-title">
-            <Text className="title-main metallic-gradient-text">
-              专业法律服务
+            <View className="hero-title">
+              <Text className="title-main metallic-gradient-text">
+                专业法律服务
+              </Text>
+              <Text className="title-sub metallic-gradient-text">触手可及</Text>
+            </View>
+
+            <Text className="hero-desc">
+              连接您与澳大利亚顶级律师事务所，提供刑事辩护、家事法、移民法等全方位专业法律咨询与代理服务
             </Text>
-            <Text className="title-sub metallic-gradient-text">触手可及</Text>
+
+            {/* 桌面端按钮 - 在文字下方 */}
+            <View className="hero-actions desktop-only">
+              <Button
+                className="primary-btn action-btn"
+                onClick={() => handleConsultClick()}
+              >
+                立即咨询
+              </Button>
+              <Button
+                className="secondary-btn action-btn"
+                onClick={handleBrowseServices}
+              >
+                浏览服务
+              </Button>
+            </View>
           </View>
 
-          <Text className="hero-desc">
-            连接您与澳大利亚顶级律师事务所，提供刑事辩护、家事法、移民法等全方位专业法律咨询与代理服务
-          </Text>
-
-          {/* Hero 图片 */}
-          <View className="hero-image-container">
-            <Image src={heroImage} className="hero-image" mode="widthFix" />
+          {/* 右侧图片 */}
+          <View className="hero-image-section">
+            <View className="hero-image-container">
+              <Image src={heroImage} className="hero-image" mode="widthFix" />
+            </View>
           </View>
 
-          {/* 特色亮点 */}
-          <View className="features-grid">
-            {featureHighlights.map((feature) => (
-              <View className="feature-card" key={feature.id}>
-                <Text className="feature-icon">{feature.icon}</Text>
-                <Text className="feature-title">{feature.title}</Text>
-                <Text className="feature-desc">{feature.description}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View className="hero-actions">
+          {/* 按钮区域 - 移动端 */}
+          <View className="hero-actions mobile-only">
             <Button
               className="primary-btn action-btn"
               onClick={() => handleConsultClick()}
@@ -395,6 +406,17 @@ export default function Index() {
             >
               浏览服务
             </Button>
+          </View>
+
+          {/* 特色亮点 */}
+          <View className="features-grid">
+            {featureHighlights.map((feature) => (
+              <View className="feature-card" key={feature.id}>
+                <Text className="feature-icon">{feature.icon}</Text>
+                <Text className="feature-title">{feature.title}</Text>
+                <Text className="feature-desc">{feature.description}</Text>
+              </View>
+            ))}
           </View>
         </View>
       </View>

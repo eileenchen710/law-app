@@ -279,3 +279,4 @@ async function handleServiceDetail(req, res, id) {
       .filter(time => new Date(time) > new Date())
       .map(time => new Date(time).toISOString())
   });
+}

@@ -67,3 +67,41 @@ export interface AppointmentResult {
   message: string;
   appointment_id: string;
 }
+
+export interface UserProfile {
+  id: string;
+  displayName: string;
+  avatarUrl: string;
+  email: string;
+  phone: string;
+  role: 'user' | 'admin';
+  provider: 'wechat' | 'anonymous' | 'admin';
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: UserProfile;
+}
+
+export interface UserProfileResponse {
+  user: UserProfile;
+  appointments: AppointmentSummary[];
+}
+
+export interface ConsultationPayload {
+  name: string;
+  email: string;
+  phone: string;
+  serviceName?: string;
+  message: string;
+  preferredTime?: string;
+}
+
+export interface ConsultationResult {
+  status: string;
+  message: string;
+  emailSummary?: unknown;
+}

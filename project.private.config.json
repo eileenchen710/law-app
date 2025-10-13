@@ -1,8 +1,8 @@
 {
-  "libVersion": "2.31.0",
+  "libVersion": "3.10.2",
   "projectname": "law-app",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "coverView": false,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,

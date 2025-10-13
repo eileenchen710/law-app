@@ -3,6 +3,7 @@ const Appointment = require('../../models/appointment');
 const Firm = require('../../models/firm');
 const Service = require('../../models/service');
 const { sendAppointmentNotification } = require('../../_lib/mailer');
+const { authenticateRequest } = require('../../_lib/auth');
 
 module.exports = async function handler(req, res) {
   // 设置CORS
@@ -102,8 +103,25 @@ module.exports = async function handler(req, res) {
         remark 
       } = req.body;
 
+      const authResult = await authenticateRequest(req, { requireAuth: false });
+      const authUser = authResult.user;
+
       // 验证必填字段
-      if (!name || !phone || !firm_id || !service_id || !time) {
+      if (!name && !authUser?.display_name) {
+        return res.status(400).json({ 
+          error: 'Missing required fields',
+          required: ['name']
+        });
+      }
+
+      if (!(phone || authUser?.phone)) {
+        return res.status(400).json({ 
+          error: 'Missing required fields',
+          required: ['phone']
+        });
+      }
+
+      if (!firm_id || !service_id || !time) {
         return res.status(400).json({ 
           error: 'Missing required fields',
           required: ['name', 'phone', 'firm_id', 'service_id', 'time']
@@ -111,17 +129,19 @@ module.exports = async function handler(req, res) {
       }
 
       // 验证手机号格式（中国手机号）
+      const phoneValue = phone || authUser?.phone;
       const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
+      if (phoneValue && !phoneRegex.test(phoneValue)) {
         return res.status(400).json({ 
           error: 'Invalid phone number format'
         });
       }
 
       // 验证邮箱格式（如果提供）
-      if (email) {
+      const emailValue = email || authUser?.email;
+      if (emailValue) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(emailValue)) {
           return res.status(400).json({ 
             error: 'Invalid email format'
           });
@@ -168,14 +188,15 @@ module.exports = async function handler(req, res) {
 
       // 创建预约记录
       const appointment = new Appointment({
-        name,
-        phone,
-        email: email || undefined,
+        name: name || authUser?.display_name,
+        phone: phoneValue,
+        email: emailValue || undefined,
         firm_id,
         service_id,
         appointment_time: appointmentTime,
         remark: remark || undefined,
-        status: 'pending'
+        status: 'pending',
+        user_id: authUser?._id
       });
 
       const savedAppointment = await appointment.save();
@@ -194,9 +215,9 @@ module.exports = async function handler(req, res) {
 
       // 发送邮件通知（异步，不阻塞响应）
       sendAppointmentNotification({
-        clientName: name,
-        clientPhone: phone,
-        clientEmail: email,
+        clientName: appointment.name,
+        clientPhone: appointment.phone,
+        clientEmail: appointment.email,
         firmName: firm.name,
         firmEmail: firm.contact_email || firm.email,
         serviceName: service.title,

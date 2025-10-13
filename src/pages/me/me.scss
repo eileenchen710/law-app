@@ -403,6 +403,102 @@ $accent-strong: #e0e0e0;
   color: $text-primary !important;
 }
 
+.empty-state {
+  background: $panel-bg;
+  border: 1px solid $panel-border;
+  border-radius: 18px;
+  padding: 32px 24px;
+  box-shadow: 0 16px 32px -20px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.empty-desc {
+  font-size: 14px;
+  color: $text-muted;
+  line-height: 1.6;
+}
+
+.appointment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.appointment-card {
+  background: $panel-bg;
+  border: 1px solid $panel-border;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6);
+}
+
+.appointment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.appointment-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.appointment-status {
+  font-size: 12px;
+  color: $accent;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appointment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.appointment-field {
+  font-size: 14px;
+  color: $text-primary;
+}
+
+.appointment-label {
+  color: $text-muted;
+  margin-right: 6px;
+}
+
+.appointment-footer {
+  font-size: 12px;
+  color: $text-muted;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: linear-gradient(110deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  border-radius: 12px;
+  height: 44px;
+  line-height: 44px;
+  border: none;
+  font-size: 15px !important;
+  font-weight: 600;
+  box-shadow: 0 18px 34px -18px rgba(79, 109, 255, 0.6);
+}
+
 // 确保 Taro Input 和 Textarea 组件内部文本颜色正确
 .me-page {
   input,

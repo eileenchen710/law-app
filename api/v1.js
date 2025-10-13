@@ -1,5 +1,9 @@
 const connectToDatabase = require('./_lib/db-optimized');
 const mongoose = require('mongoose');
+const consultationsHandler = require('./_handlers/v1/consultations');
+const authHandler = require('./_handlers/v1/auth');
+const usersMeHandler = require('./_handlers/v1/users-me');
+const { authenticateRequest } = require('./_lib/auth');
 
 // Single entry point for all v1 API routes to reduce cold starts
 module.exports = async function handler(req, res) {
@@ -45,6 +49,17 @@ module.exports = async function handler(req, res) {
           return await handleAppointmentCreate(req, res);
         }
         return await handleAppointmentsList(req, res);
+      case 'consultations':
+        return await consultationsHandler(req, res);
+      case 'auth':
+        req.params = req.params || {};
+        req.params.action = id;
+        return await authHandler(req, res);
+      case 'users':
+        if (id === 'me') {
+          return await usersMeHandler(req, res);
+        }
+        return res.status(404).json({ error: 'Route not found' });
         
       default:
         return res.status(404).json({ error: 'Route not found' });
@@ -292,10 +307,12 @@ async function handleAppointmentsList(req, res) {
 
 // Appointment create handler
 async function handleAppointmentCreate(req, res) {
+  const { user } = await authenticateRequest(req, { requireAuth: false });
+
   const { name, phone, email, firm_id, service_id, time, remark } = req.body;
   
   // Validate required fields
-  if (!name || !phone || !firm_id || !service_id || !time) {
+  if (!(name || user?.display_name) || !(phone || user?.phone) || !firm_id || !service_id || !time) {
     return res.status(400).json({ 
       error: 'Missing required fields',
       required: ['name', 'phone', 'firm_id', 'service_id', 'time']
@@ -307,14 +324,15 @@ async function handleAppointmentCreate(req, res) {
   const appointmentsCollection = db.collection('appointments');
   
   const appointment = {
-    name,
-    phone,
-    email: email || undefined,
+    name: name || user?.display_name,
+    phone: phone || user?.phone,
+    email: email || user?.email || undefined,
     firm_id,
     service_id,
     appointment_time: new Date(time),
     remark: remark || undefined,
     status: 'pending',
+    user_id: user?._id,
     createdAt: new Date(),
     updatedAt: new Date()
   };

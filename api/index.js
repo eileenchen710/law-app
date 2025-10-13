@@ -11,6 +11,9 @@ const handlers = {
   v1ServicesList: () => require('./_handlers/v1/services-list'),
   v1ServiceDetail: () => require('./_handlers/v1/services-detail'),
   v1AppointmentsList: () => require('./_handlers/v1/appointments-list'),
+  v1Consultations: () => require('./_handlers/v1/consultations'),
+  v1Auth: () => require('./_handlers/v1/auth'),
+  v1UsersMe: () => require('./_handlers/v1/users-me'),
 };
 
 const app = express();
@@ -55,6 +58,12 @@ app.all(['/v1/services', '/api/v1/services'], adapt(() => handlers.v1ServicesLis
 app.all(['/v1/services/:id', '/api/v1/services/:id'], adapt(() => handlers.v1ServiceDetail(), { mapIdParam: true }));
 
 app.all(['/v1/appointments', '/api/v1/appointments'], adapt(() => handlers.v1AppointmentsList()));
+app.all(['/v1/consultations', '/api/v1/consultations'], adapt(() => handlers.v1Consultations()));
+app.all(
+  ['/v1/auth', '/api/v1/auth', '/v1/auth/:action', '/api/v1/auth/:action'],
+  adapt(() => handlers.v1Auth())
+);
+app.all(['/v1/users/me', '/api/v1/users/me'], adapt(() => handlers.v1UsersMe()));
 
 app.use((request, response) => {
   response.status(404).json({ error: 'Not found' });

@@ -1,4 +1,4 @@
-﻿const { Schema, model, models } = require("mongoose");
+const { Schema, model, models } = require("mongoose");
 
 const ServiceSchema = new Schema(
   {

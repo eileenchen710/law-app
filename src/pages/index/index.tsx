@@ -662,7 +662,7 @@ export default function Index() {
                   placeholder="请输入您的姓名"
                   value={formName}
                   onInput={(e) => setFormName(e.detail.value)}
-                  style={{ color: "#fff", fontSize: "13px" }}
+                  style={{ color: "#fff" }}
                 />
               </View>
               <View className="form-group">
@@ -675,7 +675,7 @@ export default function Index() {
                   placeholder="请输入您的邮箱"
                   value={formEmail}
                   onInput={(e) => setFormEmail(e.detail.value)}
-                  style={{ color: "#fff", fontSize: "13px" }}
+                  style={{ color: "#fff" }}
                 />
               </View>
             </View>
@@ -690,7 +690,7 @@ export default function Index() {
                 placeholder="请输入您的手机号码"
                 value={formPhone}
                 onInput={(e) => setFormPhone(e.detail.value)}
-                style={{ color: "#fff", fontSize: "13px" }}
+                style={{ color: "#fff" }}
               />
             </View>
 
@@ -709,7 +709,7 @@ export default function Index() {
                     setSelectedServiceName(null);
                   }
                 }}
-                style={{ color: "#fff", fontSize: "13px" }}
+                style={{ color: "#fff" }}
               />
             </View>
 
@@ -724,7 +724,6 @@ export default function Index() {
                 onInput={(e) => setFormMessage(e.detail.value)}
                 style={{
                   color: "#fff",
-                  fontSize: "13px",
                   backgroundColor: "transparent",
                 }}
               />

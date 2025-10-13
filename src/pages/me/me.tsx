@@ -164,18 +164,22 @@ export default function Me() {
     console.log("Me page loaded.");
   });
 
-  const isAdmin = useMemo(() => user?.role === "admin", [user]);
-
-  useEffect(() => {
-    setActiveTab("appointments");
-  }, [isAdmin]);
+  const isAdmin = useMemo(() => {
+    const admin = user?.role === "admin";
+    console.log("[ME PAGE] isAdmin check:", { user, role: user?.role, isAdmin: admin });
+    return admin;
+  }, [user]);
 
   const tabs = useMemo<TabItem<typeof activeTab>[]>(
-    () => [
-      { key: "appointments", label: "我的预约", visible: true },
-      { key: "firms", label: "律所管理", visible: isAdmin },
-      { key: "services", label: "服务管理", visible: isAdmin },
-    ],
+    () => {
+      const tabsArray = [
+        { key: "appointments", label: "我的预约", visible: true },
+        { key: "firms", label: "律所管理", visible: isAdmin },
+        { key: "services", label: "服务管理", visible: isAdmin },
+      ];
+      console.log("[ME PAGE] Tabs generated:", tabsArray, "isAdmin:", isAdmin);
+      return tabsArray;
+    },
     [isAdmin]
   );
 

@@ -913,11 +913,35 @@ button,
         }
       }
 
+      .firm-services {
+        margin-bottom: 20px;
+
+        .service-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          margin-bottom: 10px;
+
+          .service-check {
+            color: $primary-color;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+          }
+
+          .service-text {
+            color: $text-white-80;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+        }
+      }
+
       .firm-practice-areas {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin-bottom: 16px;
+        margin-bottom: 24px;
 
         .practice-area-tag {
           display: inline-block;
@@ -930,63 +954,6 @@ button,
             color: $primary-color;
             font-size: 12px;
             font-weight: 500;
-          }
-        }
-      }
-
-      .firm-services {
-        margin-bottom: 16px;
-
-        .service-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 12px;
-
-          .service-check {
-            color: $primary-color;
-            font-size: 10px;
-            flex-shrink: 0;
-            margin-top: -2px;
-          }
-
-          .service-text {
-            color: $text-white-80;
-            font-size: 14px;
-            line-height: 1.4;
-          }
-        }
-      }
-
-      .firm-lawyers {
-        margin-bottom: 24px;
-        padding-top: 16px;
-        border-top: 1px solid $border-white-10;
-
-        .firm-lawyers-title {
-          color: $text-white-80;
-          font-size: 13px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          display: block;
-        }
-
-        .lawyers-list {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-
-          .lawyer-item {
-            color: $text-white-60;
-            font-size: 13px;
-            line-height: 1.4;
-          }
-
-          .lawyer-more {
-            color: $primary-color;
-            font-size: 12px;
-            font-weight: 500;
-            margin-top: 2px;
           }
         }
       }

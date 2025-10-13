@@ -134,7 +134,8 @@ export default function Index() {
           title: item.title,
           description: item.description || "",
           category: item.category,
-          lawFirmId: item.law_firm_id || "",
+          lawFirmId: item.law_firm_id || item.firm_id || "",
+          lawFirm: item.firm_name || "律所名称待定",
           price: item.price || "面议",
           duration: item.duration || "1-2小时",
           lawyerName: item.lawyer_name || "专业律师",
@@ -599,16 +600,6 @@ export default function Index() {
                 <Text className="firm-desc">{firm.description}</Text>
               </View>
 
-              {firm.practiceAreas && firm.practiceAreas.length > 0 && (
-                <View className="firm-practice-areas">
-                  {firm.practiceAreas.map((area, idx) => (
-                    <View key={idx} className="practice-area-tag">
-                      <Text className="practice-area-text">{area}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-
               {firm.services && firm.services.length > 0 && (
                 <View className="firm-services">
                   {firm.services.map((service, idx) => (
@@ -620,19 +611,13 @@ export default function Index() {
                 </View>
               )}
 
-              {firm.lawyers && firm.lawyers.length > 0 && (
-                <View className="firm-lawyers">
-                  <Text className="firm-lawyers-title">律师团队：</Text>
-                  <View className="lawyers-list">
-                    {firm.lawyers.slice(0, 2).map((lawyer, idx) => (
-                      <Text key={idx} className="lawyer-item">
-                        {lawyer.name} ({lawyer.title})
-                      </Text>
-                    ))}
-                    {firm.lawyers.length > 2 && (
-                      <Text className="lawyer-more">等 {firm.lawyers.length} 位律师</Text>
-                    )}
-                  </View>
+              {firm.practiceAreas && firm.practiceAreas.length > 0 && (
+                <View className="firm-practice-areas">
+                  {firm.practiceAreas.map((area, idx) => (
+                    <View key={idx} className="practice-area-tag">
+                      <Text className="practice-area-text">{area}</Text>
+                    </View>
+                  ))}
                 </View>
               )}
 

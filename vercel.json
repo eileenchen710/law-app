@@ -3,6 +3,25 @@
   "installCommand": "npm_config_production=false npm ci --legacy-peer-deps || npm_config_production=false npm install --legacy-peer-deps",
   "framework": null,
   "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    }
+  ],
   "functions": {
     "api/index.js": {
       "memory": 1024,

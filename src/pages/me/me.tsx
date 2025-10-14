@@ -142,13 +142,15 @@ const formatDateTime = (value?: string | number | Date | null) => {
 export default function Me() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [allAppointments, setAllAppointments] = useState<AppointmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [authenticating, setAuthenticating] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "appointments" | "firms" | "services"
+    "appointments" | "all-appointments" | "firms" | "services"
   >("appointments");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showLoginForm, setShowLoginForm] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   // 管理员状态
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
@@ -200,6 +202,7 @@ export default function Me() {
     () => {
       const tabsArray = [
         { key: "appointments", label: "我的预约", visible: true },
+        { key: "all-appointments", label: "预约管理", visible: isAdmin },
         { key: "firms", label: "律所管理", visible: isAdmin },
         { key: "services", label: "服务管理", visible: isAdmin },
       ];
@@ -246,6 +249,62 @@ export default function Me() {
   useEffect(() => {
     loadAdminData();
   }, [loadAdminData]);
+
+  // 加载所有预约（仅管理员）
+  const loadAllAppointments = useCallback(async () => {
+    if (!isAdmin) return;
+
+    try {
+      const response = await apiClient.getAllAppointments();
+      const items = response.items || [];
+      setAllAppointments(items);
+      console.log('[ME PAGE] Loaded all appointments:', items.length);
+    } catch (error) {
+      console.error("Failed to load all appointments:", error);
+      Taro.showToast({ title: "加载预约失败", icon: "none" });
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAllAppointments();
+    }
+  }, [isAdmin, loadAllAppointments]);
+
+  // 取消预约
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      await Taro.showModal({
+        title: "确认取消",
+        content: "确定要取消这个预约吗？",
+        confirmText: "确定",
+        cancelText: "不取消"
+      });
+    } catch (error) {
+      // 用户点击了取消
+      return;
+    }
+
+    try {
+      setCancellingId(appointmentId);
+      await apiClient.cancelAppointment(appointmentId);
+
+      Taro.showToast({ title: "预约已取消", icon: "success" });
+
+      // 刷新预约列表
+      await refreshProfile();
+
+      // 如果是管理员，也刷新所有预约列表
+      if (isAdmin) {
+        await loadAllAppointments();
+      }
+    } catch (error) {
+      console.error("Failed to cancel appointment:", error);
+      Taro.showToast({ title: "取消失败，请重试", icon: "none" });
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -746,6 +805,88 @@ export default function Me() {
                 <Text className="appointment-meta">
                   提交时间：{formatDateTime(item.created_at)}
                 </Text>
+                {item.status !== "cancelled" && (
+                  <Button
+                    className="cancel-btn"
+                    size="mini"
+                    disabled={cancellingId === item.id}
+                    onClick={() => handleCancelAppointment(item.id)}
+                  >
+                    {cancellingId === item.id ? "取消中..." : "取消预约"}
+                  </Button>
+                )}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+
+  const renderAllAppointments = () => (
+    <View className="section">
+      <View className="section-header">
+        <Text className="section-title">预约管理</Text>
+        <Text className="section-desc">
+          查看和管理所有用户的预约记录
+        </Text>
+      </View>
+
+      {allAppointments.length === 0 ? (
+        <View className="empty-state">
+          <Text className="empty-title">暂无预约记录</Text>
+          <Text className="empty-desc">
+            还没有用户提交预约申请
+          </Text>
+        </View>
+      ) : (
+        <View className="appointment-list">
+          {allAppointments.map((item) => (
+            <View className="appointment-card" key={item.id}>
+              <View className="appointment-header">
+                <Text className="appointment-title">{item.service_name || "未指定服务"}</Text>
+                <Text className="appointment-status">{item.status || "待确认"}</Text>
+              </View>
+              <View className="appointment-body">
+                <Text className="appointment-field">
+                  <Text className="appointment-label">客户姓名：</Text>
+                  {item.name}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">联系电话：</Text>
+                  {item.phone}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">邮箱：</Text>
+                  {item.email}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">预约时间：</Text>
+                  {formatDateTime(item.time)}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">律所 / 服务：</Text>
+                  {item.firm_name || "-"}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">备注：</Text>
+                  {item.remark || "无"}
+                </Text>
+              </View>
+              <View className="appointment-footer">
+                <Text className="appointment-meta">
+                  提交时间：{formatDateTime(item.created_at)}
+                </Text>
+                {item.status !== "cancelled" && (
+                  <Button
+                    className="cancel-btn"
+                    size="mini"
+                    disabled={cancellingId === item.id}
+                    onClick={() => handleCancelAppointment(item.id)}
+                  >
+                    {cancellingId === item.id ? "取消中..." : "取消预约"}
+                  </Button>
+                )}
               </View>
             </View>
           ))}
@@ -1209,6 +1350,9 @@ export default function Me() {
               {isAdmin && (
                 <>
                   <View className="desktop-card">
+                    {renderAllAppointments()}
+                  </View>
+                  <View className="desktop-card">
                     {renderFirmsManagement()}
                   </View>
                   <View className="desktop-card">
@@ -1221,6 +1365,7 @@ export default function Me() {
             /* 移动端:Tab切换布局 */
             <>
               {activeTab === "appointments" && renderAppointments()}
+              {activeTab === "all-appointments" && isAdmin && renderAllAppointments()}
               {activeTab === "firms" && isAdmin && renderFirmsManagement()}
               {activeTab === "services" && isAdmin && renderServicesManagement()}
             </>

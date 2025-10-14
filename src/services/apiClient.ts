@@ -15,19 +15,35 @@ interface ApiResponse<T> {
 }
 
 class ApiClient {
+  private getAuthToken(): string | null {
+    try {
+      return Taro.getStorageSync("auth_token") || null;
+    } catch (error) {
+      console.warn("Failed to get auth token", error);
+      return null;
+    }
+  }
+
   private async request<T>(
     url: string,
     options: Partial<Taro.request.Option> = {},
     useAdminApi = false
   ): Promise<T> {
     try {
+      const token = this.getAuthToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(options.header as Record<string, string>),
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const baseUrl = useAdminApi ? ADMIN_API_BASE_URL : API_BASE_URL;
       const response = await Taro.request({
         url: `${baseUrl}${url}`,
-        header: {
-          "Content-Type": "application/json",
-          ...options.header,
-        },
+        header: headers,
         ...options,
       });
 
@@ -90,6 +106,26 @@ class ApiClient {
     return this.request(`/services/${id}`, {
       method: "DELETE",
     }, true);
+  }
+
+  // Appointments API
+  async getAllAppointments(page = 1, size = 100, status?: string): Promise<ApiResponse<any>> {
+    const statusParam = status ? `&status=${status}` : '';
+    return this.request(`/consultations?page=${page}&size=${size}${statusParam}`);
+  }
+
+  async cancelAppointment(id: string): Promise<any> {
+    return this.request(`/consultations/${id}`, {
+      method: "PATCH",
+      data: { status: "cancelled" },
+    });
+  }
+
+  async updateAppointmentStatus(id: string, status: string): Promise<any> {
+    return this.request(`/consultations/${id}`, {
+      method: "PATCH",
+      data: { status },
+    });
   }
 }
 

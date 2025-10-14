@@ -45,6 +45,7 @@ module.exports = async function handler(req, res) {
         return await handleServicesList(req, res);
 
       case 'consultations':
+        // Support both /consultations and /consultations/:id
         return await consultationsHandler(req, res);
       case 'auth':
         req.params = req.params || {};

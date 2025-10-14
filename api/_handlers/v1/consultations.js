@@ -102,13 +102,172 @@ const buildClientHtml = ({
   `;
 };
 
+// Handle GET - Get all appointments (admin only)
+const handleGetAppointments = async (req, res) => {
+  const authResult = await authenticateRequest(req, { requireAuth: true });
+  if (authResult.error || !authResult.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: '需要登录'
+    });
+  }
+
+  // Check if user is admin
+  if (authResult.user.role !== 'admin') {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: '只有管理员可以查看所有预约'
+    });
+  }
+
+  try {
+    await connectToDatabase();
+
+    const { page = 1, size = 100, status } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(size);
+    const limit = parseInt(size);
+
+    const query = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    const [total, consultations] = await Promise.all([
+      Consultation.countDocuments(query),
+      Consultation.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+    ]);
+
+    const items = consultations.map((consultation) => ({
+      id: consultation._id.toString(),
+      user_id: consultation.user_id?.toString() || null,
+      name: consultation.name,
+      phone: consultation.phone,
+      email: consultation.email,
+      firm_id: consultation.firm_id?.toString() || null,
+      firm_name: consultation.firm_name || null,
+      service_id: consultation.service_id?.toString() || null,
+      service_name: consultation.service_name || '在线咨询',
+      time: consultation.preferred_time || consultation.createdAt,
+      remark: consultation.message,
+      status: consultation.status,
+      created_at: consultation.createdAt
+    }));
+
+    return res.status(200).json({
+      items,
+      total,
+      page: parseInt(page),
+      size: parseInt(size),
+      pages: Math.ceil(total / parseInt(size))
+    });
+  } catch (error) {
+    console.error('[consultations] Failed to get appointments:', error);
+    return res.status(500).json({
+      error: 'Failed to get appointments',
+      details: error.message
+    });
+  }
+};
+
+// Handle PATCH - Update appointment status
+const handleUpdateAppointment = async (req, res) => {
+  const authResult = await authenticateRequest(req, { requireAuth: true });
+  if (authResult.error || !authResult.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: '需要登录'
+    });
+  }
+
+  try {
+    await connectToDatabase();
+
+    // Get appointment ID from URL
+    const urlParts = req.url.split('/').filter(Boolean);
+    const appointmentId = urlParts[urlParts.length - 1].split('?')[0];
+
+    if (!appointmentId) {
+      return res.status(400).json({ error: 'Missing appointment ID' });
+    }
+
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Missing status field' });
+    }
+
+    // Validate status
+    const validStatuses = ['pending', 'contacted', 'converted', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: 'Invalid status',
+        validStatuses
+      });
+    }
+
+    // Find the appointment
+    const appointment = await Consultation.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Check permission: user can only update their own appointments
+    // Admin can update any appointment
+    const userId = authResult.user._id.toString();
+    const appointmentUserId = appointment.user_id?.toString();
+    const isAdmin = authResult.user.role === 'admin';
+
+    if (!isAdmin && appointmentUserId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: '只能取消自己的预约'
+      });
+    }
+
+    // Update status
+    appointment.status = status;
+    await appointment.save();
+
+    console.log('[consultations] Updated appointment:', appointmentId, 'status:', status);
+
+    return res.status(200).json({
+      success: true,
+      message: '预约状态已更新',
+      appointment: {
+        id: appointment._id.toString(),
+        status: appointment.status
+      }
+    });
+  } catch (error) {
+    console.error('[consultations] Failed to update appointment:', error);
+    return res.status(500).json({
+      error: 'Failed to update appointment',
+      details: error.message
+    });
+  }
+};
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Handle GET - Get all appointments (admin only)
+  if (req.method === 'GET') {
+    return await handleGetAppointments(req, res);
+  }
+
+  // Handle PATCH - Update appointment (cancel)
+  if (req.method === 'PATCH') {
+    return await handleUpdateAppointment(req, res);
   }
 
   if (req.method !== 'POST') {

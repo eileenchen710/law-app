@@ -34,11 +34,15 @@ const buildUserPayload = (user, token) => ({
 
 const ensureDisplayName = (source) => {
   if (!source) return '';
-  if (source.displayName) return source.displayName;
-  if (source.nickName) return source.nickName;
-  if (source.nickname) return source.nickname;
-  if (source.name) return source.name;
-  return '';
+  // 尝试各种可能的字段名
+  const name = source.displayName
+    || source.nickName
+    || source.nickname
+    || source.name
+    || source.display_name;
+
+  console.log('[auth] ensureDisplayName input:', source, 'output:', name);
+  return name || '';
 };
 
 const handleWechatLogin = async (req, res) => {
@@ -75,32 +79,66 @@ const handleWechatLogin = async (req, res) => {
 
   const baseProfile = {
     display_name: ensureDisplayName(userInfo),
-    avatar_url: userInfo?.avatarUrl || userInfo?.avatar || '',
+    avatar_url: userInfo?.avatarUrl || userInfo?.avatar || userInfo?.avatarurl || '',
     email: userInfo?.email?.toLowerCase(),
-    phone: userInfo?.phoneNumber,
+    phone: userInfo?.phoneNumber || userInfo?.phone,
     provider: 'wechat',
     wechat: {
       openid: session.openId,
       unionid: session.unionId,
-      session_key: session.sessionKey
+      session_key: session.sessionKey,
+      nickname: userInfo?.nickName || userInfo?.nickname,
+      avatar: userInfo?.avatarUrl || userInfo?.avatar || userInfo?.avatarurl
     },
     last_login_at: new Date(),
     last_login_ip: ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
   };
 
+  console.log('[auth] Constructed baseProfile:', {
+    display_name: baseProfile.display_name,
+    avatar_url: baseProfile.avatar_url,
+    email: baseProfile.email,
+    phone: baseProfile.phone,
+    wechat_nickname: baseProfile.wechat.nickname,
+    wechat_avatar: baseProfile.wechat.avatar
+  });
+
   if (existingUser) {
-    console.log('[auth] Updating existing user');
-    existingUser.display_name = baseProfile.display_name || existingUser.display_name;
-    existingUser.avatar_url = baseProfile.avatar_url || existingUser.avatar_url;
-    existingUser.email = baseProfile.email || existingUser.email;
-    existingUser.phone = baseProfile.phone || existingUser.phone;
+    console.log('[auth] Updating existing user, current display_name:', existingUser.display_name, 'current avatar_url:', existingUser.avatar_url);
+
+    // 只在有新值时更新,避免用空值覆盖
+    if (baseProfile.display_name) {
+      existingUser.display_name = baseProfile.display_name;
+    }
+    if (baseProfile.avatar_url) {
+      existingUser.avatar_url = baseProfile.avatar_url;
+    }
+    if (baseProfile.email) {
+      existingUser.email = baseProfile.email;
+    }
+    if (baseProfile.phone) {
+      existingUser.phone = baseProfile.phone;
+    }
+
+    // 更新微信信息
+    if (!existingUser.wechat) {
+      existingUser.wechat = {};
+    }
     existingUser.wechat.session_key = session.sessionKey;
+    if (baseProfile.wechat.nickname) {
+      existingUser.wechat.nickname = baseProfile.wechat.nickname;
+    }
+    if (baseProfile.wechat.avatar) {
+      existingUser.wechat.avatar = baseProfile.wechat.avatar;
+    }
+
     existingUser.last_login_at = baseProfile.last_login_at;
     existingUser.last_login_ip = baseProfile.last_login_ip;
     existingUser.provider = 'wechat';
     existingUser.role = determineRole(existingUser, req.body);
 
     console.log('[auth] Determined role for existing user:', existingUser.role);
+    console.log('[auth] Updated display_name:', existingUser.display_name, 'avatar_url:', existingUser.avatar_url);
     await existingUser.save();
     console.log('[auth] User updated successfully:', existingUser._id, 'role:', existingUser.role);
     const token = createToken(existingUser);

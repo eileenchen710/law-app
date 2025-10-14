@@ -259,6 +259,8 @@ export default function Me() {
           });
           userProfile = profile?.userInfo as unknown as Record<string, unknown>;
           console.log("获取到的微信用户信息:", userProfile);
+          console.log("微信用户信息字段:", userProfile ? Object.keys(userProfile) : 'null');
+          console.log("nickName:", userProfile?.nickName, "avatarUrl:", userProfile?.avatarUrl);
         } catch (profileError) {
           console.warn("用户拒绝授权获取个人信息", profileError);
           // 即使用户拒绝授权，也继续登录流程

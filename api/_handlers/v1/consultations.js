@@ -173,6 +173,86 @@ const handleGetAppointments = async (req, res) => {
   }
 };
 
+// Build cancellation email for admin
+const buildCancellationAdminHtml = ({
+  name,
+  email,
+  phone,
+  serviceName,
+  firmName,
+  appointmentTime,
+  cancelledBy
+}) => {
+  return `
+    <h2>预约取消通知</h2>
+    <p>一个预约已被取消。</p>
+
+    <h3>客户信息</h3>
+    <ul>
+      <li>姓名：${escapeHtml(name)}</li>
+      <li>邮箱：${escapeHtml(email)}</li>
+      <li>电话：${escapeHtml(phone)}</li>
+    </ul>
+
+    <h3>预约详情</h3>
+    <ul>
+      <li>指定律所：${escapeHtml(firmName || '未指定')}</li>
+      <li>咨询服务：${escapeHtml(serviceName || '在线咨询')}</li>
+      <li>预约时间：${escapeHtml(formatAppointmentTime(appointmentTime))}</li>
+      <li>取消方：${escapeHtml(cancelledBy)}</li>
+    </ul>
+  `;
+};
+
+// Build cancellation email for client
+const buildCancellationClientHtml = ({
+  name,
+  serviceName,
+  appointmentTime
+}) => {
+  return `
+    <h2>预约已取消</h2>
+    <p>尊敬的${escapeHtml(name || '客户')}：</p>
+    <p>您的预约已被取消。</p>
+
+    <h3>预约信息</h3>
+    <ul>
+      <li>咨询服务：${escapeHtml(serviceName || '在线咨询')}</li>
+      <li>预约时间：${escapeHtml(formatAppointmentTime(appointmentTime))}</li>
+    </ul>
+
+    <p>如有疑问，请联系我们。如需重新预约，欢迎访问我们的平台。</p>
+  `;
+};
+
+// Build cancellation email for firm
+const buildCancellationFirmHtml = ({
+  firmName,
+  name,
+  email,
+  phone,
+  serviceName,
+  appointmentTime
+}) => {
+  return `
+    <h2>客户预约取消通知 - ${escapeHtml(firmName)}</h2>
+    <p>一位客户的预约已被取消。</p>
+
+    <h3>客户信息</h3>
+    <ul>
+      <li>姓名：${escapeHtml(name)}</li>
+      <li>邮箱：${escapeHtml(email)}</li>
+      <li>电话：${escapeHtml(phone)}</li>
+    </ul>
+
+    <h3>预约详情</h3>
+    <ul>
+      <li>咨询服务：${escapeHtml(serviceName || '在线咨询')}</li>
+      <li>预约时间：${escapeHtml(formatAppointmentTime(appointmentTime))}</li>
+    </ul>
+  `;
+};
+
 // Handle PATCH - Update appointment status
 const handleUpdateAppointment = async (req, res) => {
   const authResult = await authenticateRequest(req, { requireAuth: true });
@@ -228,11 +308,81 @@ const handleUpdateAppointment = async (req, res) => {
       });
     }
 
+    const oldStatus = appointment.status;
+
     // Update status
     appointment.status = status;
     await appointment.save();
 
     console.log('[consultations] Updated appointment:', appointmentId, 'status:', status);
+
+    // Send email notifications if status changed to cancelled
+    if (status === 'cancelled' && oldStatus !== 'cancelled') {
+      try {
+        // Get firm information if available
+        let firmEmail = null;
+        let firmName = null;
+
+        if (appointment.firm_id) {
+          const firm = await Firm.findById(appointment.firm_id).lean();
+          if (firm) {
+            firmEmail = firm.contact_email || firm.email;
+            firmName = firm.name;
+          }
+        }
+
+        const appointmentTime = appointment.preferred_time || appointment.createdAt;
+        const cancelledBy = isAdmin ? '管理员' : '用户本人';
+
+        // Prepare email configuration
+        const emailConfig = {
+          admin: {
+            subject: `预约取消 - ${appointment.name}`,
+            html: buildCancellationAdminHtml({
+              name: appointment.name,
+              email: appointment.email,
+              phone: appointment.phone,
+              serviceName: appointment.service_name,
+              firmName: firmName || appointment.firm_name,
+              appointmentTime,
+              cancelledBy
+            })
+          },
+          client: {
+            to: appointment.email,
+            subject: `预约取消确认`,
+            html: buildCancellationClientHtml({
+              name: appointment.name,
+              serviceName: appointment.service_name,
+              appointmentTime
+            })
+          }
+        };
+
+        // Add firm email if available
+        if (firmEmail && firmName) {
+          emailConfig.firm = {
+            to: firmEmail,
+            subject: `客户预约取消 - ${appointment.name}`,
+            html: buildCancellationFirmHtml({
+              firmName,
+              name: appointment.name,
+              email: appointment.email,
+              phone: appointment.phone,
+              serviceName: appointment.service_name,
+              appointmentTime
+            })
+          };
+        }
+
+        // Send emails
+        await sendNotificationEmails(emailConfig, { silent: true });
+        console.log('[consultations] Cancellation emails sent for appointment:', appointmentId);
+      } catch (emailError) {
+        console.error('[consultations] Failed to send cancellation emails:', emailError);
+        // Don't fail the request if email fails
+      }
+    }
 
     return res.status(200).json({
       success: true,

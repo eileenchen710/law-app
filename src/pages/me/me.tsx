@@ -182,6 +182,7 @@ export default function Me() {
       refreshProfile().catch((error) => {
         console.error("Failed to refresh profile on page show", error);
       });
+      // refreshProfile会触发user更新，useEffect会自动加载所有预约
     }
   });
 
@@ -252,24 +253,28 @@ export default function Me() {
 
   // 加载所有预约（仅管理员）
   const loadAllAppointments = useCallback(async () => {
-    if (!isAdmin) return;
-
+    // 不在这里检查isAdmin，让调用方决定是否调用
     try {
       const response = await apiClient.getAllAppointments();
       const items = response.items || [];
       setAllAppointments(items);
       console.log('[ME PAGE] Loaded all appointments:', items.length);
+      console.log('[ME PAGE] Sample appointment:', items[0]);
     } catch (error) {
       console.error("Failed to load all appointments:", error);
+      const apiError = error as any;
+      console.error("API Error details:", apiError.message, apiError.data);
       Taro.showToast({ title: "加载预约失败", icon: "none" });
     }
-  }, [isAdmin]);
+  }, []);
 
+  // 当用户信息更新且用户是管理员时，加载所有预约
   useEffect(() => {
-    if (isAdmin) {
+    if (user && isAdmin && !loading) {
+      console.log('[ME PAGE] User is admin, loading all appointments');
       loadAllAppointments();
     }
-  }, [isAdmin, loadAllAppointments]);
+  }, [user, isAdmin, loading, loadAllAppointments]);
 
   // 取消预约
   const handleCancelAppointment = async (appointmentId: string) => {

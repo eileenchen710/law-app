@@ -106,7 +106,6 @@ $accent-strong: #e0e0e0;
       letter-spacing: 0.6px;
     }
   }
-
 }
 
 .me-intro {
@@ -709,7 +708,9 @@ $accent-strong: #e0e0e0;
 }
 
 .item-desc,
-.list-card-desc {
+.list-card-desc,
+.list-card-meta {
+  display: block;
   font-size: 14px;
   color: $text-muted;
   margin-bottom: 6px;

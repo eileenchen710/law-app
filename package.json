@@ -34,7 +34,9 @@
     "start:server": "node server/dist/index.js",
     "build:server": "tsc -p server/tsconfig.json",
     "seed:server": "tsx server/src/scripts/seed.ts",
-    "test:email": "node scripts/send-test-notification.js"
+    "test:email": "node scripts/send-test-notification.js",
+    "migrate:firms": "node scripts/migrate-firm-data.js",
+    "bind:services": "node scripts/bind-services-to-firms.js"
   },
   "browserslist": [
     "defaults and fully supports es6-module",

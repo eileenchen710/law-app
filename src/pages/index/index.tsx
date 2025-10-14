@@ -555,7 +555,8 @@ export default function Index() {
                 <Text className="firm-desc">{firm.description}</Text>
               </View>
 
-              {firm.services && firm.services.length > 0 && (
+              {/* 优先显示 services，如果为空则显示 practice_areas */}
+              {firm.services && firm.services.length > 0 ? (
                 <View className="firm-services">
                   {firm.services.map((service, idx) => (
                     <View key={idx} className="service-item">
@@ -564,17 +565,16 @@ export default function Index() {
                     </View>
                   ))}
                 </View>
-              )}
-
-              {firm.practiceAreas && firm.practiceAreas.length > 0 && (
-                <View className="firm-practice-areas">
+              ) : firm.practiceAreas && firm.practiceAreas.length > 0 ? (
+                <View className="firm-services">
                   {firm.practiceAreas.map((area, idx) => (
-                    <View key={idx} className="practice-area-tag">
-                      <Text className="practice-area-text">{area}</Text>
+                    <View key={idx} className="service-item">
+                      <Text className="service-check">✓</Text>
+                      <Text className="service-text">{area}</Text>
                     </View>
                   ))}
                 </View>
-              )}
+              ) : null}
 
               <Button
                 className="firm-btn"

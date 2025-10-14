@@ -40,6 +40,20 @@ const ConsultationSchema = new Schema(
       ref: 'User',
       index: true
     },
+    firm_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Firm',
+      index: true
+    },
+    firm_name: {
+      type: String,
+      trim: true,
+    },
+    service_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Service',
+      index: true
+    },
     notes: {
       type: String,
       trim: true,

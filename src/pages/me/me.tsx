@@ -1166,6 +1166,15 @@ export default function Me() {
     </View>
   );
 
+  const isDesktop = useMemo(() => {
+    try {
+      const systemInfo = Taro.getSystemInfoSync();
+      return systemInfo.windowWidth >= 768;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return (
     <ScrollView className="me-page" scrollY>
       <AppHeader showActions={false} scrolled={false} />
@@ -1173,11 +1182,14 @@ export default function Me() {
         <Loading text={authenticating ? "正在登录..." : "加载中..."} />
       ) : (
         <View>
-          <TabBar
-            activeTab={activeTab}
-            tabs={tabs}
-            onChange={(tab) => setActiveTab(tab as typeof activeTab)}
-          />
+          {/* 移动端显示 TabBar */}
+          {!isDesktop && (
+            <TabBar
+              activeTab={activeTab}
+              tabs={tabs}
+              onChange={(tab) => setActiveTab(tab as typeof activeTab)}
+            />
+          )}
 
           {errorMessage ? (
             <View className="empty-state">
@@ -1188,9 +1200,31 @@ export default function Me() {
             </View>
           ) : null}
 
-          {activeTab === "appointments" && renderAppointments()}
-          {activeTab === "firms" && isAdmin && renderFirmsManagement()}
-          {activeTab === "services" && isAdmin && renderServicesManagement()}
+          {/* 桌面端:卡片式布局 */}
+          {isDesktop ? (
+            <View className="desktop-card-grid">
+              <View className="desktop-card">
+                {renderAppointments()}
+              </View>
+              {isAdmin && (
+                <>
+                  <View className="desktop-card">
+                    {renderFirmsManagement()}
+                  </View>
+                  <View className="desktop-card">
+                    {renderServicesManagement()}
+                  </View>
+                </>
+              )}
+            </View>
+          ) : (
+            /* 移动端:Tab切换布局 */
+            <>
+              {activeTab === "appointments" && renderAppointments()}
+              {activeTab === "firms" && isAdmin && renderFirmsManagement()}
+              {activeTab === "services" && isAdmin && renderServicesManagement()}
+            </>
+          )}
 
           <View className="section" style={{ marginBottom: "48px" }}>
             <Button

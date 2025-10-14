@@ -1,5 +1,6 @@
 const { sendNotificationEmails, __private__ } = require('../../_lib/mailer');
 const connectToDatabase = require('../../_lib/db-optimized');
+const { authenticateRequest } = require('../../_lib/auth');
 const Consultation = require('../../models/consultation');
 const Firm = require('../../models/firm');
 const Service = require('../../models/service');
@@ -104,7 +105,7 @@ const buildClientHtml = ({
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -113,6 +114,19 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // 验证用户身份（要求必须登录）
+  const authResult = await authenticateRequest(req, { requireAuth: true });
+  if (authResult.error || !authResult.user) {
+    console.log('[consultations] Authentication failed:', authResult.error);
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: '创建预约需要先登录'
+    });
+  }
+
+  const userId = authResult.user._id.toString();
+  console.log('[consultations] Authenticated user:', userId);
 
   const {
     name,
@@ -193,18 +207,22 @@ module.exports = async function handler(req, res) {
     const firmName = firm ? firm.name : null;
     const actualServiceName = service ? service.title : (trimmedService || '在线咨询');
 
-    // 创建咨询记录
+    // 创建咨询记录（包含用户ID）
     const consultation = await Consultation.create({
+      user_id: userId,
       name: trimmedName,
       email: trimmedEmail,
       phone: trimmedPhone,
       service_name: actualServiceName,
       message: trimmedMessage,
       preferred_time: preferredTime ? appointmentTime : null,
-      status: 'pending'
+      status: 'pending',
+      firm_id: firmId || (firm ? firm._id.toString() : null),
+      firm_name: firmName,
+      service_id: serviceId || (service ? service._id.toString() : null)
     });
 
-    console.log('[consultations] Created consultation record:', consultation._id);
+    console.log('[consultations] Created consultation record:', consultation._id, 'for user:', userId);
 
     // 准备邮件配置
     const emailConfig = {

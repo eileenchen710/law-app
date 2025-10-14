@@ -259,6 +259,35 @@ export default function Index() {
       return;
     }
 
+    // 检查登录状态
+    const authToken = (() => {
+      try {
+        return Taro.getStorageSync("auth_token");
+      } catch (error) {
+        console.warn("Failed to get auth token", error);
+        return "";
+      }
+    })();
+
+    if (!authToken) {
+      // 显示登录提示对话框
+      Taro.showModal({
+        title: "需要登录",
+        content: "预约服务需要先登录账号，是否前往登录？",
+        confirmText: "去登录",
+        cancelText: "取消",
+        success: (res) => {
+          if (res.confirm) {
+            // 跳转到me页面进行登录
+            Taro.switchTab({ url: "/pages/me/me" }).catch((err) => {
+              console.error("Failed to navigate to me page", err);
+            });
+          }
+        },
+      });
+      return;
+    }
+
     const trimmedName = formName.trim();
     const trimmedEmail = formEmail.trim();
     const trimmedPhone = formPhone.trim();

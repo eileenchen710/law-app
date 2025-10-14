@@ -43,12 +43,13 @@ const loadAppointmentsForUser = async (user) => {
 
   return consultations.map((consultation) => ({
     id: consultation._id.toString(),
+    user_id: consultation.user_id?.toString() || null,
     name: consultation.name,
     phone: consultation.phone,
     email: consultation.email,
-    firm_id: null,
-    firm_name: null,
-    service_id: null,
+    firm_id: consultation.firm_id?.toString() || null,
+    firm_name: consultation.firm_name || null,
+    service_id: consultation.service_id?.toString() || null,
     service_name: consultation.service_name || '在线咨询',
     time: consultation.preferred_time || consultation.createdAt,
     remark: consultation.message,

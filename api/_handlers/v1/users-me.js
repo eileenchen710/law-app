@@ -78,6 +78,13 @@ module.exports = async function handler(req, res) {
     return respond(res, 404, { error: 'User not found' });
   }
 
+  console.log('[users-me] Fresh user from DB:', {
+    id: freshUser._id,
+    email: freshUser.email,
+    role: freshUser.role,
+    display_name: freshUser.display_name
+  });
+
   if (req.method === 'PUT') {
     const { displayName, avatarUrl, email, phone, metadata } = req.body || {};
 
@@ -105,8 +112,11 @@ module.exports = async function handler(req, res) {
 
   const appointments = await loadAppointmentsForUser(freshUser);
 
+  const sanitized = sanitizeUser(freshUser);
+  console.log('[users-me] Sanitized user:', sanitized);
+
   return respond(res, 200, {
-    user: sanitizeUser(freshUser),
+    user: sanitized,
     appointments
   });
 };

@@ -8,7 +8,7 @@ import {
   Textarea,
   View,
 } from "@tarojs/components";
-import Taro, { useLoad } from "@tarojs/taro";
+import Taro, { useLoad, useDidShow } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./me.scss";
 import Loading from "../../components/Loading";
@@ -164,9 +164,35 @@ export default function Me() {
     console.log("Me page loaded.");
   });
 
+  // 页面每次显示时刷新数据
+  useDidShow(() => {
+    console.log("Me page shown, refreshing profile data...");
+    // 如果已经初始化过且有token，则刷新数据
+    const token = (() => {
+      try {
+        return Taro.getStorageSync("auth_token");
+      } catch (error) {
+        return "";
+      }
+    })();
+
+    if (token && !loading) {
+      refreshProfile().catch((error) => {
+        console.error("Failed to refresh profile on page show", error);
+      });
+    }
+  });
+
   const isAdmin = useMemo(() => {
     const admin = user?.role === "admin";
-    console.log("[ME PAGE] isAdmin check:", { user, role: user?.role, isAdmin: admin });
+    console.log("[ME PAGE] isAdmin check:", {
+      hasUser: !!user,
+      userId: user?.id,
+      userRole: user?.role,
+      roleType: typeof user?.role,
+      isAdmin: admin,
+      fullUser: JSON.stringify(user)
+    });
     return admin;
   }, [user]);
 
@@ -227,6 +253,31 @@ export default function Me() {
       console.log("Current user data:", response.user);
       console.log("User role:", response.user?.role);
       console.log("Is admin?", response.user?.role === "admin");
+      console.log("Full user object:", JSON.stringify(response.user));
+      console.log("User object keys:", response.user ? Object.keys(response.user) : 'null');
+
+      // 添加预约记录的详细日志
+      console.log("=== Appointments Debug ===");
+      console.log("Number of appointments returned:", response.appointments?.length || 0);
+      console.log("User ID:", response.user?.id);
+      console.log("User provider:", response.user?.provider);
+
+      if (response.appointments && response.appointments.length > 0) {
+        console.log("All appointments:", JSON.stringify(response.appointments, null, 2));
+        response.appointments.forEach((apt, index) => {
+          console.log(`Appointment ${index + 1}:`, {
+            id: apt.id,
+            user_id: (apt as any).user_id,
+            service_name: apt.service_name,
+            status: apt.status,
+            created_at: apt.created_at
+          });
+        });
+      } else {
+        console.log("No appointments returned from API");
+      }
+      console.log("=== End Appointments Debug ===");
+
       setUser(response.user);
       setAppointments(response.appointments || []);
     } catch (error) {

@@ -214,6 +214,30 @@ export default function Index() {
 
   const triggerScrollTo = (targetId: string) => {
     if (!targetId) return;
+
+    // 使用 Taro.createSelectorQuery 获取元素位置，然后滚动
+    // 这种方式在微信小程序中更可靠
+    setTimeout(() => {
+      const query = Taro.createSelectorQuery();
+      query.select(`#${targetId}`).boundingClientRect();
+      query.selectViewport().scrollOffset();
+      query.exec((res) => {
+        if (res && res[0] && res[1]) {
+          const targetTop = res[0].top;
+          const scrollTop = res[1].scrollTop;
+          const offsetTop = targetTop + scrollTop - 10; // 10px 偏移量
+
+          Taro.pageScrollTo({
+            scrollTop: offsetTop,
+            duration: 300
+          }).catch((err) => {
+            console.warn('Scroll failed:', err);
+          });
+        }
+      });
+    }, 100); // 延迟确保DOM已渲染
+
+    // 保留原有的 scrollIntoView 作为备用方案
     setScrollTarget(targetId);
     if (scrollResetTimer.current) {
       clearTimeout(scrollResetTimer.current);

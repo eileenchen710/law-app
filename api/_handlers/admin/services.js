@@ -193,7 +193,47 @@ async function updateService(req, res) {
 }
 
 /**
+ * GET /api/admin/services/:id - 获取单个服务详情
+ */
+async function getService(req, res) {
+  try {
+    const { db } = await connectDB();
+    const { id } = req.query;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid service ID',
+      });
+    }
+
+    const service = await db.collection('services').findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        error: 'Service not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch service',
+    });
+  }
+}
+
+/**
  * DELETE /api/admin/services/:id - 删除服务
+ * 同时从关联的律所 services 数组中移除服务标题
  */
 async function deleteService(req, res) {
   try {
@@ -207,15 +247,50 @@ async function deleteService(req, res) {
       });
     }
 
-    const result = await db.collection('services').deleteOne({
-      _id: new ObjectId(id),
-    });
+    const serviceId = new ObjectId(id);
+
+    // 1. 先获取服务信息，看它关联了哪些律所
+    const service = await db.collection('services').findOne({ _id: serviceId });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        error: 'Service not found',
+      });
+    }
+
+    // 2. 删除服务
+    const result = await db.collection('services').deleteOne({ _id: serviceId });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({
         success: false,
         error: 'Service not found',
       });
+    }
+
+    // 3. 从相关律所的 services 数组中移除该服务标题
+    if (service.law_firm_id) {
+      await db.collection('firms').updateOne(
+        { _id: service.law_firm_id },
+        { $pull: { services: service.title } }
+      );
+    }
+
+    // 如果有 firm_id 字段（向后兼容）
+    if (service.firm_id && service.firm_id !== service.law_firm_id) {
+      await db.collection('firms').updateOne(
+        { _id: service.firm_id },
+        { $pull: { services: service.title } }
+      );
+    }
+
+    // 如果有 firm_ids 数组（多对多关系）
+    if (service.firm_ids && Array.isArray(service.firm_ids)) {
+      await db.collection('firms').updateMany(
+        { _id: { $in: service.firm_ids } },
+        { $pull: { services: service.title } }
+      );
     }
 
     res.status(200).json({
@@ -234,6 +309,7 @@ async function deleteService(req, res) {
 module.exports = {
   listServices,
   createService,
+  getService,
   updateService,
   deleteService,
 };

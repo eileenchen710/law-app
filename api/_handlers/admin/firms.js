@@ -97,6 +97,7 @@ async function createFirm(req, res) {
 
 /**
  * PUT /api/admin/firms/:id - 更新律所
+ * 如果修改了 name，同步更新关联服务的 firm_name
  */
 async function updateFirm(req, res) {
   try {
@@ -152,6 +153,10 @@ async function updateFirm(req, res) {
 
     // 使用找到的文档的实际 _id 进行更新
     const actualId = existingFirm._id;
+
+    // 如果修改了律所名称，需要同步更新关联的服务
+    const nameChanged = updateData.name && updateData.name !== existingFirm.name;
+
     const result = await db.collection('firms').updateOne(
       { _id: actualId },
       { $set: updateData }
@@ -164,6 +169,19 @@ async function updateFirm(req, res) {
         success: false,
         error: 'Firm not found during update',
       });
+    }
+
+    // 如果律所名称改变了，更新所有关联服务的 firm_name 字段（如果存在）
+    if (nameChanged) {
+      await db.collection('services').updateMany(
+        { law_firm_id: actualId },
+        { $set: { firm_name: updateData.name } }
+      );
+      // 向后兼容 firm_id 字段
+      await db.collection('services').updateMany(
+        { firm_id: actualId },
+        { $set: { firm_name: updateData.name } }
+      );
     }
 
     // 获取更新后的文档
@@ -195,6 +213,7 @@ async function updateFirm(req, res) {
 
 /**
  * DELETE /api/admin/firms/:id - 删除律所
+ * 同时删除或更新关联的服务
  */
 async function deleteFirm(req, res) {
   try {
@@ -219,8 +238,22 @@ async function deleteFirm(req, res) {
       });
     }
 
+    const firmId = new ObjectId(id);
+
+    // 1. 检查有多少服务关联到这个律所
+    const relatedServicesCount = await db.collection('services').countDocuments({
+      $or: [
+        { law_firm_id: firmId },
+        { firm_id: firmId },
+        { firm_ids: firmId }
+      ]
+    });
+
+    console.log(`Found ${relatedServicesCount} services related to firm ${id}`);
+
+    // 2. 删除律所
     const result = await db.collection('firms').deleteOne({
-      _id: new ObjectId(id),
+      _id: firmId,
     });
 
     if (result.deletedCount === 0) {
@@ -230,9 +263,37 @@ async function deleteFirm(req, res) {
       });
     }
 
+    // 3. 处理关联的服务
+    // 选项A: 删除所有关联的服务（如果服务只属于这个律所）
+    await db.collection('services').deleteMany({
+      $and: [
+        { law_firm_id: firmId },
+        { $or: [
+          { firm_ids: { $exists: false } },
+          { firm_ids: { $size: 0 } },
+          { firm_ids: [firmId] }
+        ]}
+      ]
+    });
+
+    // 选项B: 从 firm_ids 数组中移除该律所（如果服务属于多个律所）
+    await db.collection('services').updateMany(
+      { firm_ids: firmId },
+      { $pull: { firm_ids: firmId } }
+    );
+
+    // 选项C: 清除单一关联字段
+    await db.collection('services').updateMany(
+      { firm_id: firmId },
+      { $unset: { firm_id: "" } }
+    );
+
+    console.log(`Cleaned up ${relatedServicesCount} service records`);
+
     res.status(200).json({
       success: true,
       message: 'Firm deleted successfully',
+      relatedServicesAffected: relatedServicesCount
     });
   } catch (error) {
     console.error('Error deleting firm:', error);

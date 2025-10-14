@@ -33,7 +33,10 @@ import {
   loginWithWechat,
 } from "../../services/api";
 import { apiClient } from "../../services/apiClient";
-import { adaptFirmFromApi, adaptServiceFromApi } from "../../services/dataAdapter";
+import {
+  adaptFirmFromApi,
+  adaptServiceFromApi,
+} from "../../services/dataAdapter";
 
 interface FirmFormState {
   name: string;
@@ -129,11 +132,12 @@ const formatDateTime = (value?: string | number | Date | null) => {
   try {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "-";
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-      date.getDate()
-    ).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(date.getDate()).padStart(2, "0")} ${String(
+      date.getHours()
+    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
   } catch (error) {
     return "-";
   }
@@ -142,7 +146,9 @@ const formatDateTime = (value?: string | number | Date | null) => {
 export default function Me() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
-  const [allAppointments, setAllAppointments] = useState<AppointmentSummary[]>([]);
+  const [allAppointments, setAllAppointments] = useState<AppointmentSummary[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [authenticating, setAuthenticating] = useState(false);
   const [activeTab, setActiveTab] = useState<
@@ -155,7 +161,9 @@ export default function Me() {
   // 管理员状态
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
   const [legalServices, setLegalServices] = useState<LegalServiceMock[]>([]);
-  const [firmForm, setFirmForm] = useState<FirmFormState>(createEmptyFirmForm());
+  const [firmForm, setFirmForm] = useState<FirmFormState>(
+    createEmptyFirmForm()
+  );
   const [serviceForm, setServiceForm] = useState<ServiceFormState>(
     createEmptyServiceForm()
   );
@@ -194,24 +202,21 @@ export default function Me() {
       userRole: user?.role,
       roleType: typeof user?.role,
       isAdmin: admin,
-      fullUser: JSON.stringify(user)
+      fullUser: JSON.stringify(user),
     });
     return admin;
   }, [user]);
 
-  const tabs = useMemo<TabItem<typeof activeTab>[]>(
-    () => {
-      const tabsArray = [
-        { key: "appointments", label: "我的预约", visible: true },
-        { key: "all-appointments", label: "预约管理", visible: isAdmin },
-        { key: "firms", label: "律所管理", visible: isAdmin },
-        { key: "services", label: "服务管理", visible: isAdmin },
-      ];
-      console.log("[ME PAGE] Tabs generated:", tabsArray, "isAdmin:", isAdmin);
-      return tabsArray;
-    },
-    [isAdmin]
-  );
+  const tabs = useMemo<TabItem<typeof activeTab>[]>(() => {
+    const tabsArray = [
+      { key: "appointments", label: "我的预约", visible: true },
+      { key: "all-appointments", label: "预约管理", visible: isAdmin },
+      { key: "firms", label: "律所管理", visible: isAdmin },
+      { key: "services", label: "服务管理", visible: isAdmin },
+    ];
+    console.log("[ME PAGE] Tabs generated:", tabsArray, "isAdmin:", isAdmin);
+    return tabsArray;
+  }, [isAdmin]);
 
   // 加载律所和服务数据（管理员功能）
   // 加载律所和服务数据（仅管理员）
@@ -224,8 +229,12 @@ export default function Me() {
         apiClient.getServices(),
       ]);
 
-      const firms = (firmsRes.items || firmsRes.data || []).map(adaptFirmFromApi);
-      const services = (servicesRes.items || servicesRes.data || []).map(adaptServiceFromApi);
+      const firms = (firmsRes.items || firmsRes.data || []).map(
+        adaptFirmFromApi
+      );
+      const services = (servicesRes.items || servicesRes.data || []).map(
+        adaptServiceFromApi
+      );
 
       setLawFirms(firms);
       setLegalServices(services);
@@ -258,8 +267,8 @@ export default function Me() {
       const response = await apiClient.getAllAppointments();
       const items = response.items || [];
       setAllAppointments(items);
-      console.log('[ME PAGE] Loaded all appointments:', items.length);
-      console.log('[ME PAGE] Sample appointment:', items[0]);
+      console.log("[ME PAGE] Loaded all appointments:", items.length);
+      console.log("[ME PAGE] Sample appointment:", items[0]);
     } catch (error) {
       console.error("Failed to load all appointments:", error);
       const apiError = error as any;
@@ -271,7 +280,7 @@ export default function Me() {
   // 当用户信息更新且用户是管理员时，加载所有预约
   useEffect(() => {
     if (user && isAdmin && !loading) {
-      console.log('[ME PAGE] User is admin, loading all appointments');
+      console.log("[ME PAGE] User is admin, loading all appointments");
       loadAllAppointments();
     }
   }, [user, isAdmin, loading, loadAllAppointments]);
@@ -283,7 +292,7 @@ export default function Me() {
         title: "确认取消",
         content: "确定要取消这个预约吗？",
         confirmText: "确定",
-        cancelText: "不取消"
+        cancelText: "不取消",
       });
     } catch (error) {
       // 用户点击了取消
@@ -318,23 +327,32 @@ export default function Me() {
       console.log("User role:", response.user?.role);
       console.log("Is admin?", response.user?.role === "admin");
       console.log("Full user object:", JSON.stringify(response.user));
-      console.log("User object keys:", response.user ? Object.keys(response.user) : 'null');
+      console.log(
+        "User object keys:",
+        response.user ? Object.keys(response.user) : "null"
+      );
 
       // 添加预约记录的详细日志
       console.log("=== Appointments Debug ===");
-      console.log("Number of appointments returned:", response.appointments?.length || 0);
+      console.log(
+        "Number of appointments returned:",
+        response.appointments?.length || 0
+      );
       console.log("User ID:", response.user?.id);
       console.log("User provider:", response.user?.provider);
 
       if (response.appointments && response.appointments.length > 0) {
-        console.log("All appointments:", JSON.stringify(response.appointments, null, 2));
+        console.log(
+          "All appointments:",
+          JSON.stringify(response.appointments, null, 2)
+        );
         response.appointments.forEach((apt, index) => {
           console.log(`Appointment ${index + 1}:`, {
             id: apt.id,
             user_id: (apt as any).user_id,
             service_name: apt.service_name,
             status: apt.status,
-            created_at: apt.created_at
+            created_at: apt.created_at,
           });
         });
       } else {
@@ -356,88 +374,107 @@ export default function Me() {
     }
   }, []);
 
-  const performWechatLogin = useCallback(async (withUserInfo = false, autoPrompt = false): Promise<AuthResponse | null> => {
-    try {
-      setAuthenticating(true);
-      const loginRes = await Taro.login();
-      if (!loginRes.code) {
-        throw new Error("未获取到微信登录凭证");
-      }
-
-      let userProfile: Record<string, unknown> | undefined;
-
-      // 如果需要获取用户信息（手动点击或自动提示）
-      if (withUserInfo || autoPrompt) {
-        try {
-          const profile = await Taro.getUserProfile({
-            desc: "用于完善个人资料",
-          });
-          userProfile = profile?.userInfo as unknown as Record<string, unknown>;
-          console.log("获取到的微信用户信息:", userProfile);
-          console.log("微信用户信息字段:", userProfile ? Object.keys(userProfile) : 'null');
-          console.log("nickName:", userProfile?.nickName, "avatarUrl:", userProfile?.avatarUrl);
-        } catch (profileError) {
-          console.warn("用户拒绝授权获取个人信息", profileError);
-          // 即使用户拒绝授权，也继续登录流程
+  const performWechatLogin = useCallback(
+    async (
+      withUserInfo = false,
+      autoPrompt = false
+    ): Promise<AuthResponse | null> => {
+      try {
+        setAuthenticating(true);
+        const loginRes = await Taro.login();
+        if (!loginRes.code) {
+          throw new Error("未获取到微信登录凭证");
         }
-      }
 
-      console.log("准备发送登录请求，userInfo:", userProfile);
-      const authRes = await loginWithWechat({
-        code: loginRes.code,
-        userInfo: userProfile,
-      });
+        let userProfile: Record<string, unknown> | undefined;
 
-      console.log("微信登录API响应:", authRes);
+        // 如果需要获取用户信息（手动点击或自动提示）
+        if (withUserInfo || autoPrompt) {
+          try {
+            const profile = await Taro.getUserProfile({
+              desc: "用于完善个人资料",
+            });
+            userProfile = profile?.userInfo as unknown as Record<
+              string,
+              unknown
+            >;
+            console.log("获取到的微信用户信息:", userProfile);
+            console.log(
+              "微信用户信息字段:",
+              userProfile ? Object.keys(userProfile) : "null"
+            );
+            console.log(
+              "nickName:",
+              userProfile?.nickName,
+              "avatarUrl:",
+              userProfile?.avatarUrl
+            );
+          } catch (profileError) {
+            console.warn("用户拒绝授权获取个人信息", profileError);
+            // 即使用户拒绝授权，也继续登录流程
+          }
+        }
 
-      if (!authRes?.token) {
-        throw new Error("登录响应中缺少 token");
-      }
+        console.log("准备发送登录请求，userInfo:", userProfile);
+        const authRes = await loginWithWechat({
+          code: loginRes.code,
+          userInfo: userProfile,
+        });
 
-      if (!authRes?.user) {
-        throw new Error("登录响应中缺少用户信息");
-      }
+        console.log("微信登录API响应:", authRes);
 
-      storeAuthToken(authRes.token);
-      console.log("微信登录成功:", {
-        userId: authRes.user.id,
-        displayName: authRes.user.displayName,
-        role: authRes.user.role,
-        provider: authRes.user.provider
-      });
+        if (!authRes?.token) {
+          throw new Error("登录响应中缺少 token");
+        }
 
-      if (userProfile) {
+        if (!authRes?.user) {
+          throw new Error("登录响应中缺少用户信息");
+        }
+
+        storeAuthToken(authRes.token);
+        console.log("微信登录成功:", {
+          userId: authRes.user.id,
+          displayName: authRes.user.displayName,
+          role: authRes.user.role,
+          provider: authRes.user.provider,
+        });
+
+        if (userProfile) {
+          Taro.showToast({
+            title: `登录成功！欢迎 ${authRes.user?.displayName || "用户"}`,
+            icon: "success",
+          }).catch(() => undefined);
+        }
+
+        return authRes;
+      } catch (error) {
+        console.error("WeChat login failed", error);
+
+        // 获取详细的错误信息
+        let message = "微信登录失败";
+        if (error && typeof error === "object") {
+          const apiError = error as any;
+          message =
+            apiError.message || apiError.error || apiError.details || message;
+
+          // 记录完整的错误对象以便调试
+          console.error("完整错误对象:", JSON.stringify(error, null, 2));
+        }
+
         Taro.showToast({
-          title: `登录成功！欢迎 ${authRes.user?.displayName || "用户"}`,
-          icon: "success"
+          title:
+            message.length > 30 ? message.substring(0, 30) + "..." : message,
+          icon: "none",
+          duration: 3000,
         }).catch(() => undefined);
+
+        return null;
+      } finally {
+        setAuthenticating(false);
       }
-
-      return authRes;
-    } catch (error) {
-      console.error("WeChat login failed", error);
-
-      // 获取详细的错误信息
-      let message = "微信登录失败";
-      if (error && typeof error === 'object') {
-        const apiError = error as any;
-        message = apiError.message || apiError.error || apiError.details || message;
-
-        // 记录完整的错误对象以便调试
-        console.error("完整错误对象:", JSON.stringify(error, null, 2));
-      }
-
-      Taro.showToast({
-        title: message.length > 30 ? message.substring(0, 30) + "..." : message,
-        icon: "none",
-        duration: 3000
-      }).catch(() => undefined);
-
-      return null;
-    } finally {
-      setAuthenticating(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const performAnonymousLogin = useCallback(async () => {
     // 非微信环境，显示登录表单
@@ -685,10 +722,11 @@ export default function Me() {
   };
 
   // 服务管理处理函数
-  const handleServiceInput = (field: keyof ServiceFormState) => (event: any) => {
-    const value = event?.detail?.value ?? "";
-    setServiceForm((prev) => ({ ...prev, [field]: value }));
-  };
+  const handleServiceInput =
+    (field: keyof ServiceFormState) => (event: any) => {
+      const value = event?.detail?.value ?? "";
+      setServiceForm((prev) => ({ ...prev, [field]: value }));
+    };
 
   const handleServiceSubmit = async () => {
     const svc = serviceForm;
@@ -789,8 +827,12 @@ export default function Me() {
           {appointments.map((item) => (
             <View className="appointment-card" key={item.id}>
               <View className="appointment-header">
-                <Text className="appointment-title">{item.service_name || "未指定服务"}</Text>
-                <Text className="appointment-status">{item.status || "待确认"}</Text>
+                <Text className="appointment-title">
+                  {item.service_name || "未指定服务"}
+                </Text>
+                <Text className="appointment-status">
+                  {item.status || "待确认"}
+                </Text>
               </View>
               <View className="appointment-body">
                 <Text className="appointment-field">
@@ -832,25 +874,25 @@ export default function Me() {
     <View className="section">
       <View className="section-header">
         <Text className="section-title">预约管理</Text>
-        <Text className="section-desc">
-          查看和管理所有用户的预约记录
-        </Text>
+        <Text className="section-desc">查看和管理所有用户的预约记录</Text>
       </View>
 
       {allAppointments.length === 0 ? (
         <View className="empty-state">
           <Text className="empty-title">暂无预约记录</Text>
-          <Text className="empty-desc">
-            还没有用户提交预约申请
-          </Text>
+          <Text className="empty-desc">还没有用户提交预约申请</Text>
         </View>
       ) : (
         <View className="appointment-list">
           {allAppointments.map((item) => (
             <View className="appointment-card" key={item.id}>
               <View className="appointment-header">
-                <Text className="appointment-title">{item.service_name || "未指定服务"}</Text>
-                <Text className="appointment-status">{item.status || "待确认"}</Text>
+                <Text className="appointment-title">
+                  {item.service_name || "未指定服务"}
+                </Text>
+                <Text className="appointment-status">
+                  {item.status || "待确认"}
+                </Text>
               </View>
               <View className="appointment-body">
                 <Text className="appointment-field">
@@ -1110,14 +1152,20 @@ export default function Me() {
         {lawFirms.map((firm) => (
           <View
             key={firm.id}
-            className={`list-card ${editingFirmId === firm.id ? "editing" : ""}`}
+            className={`list-card ${
+              editingFirmId === firm.id ? "editing" : ""
+            }`}
           >
             <View className="list-card-header">
               <Text className="list-card-title">{firm.name}</Text>
               <View className="list-card-tags">
                 {firm.recommended && <Text className="tag">推荐</Text>}
-                {firm.rating != null && <Text className="tag">评分 {firm.rating.toFixed(1)}</Text>}
-                {firm.cases != null && <Text className="tag">案例 {firm.cases}</Text>}
+                {firm.rating != null && (
+                  <Text className="tag">评分 {firm.rating.toFixed(1)}</Text>
+                )}
+                {firm.cases != null && (
+                  <Text className="tag">案例 {firm.cases}</Text>
+                )}
               </View>
             </View>
             <Text className="list-card-desc">{firm.description}</Text>
@@ -1125,7 +1173,10 @@ export default function Me() {
               <Button className="edit-btn" onClick={() => handleFirmEdit(firm)}>
                 编辑
               </Button>
-              <Button className="delete-btn" onClick={() => handleFirmDelete(firm.id)}>
+              <Button
+                className="delete-btn"
+                onClick={() => handleFirmDelete(firm.id)}
+              >
                 删除
               </Button>
             </View>
@@ -1175,17 +1226,21 @@ export default function Me() {
               mode="selector"
               range={lawFirms}
               rangeKey="name"
-              value={lawFirms.findIndex(f => f.id === serviceForm.lawFirmId)}
+              value={lawFirms.findIndex((f) => f.id === serviceForm.lawFirmId)}
               onChange={(e) => {
                 const index = Number(e.detail.value);
                 if (lawFirms[index]) {
-                  setServiceForm((prev) => ({ ...prev, lawFirmId: lawFirms[index].id }));
+                  setServiceForm((prev) => ({
+                    ...prev,
+                    lawFirmId: lawFirms[index].id,
+                  }));
                 }
               }}
             >
               <View className="picker-display">
                 <Text className="picker-text">
-                  {lawFirms.find(f => f.id === serviceForm.lawFirmId)?.name || "请选择律所"}
+                  {lawFirms.find((f) => f.id === serviceForm.lawFirmId)?.name ||
+                    "请选择律所"}
                 </Text>
               </View>
             </Picker>
@@ -1196,17 +1251,28 @@ export default function Me() {
               mode="selector"
               range={SERVICE_CATEGORIES}
               rangeKey="name"
-              value={SERVICE_CATEGORIES.findIndex(c => c.id === serviceForm.category)}
+              value={SERVICE_CATEGORIES.findIndex(
+                (c) => c.id === serviceForm.category
+              )}
               onChange={(e) => {
                 const index = Number(e.detail.value);
                 if (SERVICE_CATEGORIES[index]) {
-                  setServiceForm((prev) => ({ ...prev, category: SERVICE_CATEGORIES[index].id }));
+                  setServiceForm((prev) => ({
+                    ...prev,
+                    category: SERVICE_CATEGORIES[index].id,
+                  }));
                 }
               }}
             >
               <View className="picker-display">
                 <Text className="picker-text">
-                  {SERVICE_CATEGORIES.find(c => c.id === serviceForm.category)?.icon} {SERVICE_CATEGORIES.find(c => c.id === serviceForm.category)?.name || "请选择分类"}
+                  {
+                    SERVICE_CATEGORIES.find(
+                      (c) => c.id === serviceForm.category
+                    )?.icon
+                  }{" "}
+                  {SERVICE_CATEGORIES.find((c) => c.id === serviceForm.category)
+                    ?.name || "请选择分类"}
                 </Text>
               </View>
             </Picker>
@@ -1270,12 +1336,16 @@ export default function Me() {
       <View className="list-section">
         {legalServices.map((service) => {
           const firm = lawFirms.find((f) => f.id === service.lawFirmId);
-          const category = SERVICE_CATEGORIES.find((c) => c.id === service.category);
+          const category = SERVICE_CATEGORIES.find(
+            (c) => c.id === service.category
+          );
 
           return (
             <View
               key={service.id}
-              className={`list-card ${editingServiceId === service.id ? "editing" : ""}`}
+              className={`list-card ${
+                editingServiceId === service.id ? "editing" : ""
+              }`}
             >
               <View className="list-card-header">
                 <Text className="list-card-title">{service.title}</Text>
@@ -1285,7 +1355,9 @@ export default function Me() {
                       {category.icon} {category.name}
                     </Text>
                   )}
-                  {service.price && <Text className="tag">{service.price}</Text>}
+                  {service.price && (
+                    <Text className="tag">{service.price}</Text>
+                  )}
                 </View>
               </View>
               <Text className="list-card-desc">{service.description}</Text>
@@ -1293,10 +1365,16 @@ export default function Me() {
                 律所：{firm?.name || "未关联"} | 律师：{service.lawyerName}
               </Text>
               <View className="list-card-actions">
-                <Button className="edit-btn" onClick={() => handleServiceEdit(service)}>
+                <Button
+                  className="edit-btn"
+                  onClick={() => handleServiceEdit(service)}
+                >
                   编辑
                 </Button>
-                <Button className="delete-btn" onClick={() => handleServiceDelete(service.id)}>
+                <Button
+                  className="delete-btn"
+                  onClick={() => handleServiceDelete(service.id)}
+                >
                   删除
                 </Button>
               </View>
@@ -1312,15 +1390,6 @@ export default function Me() {
     </View>
   );
 
-  const isDesktop = useMemo(() => {
-    try {
-      const systemInfo = Taro.getSystemInfoSync();
-      return systemInfo.windowWidth >= 768;
-    } catch {
-      return false;
-    }
-  }, []);
-
   return (
     <ScrollView className="me-page" scrollY>
       <AppHeader showActions={false} scrolled={false} />
@@ -1328,14 +1397,11 @@ export default function Me() {
         <Loading text={authenticating ? "正在登录..." : "加载中..."} />
       ) : (
         <View>
-          {/* 移动端显示 TabBar */}
-          {!isDesktop && (
-            <TabBar
-              activeTab={activeTab}
-              tabs={tabs}
-              onChange={(tab) => setActiveTab(tab as typeof activeTab)}
-            />
-          )}
+          <TabBar
+            activeTab={activeTab}
+            tabs={tabs}
+            onChange={(tab) => setActiveTab(tab as typeof activeTab)}
+          />
 
           {errorMessage ? (
             <View className="empty-state">
@@ -1346,35 +1412,14 @@ export default function Me() {
             </View>
           ) : null}
 
-          {/* 桌面端:卡片式布局 */}
-          {isDesktop ? (
-            <View className="desktop-card-grid">
-              <View className="desktop-card">
-                {renderAppointments()}
-              </View>
-              {isAdmin && (
-                <>
-                  <View className="desktop-card">
-                    {renderAllAppointments()}
-                  </View>
-                  <View className="desktop-card">
-                    {renderFirmsManagement()}
-                  </View>
-                  <View className="desktop-card">
-                    {renderServicesManagement()}
-                  </View>
-                </>
-              )}
-            </View>
-          ) : (
-            /* 移动端:Tab切换布局 */
-            <>
-              {activeTab === "appointments" && renderAppointments()}
-              {activeTab === "all-appointments" && isAdmin && renderAllAppointments()}
-              {activeTab === "firms" && isAdmin && renderFirmsManagement()}
-              {activeTab === "services" && isAdmin && renderServicesManagement()}
-            </>
-          )}
+          {activeTab === "appointments" && renderAppointments()}
+          {activeTab === "all-appointments" &&
+            isAdmin &&
+            renderAllAppointments()}
+          {activeTab === "firms" && isAdmin && renderFirmsManagement()}
+          {activeTab === "services" &&
+            isAdmin &&
+            renderServicesManagement()}
 
           <View className="section" style={{ marginBottom: "48px" }}>
             <Button

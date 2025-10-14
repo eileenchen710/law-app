@@ -100,9 +100,11 @@ const handleWechatLogin = async (req, res) => {
     existingUser.provider = 'wechat';
     existingUser.role = determineRole(existingUser, req.body);
 
+    console.log('[auth] Determined role for existing user:', existingUser.role);
     await existingUser.save();
-    console.log('[auth] User updated successfully:', existingUser._id);
+    console.log('[auth] User updated successfully:', existingUser._id, 'role:', existingUser.role);
     const token = createToken(existingUser);
+    console.log('[auth] Token created, payload includes role:', existingUser.role);
     return respond(res, 200, buildUserPayload(existingUser, token));
   }
 
@@ -112,14 +114,17 @@ const handleWechatLogin = async (req, res) => {
     wechat: { openid: session.openId }
   }, req.body);
 
+  console.log('[auth] Determined role for new user:', role);
+
   const newUser = await User.create({
     ...baseProfile,
     role,
     metadata: userInfo?.metadata || {}
   });
 
-  console.log('[auth] New user created successfully:', newUser._id);
+  console.log('[auth] New user created successfully:', newUser._id, 'role:', newUser.role);
   const token = createToken(newUser);
+  console.log('[auth] Token created for new user, payload includes role:', newUser.role);
   return respond(res, 200, buildUserPayload(newUser, token));
   } catch (error) {
     console.error('[auth] WeChat login handler error:', error);
@@ -199,7 +204,9 @@ const handlePasswordLogin = async (req, res) => {
   user.last_login_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   await user.save();
 
+  console.log('[auth] Password login successful for user:', user._id, 'role:', user.role);
   const token = createToken(user);
+  console.log('[auth] Token created for password login, payload includes role:', user.role);
   return respond(res, 200, buildUserPayload(user, token));
 };
 

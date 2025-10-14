@@ -87,18 +87,27 @@ const getAdminWechatOpenIds = () =>
     .filter(Boolean);
 
 const resolveUserRole = ({ email, wechatOpenId, requestedRole }) => {
+  console.log('[auth] resolveUserRole called with:', { email, wechatOpenId, requestedRole });
+
   if (requestedRole === 'admin') {
+    console.log('[auth] Granting admin role due to requestedRole');
     return 'admin';
   }
   const adminEmails = getAdminEmails();
   const adminWechatIds = getAdminWechatOpenIds();
 
+  console.log('[auth] Admin emails from env:', adminEmails);
+  console.log('[auth] Admin WeChat IDs from env:', adminWechatIds);
+
   if (email && adminEmails.includes(email.toLowerCase())) {
+    console.log('[auth] Granting admin role due to email match');
     return 'admin';
   }
   if (wechatOpenId && adminWechatIds.includes(wechatOpenId)) {
+    console.log('[auth] Granting admin role due to WeChat openid match');
     return 'admin';
   }
+  console.log('[auth] Returning user role (no admin match)');
   return 'user';
 };
 

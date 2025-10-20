@@ -478,11 +478,13 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid phone number format' });
   }
 
-  let appointmentTime = new Date();
+  // Keep preferredTime as string for better display in emails
+  // Only convert to Date for database storage
+  let appointmentTimeForDb = null;
   if (preferredTime) {
     const candidate = new Date(preferredTime);
     if (!Number.isNaN(candidate.getTime())) {
-      appointmentTime = candidate;
+      appointmentTimeForDb = candidate;
     }
   }
 
@@ -524,7 +526,7 @@ module.exports = async function handler(req, res) {
       phone: trimmedPhone,
       service_name: actualServiceName,
       message: trimmedMessage,
-      preferred_time: preferredTime ? appointmentTime : null,
+      preferred_time: appointmentTimeForDb,
       status: 'pending',
       firm_id: firmId || (firm ? firm._id.toString() : null),
       firm_name: firmName,
@@ -544,7 +546,7 @@ module.exports = async function handler(req, res) {
           serviceName: actualServiceName,
           firmName: firmName,
           message: trimmedMessage,
-          preferredTime: appointmentTime
+          preferredTime: preferredTime || null
         })
       },
       client: {
@@ -553,7 +555,7 @@ module.exports = async function handler(req, res) {
         html: buildClientHtml({
           name: trimmedName,
           serviceName: actualServiceName,
-          preferredTime: preferredTime ? appointmentTime : null
+          preferredTime: preferredTime || null
         })
       }
     };
@@ -570,7 +572,7 @@ module.exports = async function handler(req, res) {
           phone: trimmedPhone,
           serviceName: actualServiceName,
           message: trimmedMessage,
-          preferredTime: appointmentTime
+          preferredTime: preferredTime || null
         })
       };
     }

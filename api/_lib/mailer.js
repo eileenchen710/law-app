@@ -155,6 +155,16 @@ const getTransporter = () => {
 };
 
 const formatAppointmentTime = (appointmentTime) => {
+  // If it's already a formatted string (not a Date object), return as is
+  if (typeof appointmentTime === 'string') {
+    return appointmentTime;
+  }
+
+  // If it's not a valid Date object, return the string representation
+  if (!(appointmentTime instanceof Date) || isNaN(appointmentTime.getTime())) {
+    return String(appointmentTime);
+  }
+
   const locale = process.env.EMAIL_LOCALE || 'zh-CN';
   const timeZone = process.env.EMAIL_TIMEZONE;
 
@@ -163,7 +173,8 @@ const formatAppointmentTime = (appointmentTime) => {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   };
 
   if (timeZone) {

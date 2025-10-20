@@ -44,10 +44,8 @@ export default function FirmDetail() {
       });
     };
 
+    // Only collect times from firm, not from individual services
     collect(firm?.availableTimes || []);
-    services.forEach((service) => {
-      collect(service.availableTimes || []);
-    });
 
     const unique = Array.from(new Set(times));
     const now = dayjs();

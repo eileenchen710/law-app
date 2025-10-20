@@ -66,7 +66,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "根据案件复杂度",
     lawyerName: "张伟律师",
     lawyerTitle: "高级合伙人 · 20年刑辩经验",
-    availableTimes: [],
   },
   {
     id: "s2",
@@ -79,7 +78,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "长期服务",
     lawyerName: "李明律师",
     lawyerTitle: "合伙人 · 企业法务专家",
-    availableTimes: [],
   },
   {
     id: "s3",
@@ -92,7 +90,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "1-2周",
     lawyerName: "王芳律师",
     lawyerTitle: "家事法律专家 · 15年经验",
-    availableTimes: [],
   },
   {
     id: "s4",
@@ -105,7 +102,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "2-4周",
     lawyerName: "刘强律师",
     lawyerTitle: "劳动法专家 · 18年经验",
-    availableTimes: [],
   },
   {
     id: "s5",
@@ -118,7 +114,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "1-3周",
     lawyerName: "赵敏律师",
     lawyerTitle: "交通事故专业律师",
-    availableTimes: [],
   },
   {
     id: "s6",
@@ -131,7 +126,6 @@ export const defaultLegalServices: LegalServiceMock[] = [
     duration: "1-3个月",
     lawyerName: "陈立律师",
     lawyerTitle: "移民法律顾问",
-    availableTimes: [],
   },
 ];
 

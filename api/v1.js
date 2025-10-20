@@ -5,6 +5,21 @@ const authHandler = require('./_handlers/v1/auth');
 const usersMeHandler = require('./_handlers/v1/users-me');
 const { authenticateRequest } = require('./_lib/auth');
 
+// Helper function to find document by ID (supports both string and ObjectId)
+async function findById(collection, id) {
+  const { ObjectId } = require('mongodb');
+
+  // Try with original id first
+  let doc = await collection.findOne({ _id: id });
+
+  // If not found and id is a valid ObjectId string, try with ObjectId
+  if (!doc && ObjectId.isValid(id)) {
+    doc = await collection.findOne({ _id: new ObjectId(id) });
+  }
+
+  return doc;
+}
+
 // Single entry point for all v1 API routes to reduce cold starts
 module.exports = async function handler(req, res) {
   // Set CORS headers
@@ -72,17 +87,18 @@ module.exports = async function handler(req, res) {
 
 // Firms list handler - using direct MongoDB access
 async function handleFirmsList(req, res) {
+  const startTime = Date.now();
   const { q, city, page = 1, size = 10 } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(size);
   const limit = parseInt(size);
-  
+
   const query = {};
   if (q) query.name = { $regex: q, $options: 'i' };
   if (city) query.city = city;
-  
+
   const db = mongoose.connection.db;
   const firmsCollection = db.collection('firms');
-  
+
   const [total, firms] = await Promise.all([
     firmsCollection.countDocuments(query),
     firmsCollection.find(query)
@@ -91,6 +107,8 @@ async function handleFirmsList(req, res) {
       .limit(limit)
       .toArray()
   ]);
+
+  console.log(`[Performance] Firms list query completed in ${Date.now() - startTime}ms (${firms.length} items)`);
   
   const items = firms.map(firm => ({
     id: firm._id.toString(),
@@ -130,18 +148,9 @@ async function handleFirmsList(req, res) {
 async function handleFirmDetail(req, res, id) {
   const db = mongoose.connection.db;
   const firmsCollection = db.collection('firms');
-  
-  // Try finding by string id first (for non-ObjectId format)
-  let firm = await firmsCollection.findOne({ _id: id });
-  
-  // If not found, try with ObjectId
-  if (!firm) {
-    const { ObjectId } = require('mongodb');
-    if (ObjectId.isValid(id)) {
-      firm = await firmsCollection.findOne({ _id: new ObjectId(id) });
-    }
-  }
-  
+
+  const firm = await findById(firmsCollection, id);
+
   if (!firm) {
     return res.status(404).json({ error: 'Firm not found' });
   }
@@ -174,10 +183,11 @@ async function handleFirmDetail(req, res, id) {
 
 // Services list handler
 async function handleServicesList(req, res) {
+  const startTime = Date.now();
   const { q, firm_id, category, page = 1, size = 10 } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(size);
   const limit = parseInt(size);
-  
+
   const query = {};
   if (q) {
     query.$or = [
@@ -187,11 +197,12 @@ async function handleServicesList(req, res) {
   }
   if (firm_id) query.firm_id = firm_id;
   if (category) query.category = category;
-  
+
   const db = mongoose.connection.db;
   const servicesCollection = db.collection('services');
   const firmsCollection = db.collection('firms');
-  
+
+  const queryStartTime = Date.now();
   const [total, services] = await Promise.all([
     servicesCollection.countDocuments(query),
     servicesCollection.find(query)
@@ -200,14 +211,34 @@ async function handleServicesList(req, res) {
       .limit(limit)
       .toArray()
   ]);
-  
-  // Manually populate firm info
+  console.log(`[Performance] Services query completed in ${Date.now() - queryStartTime}ms (${services.length} items)`);
+
+  // Batch populate firm info to avoid N+1 queries
+  const firmIds = services
+    .map(service => service.law_firm_id || service.firm_id)
+    .filter(Boolean);
+
+  let firmsMap = {};
+  if (firmIds.length > 0) {
+    const firmQueryStartTime = Date.now();
+    const firms = await firmsCollection.find({ _id: { $in: firmIds } }).toArray();
+    console.log(`[Performance] Batch firm lookup completed in ${Date.now() - firmQueryStartTime}ms (${firms.length} firms)`);
+    firmsMap = firms.reduce((acc, firm) => {
+      acc[firm._id.toString()] = firm;
+      return acc;
+    }, {});
+  }
+
+  // Attach firm info to services
   for (const service of services) {
     const firmId = service.law_firm_id || service.firm_id;
     if (firmId) {
-      service.firm = await firmsCollection.findOne({ _id: firmId });
+      const firmIdStr = firmId.toString();
+      service.firm = firmsMap[firmIdStr] || null;
     }
   }
+
+  console.log(`[Performance] Total services list handler time: ${Date.now() - startTime}ms`);
   
   const items = services.map(service => ({
     id: service._id ? service._id.toString() : service.id,
@@ -239,25 +270,18 @@ async function handleServiceDetail(req, res, id) {
   const db = mongoose.connection.db;
   const servicesCollection = db.collection('services');
   const firmsCollection = db.collection('firms');
-  
-  let service = await servicesCollection.findOne({ _id: id });
-  
-  if (!service) {
-    const { ObjectId } = require('mongodb');
-    if (ObjectId.isValid(id)) {
-      service = await servicesCollection.findOne({ _id: new ObjectId(id) });
-    }
-  }
-  
+
+  const service = await findById(servicesCollection, id);
+
   if (!service) {
     return res.status(404).json({ error: 'Service not found' });
   }
-  
+
   // Get firm info if available
   let firm = null;
   const firmId = service.law_firm_id || service.firm_id;
   if (firmId) {
-    firm = await firmsCollection.findOne({ _id: firmId });
+    firm = await findById(firmsCollection, firmId);
   }
   
   res.json({

@@ -257,7 +257,7 @@ export default function Search() {
       serviceName: selectedService?.title || "咨询",
       message: trimmedDescription,
       preferredTime: selectedPreferredTime || undefined,
-      firmId: selectedFirmId || undefined,
+      firmId: selectedFirmId || selectedService?.lawFirmId || undefined,
       serviceId: selectedServiceId || undefined,
     };
 

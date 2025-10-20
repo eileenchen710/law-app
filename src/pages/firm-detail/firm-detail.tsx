@@ -1,11 +1,20 @@
-import { Button, Input, ScrollView, Text, Textarea, View } from "@tarojs/components";
+import { Button, Input, Picker, ScrollView, Text, Textarea, View } from "@tarojs/components";
 import Taro, { useLoad, useRouter } from "@tarojs/taro";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import "./firm-detail.scss";
 import { getSnapshot, onMockDataChange } from "../../services/dataStore";
 import type { LawFirmMock, LegalServiceMock } from "../../mock/types";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import AppHeader from "../index/components/AppHeader";
+
+const formatBookingTime = (value: string): string => {
+  const parsed = dayjs(value);
+  if (parsed.isValid()) {
+    return parsed.format("YYYY-MM-DD HH:mm");
+  }
+  return value;
+};
 
 export default function FirmDetail() {
   const router = useRouter();
@@ -18,7 +27,101 @@ export default function FirmDetail() {
     name: "",
     phone: "",
     description: "",
+    preferredTime: "",
   });
+
+  const availableTimes = useMemo(() => {
+    const times: string[] = [];
+
+    const collect = (list?: string[] | null) => {
+      if (!list) {
+        return;
+      }
+      list.forEach((time) => {
+        if (typeof time === "string" && time.trim()) {
+          times.push(time.trim());
+        }
+      });
+    };
+
+    collect(firm?.availableTimes || []);
+    services.forEach((service) => {
+      collect(service.availableTimes || []);
+    });
+
+    const unique = Array.from(new Set(times));
+    const now = dayjs();
+
+    return unique
+      .filter((time) => {
+        const parsed = dayjs(time);
+        return parsed.isValid() ? parsed.isAfter(now) : true;
+      })
+      .sort((a, b) => {
+        const aParsed = dayjs(a);
+        const bParsed = dayjs(b);
+        if (aParsed.isValid() && bParsed.isValid()) {
+          return aParsed.valueOf() - bParsed.valueOf();
+        }
+        return a.localeCompare(b);
+      });
+  }, [firm, services]);
+
+  const formattedAvailableTimes = useMemo(
+    () => availableTimes.map((time) => formatBookingTime(time)),
+    [availableTimes]
+  );
+
+  const selectedTimeIndex = useMemo(() => {
+    if (!formData.preferredTime) {
+      return -1;
+    }
+    return availableTimes.findIndex((time) => time === formData.preferredTime);
+  }, [availableTimes, formData.preferredTime]);
+
+  const renderPreferredTimePicker = () => {
+    if (availableTimes.length === 0) {
+      return (
+        <Text className="form-hint">
+          该律所暂未设置可预约时间，您可以在备注中填写期望时间。
+        </Text>
+      );
+    }
+
+    const pickerValue = selectedTimeIndex >= 0 ? selectedTimeIndex : 0;
+
+    return (
+      <Picker
+        mode="selector"
+        range={formattedAvailableTimes}
+        value={pickerValue}
+        onChange={(e) => {
+          const index = Number(e.detail.value);
+          const value = availableTimes[index] || "";
+          setFormData((prev) => ({
+            ...prev,
+            preferredTime: value,
+          }));
+        }}
+      >
+        <View
+          className={`form-input picker-input${
+            formData.preferredTime ? "" : " placeholder"
+          }`}
+        >
+          {formData.preferredTime
+            ? formatBookingTime(formData.preferredTime)
+            : "请选择可预约时间"}
+        </View>
+      </Picker>
+    );
+  };
+
+  useEffect(() => {
+    if (formData.preferredTime && !availableTimes.includes(formData.preferredTime)) {
+      setFormData((prev) => ({ ...prev, preferredTime: "" }));
+    }
+  }, [availableTimes, formData.preferredTime]);
 
   useLoad(() => {
     console.log("Firm detail page loaded, id:", firmId);
@@ -54,13 +157,23 @@ export default function FirmDetail() {
       return;
     }
 
+    const preferredTime = formData.preferredTime;
+
+    console.log('Firm consultation request', {
+      firmId,
+      name: formData.name,
+      phone: formData.phone,
+      description: formData.description,
+      preferredTime,
+    });
+
     Taro.showToast({
       title: "预约成功！我们会尽快联系您",
       icon: "success",
     });
 
     setShowBookingForm(false);
-    setFormData({ name: "", phone: "", description: "" });
+    setFormData({ name: "", phone: "", description: "", preferredTime: "" });
   };
 
   if (!firm) {
@@ -201,6 +314,7 @@ export default function FirmDetail() {
                 setFormData({ ...formData, phone: e.detail.value })
               }
             />
+            {renderPreferredTimePicker()}
             <Textarea
               className="form-textarea"
               placeholder="请描述您的法律问题（选填）"

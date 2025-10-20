@@ -80,6 +80,8 @@ export default function Index() {
   const [selectedServiceName, setSelectedServiceName] = useState<string | null>(
     null
   );
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedFirmId, setSelectedFirmId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -256,7 +258,11 @@ export default function Index() {
     if (serviceName) {
       setSelectedServiceName(serviceName);
       setFormService(serviceName);
+    } else {
+      setSelectedServiceName(null);
     }
+    setSelectedServiceId(null);
+    setSelectedFirmId(null);
     triggerScrollTo("contact");
     setMobileMenuOpen(false);
   };
@@ -266,9 +272,11 @@ export default function Index() {
     setMobileMenuOpen(false);
   };
 
-  const handleServiceConsult = (serviceTitle: string) => {
-    setSelectedServiceName(serviceTitle);
-    setFormService(serviceTitle);
+  const handleServiceConsult = (service: UiService) => {
+    setSelectedServiceId(service.id || null);
+    setSelectedFirmId(service.lawFirmId || null);
+    setSelectedServiceName(service.title);
+    setFormService(service.title);
     triggerScrollTo("contact");
     setMobileMenuOpen(false);
   };
@@ -361,6 +369,8 @@ export default function Index() {
       phone: trimmedPhone,
       serviceName: trimmedService,
       message: trimmedMessage,
+      firmId: selectedFirmId || undefined,
+      serviceId: selectedServiceId || undefined,
     };
 
     try {
@@ -376,6 +386,8 @@ export default function Index() {
       setFormPhone("");
       setFormService("");
       setFormMessage("");
+      setSelectedServiceId(null);
+      setSelectedFirmId(null);
       setSelectedServiceName(null);
     } catch (error) {
       console.error("提交咨询失败", error);
@@ -391,6 +403,8 @@ export default function Index() {
 
   const clearSelectedService = () => {
     setSelectedServiceName(null);
+    setSelectedServiceId(null);
+    setSelectedFirmId(null);
     setFormService("");
   };
 
@@ -797,9 +811,16 @@ export default function Index() {
                 placeholder="请选择您需要咨询的法律服务"
                 value={formService}
                 onInput={(e) => {
-                  setFormService(e.detail.value);
+                  const value = e.detail.value;
+                  setFormService(value);
                   if (selectedServiceName) {
                     setSelectedServiceName(null);
+                  }
+                  if (selectedServiceId) {
+                    setSelectedServiceId(null);
+                  }
+                  if (selectedFirmId) {
+                    setSelectedFirmId(null);
                   }
                 }}
                 style={{ color: "#fff" }}

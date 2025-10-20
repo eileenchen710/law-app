@@ -1,6 +1,49 @@
 const { connectDB } = require('../../_lib/db-optimized');
 const { ObjectId } = require('mongodb');
 
+const normalizeAvailableTimes = (input) => {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  if (input === null) {
+    return [];
+  }
+
+  const values = Array.isArray(input) ? input : [input];
+  const seen = new Set();
+  const normalized = [];
+
+  values.forEach((raw) => {
+    if (!raw) {
+      return;
+    }
+
+    let value = raw;
+
+    if (value && typeof value === 'object' && '$date' in value) {
+      value = value.$date;
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return;
+    }
+
+    const isoKey = date.toISOString();
+    if (seen.has(isoKey)) {
+      return;
+    }
+
+    seen.add(isoKey);
+    normalized.push(date);
+  });
+
+  return normalized;
+};
+
+
+
 /**
  * GET /api/admin/firms - 获取所有律所（管理端）
  */
@@ -71,7 +114,7 @@ async function createFirm(req, res) {
       address: firmData.address,
       city: firmData.city,
       slug: firmData.slug,
-      available_times: firmData.available_times || [],
+      available_times: normalizeAvailableTimes(firmData.available_times) || [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -122,6 +165,13 @@ async function updateFirm(req, res) {
         error: 'Invalid firm ID',
         receivedId: id,
       });
+    }
+
+    const normalizedTimes = normalizeAvailableTimes(updateData.available_times);
+    if (normalizedTimes !== undefined) {
+      updateData.available_times = normalizedTimes;
+    } else {
+      delete updateData.available_times;
     }
 
     delete updateData._id;

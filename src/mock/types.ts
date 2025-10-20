@@ -26,6 +26,7 @@ export interface LawFirmMock {
   recommended?: boolean;
   contactPhone?: string;
   contactEmail?: string;
+  availableTimes?: string[];
 }
 
 export interface LegalServiceMock {
@@ -38,6 +39,7 @@ export interface LegalServiceMock {
   duration: string;
   lawyerName: string;
   lawyerTitle: string;
+  availableTimes?: string[];
 }
 
 export interface MockDataSnapshot {

@@ -1,6 +1,49 @@
 const { connectDB } = require('../../_lib/db-optimized');
 const { ObjectId } = require('mongodb');
 
+const normalizeAvailableTimes = (input) => {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  if (input === null) {
+    return [];
+  }
+
+  const values = Array.isArray(input) ? input : [input];
+  const seen = new Set();
+  const normalized = [];
+
+  values.forEach((raw) => {
+    if (!raw) {
+      return;
+    }
+
+    let value = raw;
+
+    if (value && typeof value === 'object' && '$date' in value) {
+      value = value.$date;
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return;
+    }
+
+    const isoKey = date.toISOString();
+    if (seen.has(isoKey)) {
+      return;
+    }
+
+    seen.add(isoKey);
+    normalized.push(date);
+  });
+
+  return normalized;
+};
+
+
+
 /**
  * GET /api/admin/services - 获取所有服务（管理端）
  */
@@ -66,7 +109,7 @@ async function createService(req, res) {
       firm_ids: firmIds,
       firm_id: serviceData.firm_id,
       law_firm_id: serviceData.law_firm_id,
-      available_times: serviceData.available_times || [],
+      available_times: normalizeAvailableTimes(serviceData.available_times) || [],
       status: serviceData.status || 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -146,6 +189,13 @@ async function updateService(req, res) {
       updateData.firm_ids = updateData.firm_ids
         .filter(firmId => ObjectId.isValid(firmId))
         .map(firmId => new ObjectId(firmId));
+    }
+
+    const normalizedTimes = normalizeAvailableTimes(updateData.available_times);
+    if (normalizedTimes !== undefined) {
+      updateData.available_times = normalizedTimes;
+    } else {
+      delete updateData.available_times;
     }
 
     delete updateData._id;

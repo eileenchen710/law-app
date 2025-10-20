@@ -10,6 +10,10 @@ import {
 } from "@tarojs/components";
 import Taro, { useLoad, useDidShow } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+import dayjs from "dayjs";
+
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import "./me.scss";
 import Loading from "../../components/Loading";
 import TabBar, { type TabItem } from "../../components/TabBar";
@@ -57,6 +61,7 @@ interface FirmFormState {
   recommended: boolean;
   contactEmail: string;
   contactPhone: string;
+  availableTimesText: string;
 }
 
 interface ServiceFormState {
@@ -71,6 +76,53 @@ interface ServiceFormState {
 }
 
 const DEFAULT_CATEGORY_ID = SERVICE_CATEGORIES[0]?.id ?? "criminal";
+
+dayjs.extend(customParseFormat);
+
+const AVAILABLE_TIME_INPUT_FORMATS = [
+  "YYYY-MM-DD HH:mm",
+  "YYYY/MM/DD HH:mm",
+  "YYYY-MM-DDTHH:mm",
+  "YYYY-MM-DDTHH:mm:ss",
+];
+
+const formatAvailableTime = (value: string): string => {
+  const parsed = dayjs(value);
+  if (parsed.isValid()) {
+    return parsed.format("YYYY-MM-DD HH:mm");
+  }
+  const fallback = dayjs(value, AVAILABLE_TIME_INPUT_FORMATS, true);
+  return fallback.isValid() ? fallback.format("YYYY-MM-DD HH:mm") : value;
+};
+
+const parseAvailableTimesInput = (raw: string): string[] => {
+  if (!raw) {
+    return [];
+  }
+
+  const tokens = raw.split(/[\n,，;；]/);
+  const results: string[] = [];
+
+  tokens.forEach((token) => {
+    const trimmed = token.trim();
+    if (!trimmed) {
+      return;
+    }
+    let parsed = dayjs(trimmed, AVAILABLE_TIME_INPUT_FORMATS, true);
+    if (!parsed.isValid()) {
+      parsed = dayjs(trimmed);
+    }
+    const normalized = parsed.isValid()
+      ? parsed.toDate().toISOString()
+      : trimmed;
+
+    if (!results.includes(normalized)) {
+      results.push(normalized);
+    }
+  });
+
+  return results;
+};
 
 const createEmptyFirmForm = (): FirmFormState => ({
   name: "",
@@ -91,6 +143,7 @@ const createEmptyFirmForm = (): FirmFormState => ({
   recommended: false,
   contactEmail: "",
   contactPhone: "",
+  availableTimesText: "",
 });
 
 const createEmptyServiceForm = (lawFirmId?: string): ServiceFormState => ({
@@ -102,6 +155,7 @@ const createEmptyServiceForm = (lawFirmId?: string): ServiceFormState => ({
   duration: "",
   lawyerName: "",
   lawyerTitle: "",
+  availableTimesText: "",
 });
 
 const storeAuthToken = (token?: string) => {
@@ -605,6 +659,8 @@ export default function Me() {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const availableTimes = parseAvailableTimesInput(firm.availableTimesText);
+
     // Parse lawyers JSON
     let lawyers: any[] | undefined;
     if (firm.lawyersText.trim()) {
@@ -641,6 +697,7 @@ export default function Me() {
           recommended: firm.recommended,
           contact_email: firm.contactEmail.trim() || undefined,
           contact_phone: firm.contactPhone.trim() || undefined,
+          available_times: availableTimes,
         });
         Taro.showToast({ title: "律所已更新", icon: "success" });
       } else {
@@ -663,6 +720,7 @@ export default function Me() {
           recommended: firm.recommended,
           contact_email: firm.contactEmail.trim() || undefined,
           contact_phone: firm.contactPhone.trim() || undefined,
+          available_times: availableTimes.length > 0 ? availableTimes : [],
         };
         // 过滤掉 undefined 值
         const filteredData = Object.fromEntries(
@@ -702,6 +760,10 @@ export default function Me() {
       recommended: firm.recommended || false,
       contactEmail: firm.contactEmail || "",
       contactPhone: firm.contactPhone || "",
+      availableTimesText:
+        firm.availableTimes && firm.availableTimes.length > 0
+          ? firm.availableTimes.map((time) => formatAvailableTime(time)).join("\n")
+          : "",
     });
   };
 
@@ -730,6 +792,8 @@ export default function Me() {
 
   const handleServiceSubmit = async () => {
     const svc = serviceForm;
+    const parsedTimes = parseAvailableTimesInput(svc.availableTimesText);
+
     if (!svc.title?.trim() || !svc.lawFirmId) {
       Taro.showToast({ title: "请填写必填字段", icon: "none" });
       return;
@@ -746,6 +810,7 @@ export default function Me() {
           duration: svc.duration.trim() || undefined,
           lawyer_name: svc.lawyerName.trim() || undefined,
           lawyer_title: svc.lawyerTitle.trim() || undefined,
+          available_times: parsedTimes,
         });
         Taro.showToast({ title: "服务已更新", icon: "success" });
       } else {
@@ -758,6 +823,7 @@ export default function Me() {
           duration: svc.duration.trim() || "1-2小时",
           lawyer_name: svc.lawyerName.trim() || "专业律师",
           lawyer_title: svc.lawyerTitle.trim() || "资深律师",
+          available_times: parsedTimes,
         });
         Taro.showToast({ title: "服务已创建", icon: "success" });
       }
@@ -782,6 +848,10 @@ export default function Me() {
       duration: service.duration || "",
       lawyerName: service.lawyerName || "",
       lawyerTitle: service.lawyerTitle || "",
+      availableTimesText:
+        service.availableTimes && service.availableTimes.length > 0
+          ? service.availableTimes.map((time) => formatAvailableTime(time)).join("\n")
+          : "",
     });
   };
 
@@ -1085,6 +1155,17 @@ export default function Me() {
         </View>
 
         <View className="form-row">
+          <Text className="form-label">可预约时间（一行一项）</Text>
+          <Textarea
+            className="form-textarea"
+            placeholder={`2025-10-25 14:00\n2025-10-25 16:30`}
+            value={firmForm.availableTimesText}
+            onInput={handleFirmInput("availableTimesText")}
+          />
+          <Text className="form-hint">支持输入具体日期时间，系统会自动转换为标准格式。</Text>
+        </View>
+
+        <View className="form-row">
           <Text className="form-label">执业领域（一行一项）</Text>
           <Textarea
             className="form-textarea"
@@ -1169,6 +1250,15 @@ export default function Me() {
               </View>
             </View>
             <Text className="list-card-desc">{firm.description}</Text>
+            <Text className="list-card-meta">
+              可预约时间：
+              {firm.availableTimes && firm.availableTimes.length > 0
+                ? `${firm.availableTimes
+                    .slice(0, 3)
+                    .map((time) => formatAvailableTime(time))
+                    .join("、")}${firm.availableTimes.length > 3 ? " 等更多..." : ""}`
+                : "暂未设置"}
+            </Text>
             <View className="list-card-actions">
               <Button className="edit-btn" onClick={() => handleFirmEdit(firm)}>
                 编辑
@@ -1321,6 +1411,17 @@ export default function Me() {
           </View>
         </View>
 
+
+        <View className="form-row">
+          <Text className="form-label">可预约时间</Text>
+          <Textarea
+            className="form-textarea"
+            placeholder="请输入可预约时间，每行一个，例如 2025-10-21 14:00"
+            value={serviceForm.availableTimesText}
+            onInput={handleServiceInput("availableTimesText")}
+          />
+        </View>
+
         <View className="form-row">
           <Button className="submit-btn" onClick={handleServiceSubmit}>
             {editingServiceId ? "更新服务" : "添加服务"}
@@ -1363,6 +1464,14 @@ export default function Me() {
               <Text className="list-card-desc">{service.description}</Text>
               <Text className="list-card-meta">
                 律所：{firm?.name || "未关联"} | 律师：{service.lawyerName}
+              </Text>
+              <Text className="list-card-meta">
+                {service.availableTimes && service.availableTimes.length > 0
+                  ? `可预约时间：${service.availableTimes
+                      .slice(0, 3)
+                      .map((time) => formatAvailableTime(time))
+                      .join("、")}${service.availableTimes.length > 3 ? " 等更多..." : ""}`
+                  : "可预约时间：暂未设置"}
               </Text>
               <View className="list-card-actions">
                 <Button

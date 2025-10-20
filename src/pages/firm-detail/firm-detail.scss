@@ -214,6 +214,23 @@
   min-height: 100px;
 }
 
+.picker-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #f3f6ff;
+}
+
+.picker-input.placeholder {
+  color: rgba(194, 204, 255, 0.6);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: rgba(194, 204, 255, 0.6);
+  margin-bottom: 16px;
+}
+
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: rgba(194, 204, 255, 0.6);

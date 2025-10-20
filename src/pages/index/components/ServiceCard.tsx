@@ -1,22 +1,16 @@
 import { View, Text, Button } from "@tarojs/components";
 import type { FC } from "react";
+import type { LegalServiceMock } from "../../../mock/types";
+
+type ServiceCardService = LegalServiceMock & { lawFirm: string };
 
 interface ServiceCardProps {
-  service: {
-    id: string;
-    title: string;
-    description: string;
-    price: string;
-    duration: string;
-    lawFirm: string;
-    lawyerName: string;
-    lawyerTitle: string;
-  };
+  service: ServiceCardService;
   lawFirmMeta?: {
     name: string;
     rating?: number;
   };
-  onConsult: (serviceTitle: string) => void;
+  onConsult: (service: ServiceCardService) => void;
 }
 
 const ServiceCard: FC<ServiceCardProps> = ({ service, lawFirmMeta, onConsult }) => {
@@ -57,7 +51,7 @@ const ServiceCard: FC<ServiceCardProps> = ({ service, lawFirmMeta, onConsult }) 
         <Button
           className="service-cta"
           type="button"
-          onClick={() => onConsult(service.title)}
+          onClick={() => onConsult(service)}
         >
           立即预约
         </Button>

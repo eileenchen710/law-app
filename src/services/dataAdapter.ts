@@ -2,6 +2,61 @@
 
 import type { LawFirmMock, LegalServiceMock } from "../mock/types";
 
+type RawAvailableTime = string | number | Date | { $date?: string } | null | undefined;
+
+const toIsoString = (value: RawAvailableTime): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "object" && "$date" in value && value.$date) {
+    return toIsoString(value.$date as RawAvailableTime);
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+
+  const timestamp = Date.parse(text);
+  if (!Number.isNaN(timestamp)) {
+    return new Date(timestamp).toISOString();
+  }
+
+  return text;
+};
+
+const normalizeAvailableTimes = (input?: RawAvailableTime | RawAvailableTime[]): string[] => {
+  if (!input) {
+    return [];
+  }
+
+  const values = Array.isArray(input) ? input : [input];
+  const normalized = values
+    .map((value) => toIsoString(value))
+    .filter((value): value is string => Boolean(value));
+
+  // 去重，保持稳定顺序
+  return Array.from(new Set(normalized));
+};
+
+const serializeAvailableTimes = (times?: string[] | null): string[] | undefined => {
+  if (times === undefined) {
+    return undefined;
+  }
+
+  const values = Array.isArray(times) ? times : [];
+  const normalized = values
+    .map((value) => toIsoString(value))
+    .filter((value): value is string => Boolean(value));
+
+  return normalized;
+};
+
 // API 返回的律所数据格式
 interface ApiFirm {
   id: string;
@@ -16,6 +71,7 @@ interface ApiFirm {
   rating?: number;
   cases?: number;
   recommended?: boolean;
+  available_times?: RawAvailableTime[];
 }
 
 // API 返回的服务数据格式
@@ -29,15 +85,16 @@ interface ApiService {
   duration?: string;
   lawyer_name?: string;
   lawyer_title?: string;
+  available_times?: RawAvailableTime[];
 }
 
 // 将 API 律所数据转换为前端格式
 export function adaptFirmFromApi(apiFirm: ApiFirm): LawFirmMock {
   // 处理 _id 字段（可能是 ObjectId 或字符串）
   let id = apiFirm.id || (apiFirm as any)._id;
-  if (typeof id === 'object' && id.$oid) {
+  if (typeof id === "object" && id?.$oid) {
     id = id.$oid;
-  } else if (typeof id === 'object' && id.toString) {
+  } else if (typeof id === "object" && typeof id.toString === "function") {
     id = id.toString();
   }
 
@@ -53,6 +110,7 @@ export function adaptFirmFromApi(apiFirm: ApiFirm): LawFirmMock {
     city: apiFirm.city,
     contactPhone: apiFirm.contact_phone,
     contactEmail: apiFirm.contact_email,
+    availableTimes: normalizeAvailableTimes(apiFirm.available_times),
   };
 }
 
@@ -69,6 +127,7 @@ export function adaptFirmToApi(firm: Partial<LawFirmMock>): Partial<ApiFirm> {
     city: firm.city,
     contact_phone: firm.contactPhone,
     contact_email: firm.contactEmail,
+    available_times: serializeAvailableTimes(firm.availableTimes),
   };
 }
 
@@ -76,9 +135,9 @@ export function adaptFirmToApi(firm: Partial<LawFirmMock>): Partial<ApiFirm> {
 export function adaptServiceFromApi(apiService: ApiService): LegalServiceMock {
   // 处理 _id 字段（可能是 ObjectId 或字符串）
   let id = apiService.id || (apiService as any)._id;
-  if (typeof id === 'object' && id.$oid) {
+  if (typeof id === "object" && id?.$oid) {
     id = id.$oid;
-  } else if (typeof id === 'object' && id.toString) {
+  } else if (typeof id === "object" && typeof id.toString === "function") {
     id = id.toString();
   }
 
@@ -92,6 +151,7 @@ export function adaptServiceFromApi(apiService: ApiService): LegalServiceMock {
     duration: apiService.duration || "待沟通",
     lawyerName: apiService.lawyer_name || "待定律师",
     lawyerTitle: apiService.lawyer_title || "",
+    availableTimes: normalizeAvailableTimes(apiService.available_times),
   };
 }
 
@@ -108,5 +168,6 @@ export function adaptServiceToApi(
     duration: service.duration,
     lawyer_name: service.lawyerName,
     lawyer_title: service.lawyerTitle,
+    available_times: serializeAvailableTimes(service.availableTimes),
   };
 }

@@ -1,7 +1,8 @@
-import { Button, Input, ScrollView, Text, Textarea, View } from "@tarojs/components";
+import { Button, Input, Picker, ScrollView, Text, Textarea, View } from "@tarojs/components";
 import type { ITouchEvent } from "@tarojs/components";
 import Taro, { useLoad } from "@tarojs/taro";
 import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import "./search.scss";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import type {
@@ -33,6 +34,14 @@ function toText(value: unknown): string {
   return String(value);
 }
 
+function formatBookingTime(value: string): string {
+  const parsed = dayjs(value);
+  if (parsed.isValid()) {
+    return parsed.format("YYYY-MM-DD HH:mm");
+  }
+  return value;
+}
+
 export default function Search() {
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
   const [legalServices, setLegalServices] = useState<LegalServiceMock[]>([]);
@@ -49,6 +58,7 @@ export default function Search() {
     phone: "",
     email: "",
     description: "",
+    preferredTime: "",
   });
   const [submittingBooking, setSubmittingBooking] = useState(false);
 
@@ -188,7 +198,7 @@ export default function Search() {
     setSelectedFirmId(null);
     setSelectedServiceId(null);
     setShowBookingForm(false);
-    setFormData({ name: "", phone: "", email: "", description: "" });
+    setFormData({ name: "", phone: "", email: "", description: "", preferredTime: "" });
   };
 
   const handleSubmitBooking = async () => {
@@ -237,6 +247,8 @@ export default function Search() {
     const selectedFirm = selectedFirmId
       ? lawFirms.find((f) => f.id === selectedFirmId)
       : null;
+    const selectedPreferredTime = formData.preferredTime;
+
 
     const payload: ConsultationPayload = {
       name: trimmedName,
@@ -244,6 +256,7 @@ export default function Search() {
       phone: trimmedPhone,
       serviceName: selectedService?.title || "咨询",
       message: trimmedDescription,
+      preferredTime: selectedPreferredTime || undefined,
       firmId: selectedFirmId || undefined,
       serviceId: selectedServiceId || undefined,
     };
@@ -257,7 +270,7 @@ export default function Search() {
         duration: 2000,
       });
       setShowBookingForm(false);
-      setFormData({ name: "", phone: "", email: "", description: "" });
+      setFormData({ name: "", phone: "", email: "", description: "", preferredTime: "" });
     } catch (error) {
       console.error("提交预约失败", error);
       Taro.showToast({
@@ -294,6 +307,159 @@ export default function Search() {
   const serviceFirm = selectedService
     ? lawFirms.find((f) => f.id === selectedService.lawFirmId)
     : null;
+
+  const availableTimes = useMemo(() => {
+    const times: string[] = [];
+
+    const collect = (list?: string[] | null) => {
+      if (!list) {
+        return;
+      }
+      list.forEach((time) => {
+        if (typeof time === "string" && time.trim()) {
+          times.push(time.trim());
+        }
+      });
+    };
+
+    collect(selectedService?.availableTimes || []);
+
+    if (times.length === 0) {
+      collect(selectedFirm?.availableTimes || []);
+      if (selectedFirmId) {
+        legalServices.forEach((service) => {
+          if (service.lawFirmId === selectedFirmId) {
+            collect(service.availableTimes || []);
+          }
+        });
+      }
+    }
+
+    const unique = Array.from(new Set(times));
+    const now = dayjs();
+
+    return unique
+      .filter((time) => {
+        const parsed = dayjs(time);
+        return parsed.isValid() ? parsed.isAfter(now) : true;
+      })
+      .sort((a, b) => {
+        const aParsed = dayjs(a);
+        const bParsed = dayjs(b);
+        if (aParsed.isValid() && bParsed.isValid()) {
+          return aParsed.valueOf() - bParsed.valueOf();
+        }
+        return a.localeCompare(b);
+      });
+  }, [selectedService, selectedFirm, selectedFirmId, legalServices]);
+
+  const formattedAvailableTimes = useMemo(
+    () => availableTimes.map((time) => formatBookingTime(time)),
+    [availableTimes]
+  );
+
+  const selectedTimeIndex = useMemo(() => {
+    if (!formData.preferredTime) {
+      return -1;
+    }
+    return availableTimes.findIndex((time) => time === formData.preferredTime);
+  }, [availableTimes, formData.preferredTime]);
+
+  const renderPreferredTimePicker = () => {
+    if (availableTimes.length === 0) {
+      return (
+        <Text className="form-hint">
+          该服务暂未设置可预约时间，您可以在备注中填写期望时间。
+        </Text>
+      );
+    }
+
+    const pickerValue = selectedTimeIndex >= 0 ? selectedTimeIndex : 0;
+
+    return (
+      <Picker
+        mode="selector"
+        range={formattedAvailableTimes}
+        value={pickerValue}
+        onChange={(e) => {
+          const index = Number(e.detail.value);
+          const value = availableTimes[index] || "";
+          setFormData((prev) => ({
+            ...prev,
+            preferredTime: value,
+          }));
+        }}
+      >
+        <View
+          className={`form-input picker-input${
+            formData.preferredTime ? "" : " placeholder"
+          }`}
+        >
+          {formData.preferredTime
+            ? formatBookingTime(formData.preferredTime)
+            : "请选择可预约时间"}
+        </View>
+      </Picker>
+    );
+  };
+
+  const renderBookingForm = () => (
+    <View className="booking-form">
+      <Text className="form-title">预约咨询</Text>
+      <Input
+        className="form-input"
+        placeholder="您的姓名"
+        value={formData.name}
+        onInput={(e) =>
+          setFormData({ ...formData, name: e.detail.value })
+        }
+      />
+      <Input
+        className="form-input"
+        placeholder="您的邮箱"
+        type="text"
+        value={formData.email}
+        onInput={(e) =>
+          setFormData({ ...formData, email: e.detail.value })
+        }
+      />
+      <Input
+        className="form-input"
+        placeholder="联系电话"
+        type="number"
+        value={formData.phone}
+        onInput={(e) =>
+          setFormData({ ...formData, phone: e.detail.value })
+        }
+      />
+      {renderPreferredTimePicker()}
+      <Textarea
+        className="form-textarea"
+        placeholder="请描述您的法律问题（选填）"
+        value={formData.description}
+        onInput={(e) =>
+          setFormData({ ...formData, description: e.detail.value })
+        }
+      />
+      <View className="form-actions">
+        <Button
+          className="form-btn cancel"
+          onClick={() => setShowBookingForm(false)}
+        >
+          取消
+        </Button>
+        <Button className="form-btn submit" onClick={handleSubmitBooking}>
+          提交预约
+        </Button>
+      </View>
+    </View>
+  );
+
+  useEffect(() => {
+    if (formData.preferredTime && !availableTimes.includes(formData.preferredTime)) {
+      setFormData((prev) => ({ ...prev, preferredTime: "" }));
+    }
+  }, [availableTimes, formData.preferredTime]);
 
   // Show detail view if firm or service is selected
   if (selectedFirm) {
@@ -497,54 +663,7 @@ export default function Search() {
               立即预约咨询
             </Button>
           ) : (
-            <View className="booking-form">
-              <Text className="form-title">预约咨询</Text>
-              <Input
-                className="form-input"
-                placeholder="您的姓名"
-                value={formData.name}
-                onInput={(e) =>
-                  setFormData({ ...formData, name: e.detail.value })
-                }
-              />
-              <Input
-                className="form-input"
-                placeholder="您的邮箱"
-                type="text"
-                value={formData.email}
-                onInput={(e) =>
-                  setFormData({ ...formData, email: e.detail.value })
-                }
-              />
-              <Input
-                className="form-input"
-                placeholder="联系电话"
-                type="number"
-                value={formData.phone}
-                onInput={(e) =>
-                  setFormData({ ...formData, phone: e.detail.value })
-                }
-              />
-              <Textarea
-                className="form-textarea"
-                placeholder="请描述您的法律问题（选填）"
-                value={formData.description}
-                onInput={(e) =>
-                  setFormData({ ...formData, description: e.detail.value })
-                }
-              />
-              <View className="form-actions">
-                <Button
-                  className="form-btn cancel"
-                  onClick={() => setShowBookingForm(false)}
-                >
-                  取消
-                </Button>
-                <Button className="form-btn submit" onClick={handleSubmitBooking}>
-                  提交预约
-                </Button>
-              </View>
-            </View>
+            renderBookingForm()
           )}
         </View>
       </ScrollView>

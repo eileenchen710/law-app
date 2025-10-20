@@ -495,21 +495,21 @@ module.exports = async function handler(req, res) {
     let service = null;
     let firmEmail = null;
 
-    if (firmId) {
-      firm = await Firm.findById(firmId).lean();
-      if (firm) {
-        firmEmail = firm.contact_email || firm.email;
-      }
+    const firmPromise = firmId ? Firm.findById(firmId).lean() : null;
+    const servicePromise = serviceId ? Service.findById(serviceId).lean() : null;
+
+    const [firmResult, serviceResult] = await Promise.all([firmPromise, servicePromise]);
+    firm = firmResult;
+    service = serviceResult;
+
+    if (firm) {
+      firmEmail = firm.contact_email || firm.email;
     }
 
-    if (serviceId) {
-      service = await Service.findById(serviceId).lean();
-      if (service && service.firm_id && !firm) {
-        // 如果通过服务找到律所，也获取律所信息
-        firm = await Firm.findById(service.firm_id).lean();
-        if (firm) {
-          firmEmail = firm.contact_email || firm.email;
-        }
+    if (service && service.firm_id && !firm) {
+      firm = await Firm.findById(service.firm_id).lean();
+      if (firm) {
+        firmEmail = firm.contact_email || firm.email;
       }
     }
 
@@ -575,14 +575,16 @@ module.exports = async function handler(req, res) {
       };
     }
 
-    // 发送邮件通知
-    const summary = await sendNotificationEmails(emailConfig, { silent: false });
+    // 发送邮件通知（在后台异步执行，加快响应速度）
+    sendNotificationEmails(emailConfig, { silent: false }).catch((error) => {
+      console.error('[consultations] Failed to send notification emails', error);
+    });
 
     return res.status(200).json({
       status: 'ok',
       message: '咨询已提交，我们会尽快与您联系',
       consultationId: consultation._id,
-      emailSummary: summary,
+      emailSummary: 'queued',
     });
   } catch (error) {
     console.error('[consultations] Failed to process consultation', error);

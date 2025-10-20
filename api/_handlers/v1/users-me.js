@@ -41,6 +41,21 @@ const loadAppointmentsForUser = async (user) => {
     .limit(100)
     .lean();
 
+  // Get unique firm IDs that need to be looked up
+  const Firm = require('../../models/firm');
+  const firmIdsToLookup = consultations
+    .filter(c => c.firm_id && !c.firm_name)
+    .map(c => c.firm_id);
+
+  // Batch lookup firms
+  const firmMap = new Map();
+  if (firmIdsToLookup.length > 0) {
+    const firms = await Firm.find({ _id: { $in: firmIdsToLookup } })
+      .select('name')
+      .lean();
+    firms.forEach(f => firmMap.set(f._id.toString(), f.name));
+  }
+
   return consultations.map((consultation) => ({
     id: consultation._id.toString(),
     user_id: consultation.user_id?.toString() || null,
@@ -48,7 +63,9 @@ const loadAppointmentsForUser = async (user) => {
     phone: consultation.phone,
     email: consultation.email,
     firm_id: consultation.firm_id?.toString() || null,
-    firm_name: consultation.firm_name || null,
+    firm_name: consultation.firm_name ||
+      (consultation.firm_id ? firmMap.get(consultation.firm_id.toString()) : null) ||
+      null,
     service_id: consultation.service_id?.toString() || null,
     service_name: consultation.service_name || '在线咨询',
     time: consultation.preferred_time || consultation.createdAt,

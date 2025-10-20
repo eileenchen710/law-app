@@ -96,8 +96,8 @@ export default function Index() {
       try {
         // 获取真实的律所和服务数据
         const [firmsRes, servicesRes] = await Promise.all([
-          fetchFirms({ page: 1, size: 100 }),
-          fetchServices({ page: 1, size: 100 })
+          fetchFirms({ page: 1, size: 20 }),
+          fetchServices({ page: 1, size: 20 })
         ]);
 
         // 转换律所数据

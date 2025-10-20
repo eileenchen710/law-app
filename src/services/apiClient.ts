@@ -59,7 +59,7 @@ class ApiClient {
   }
 
   // Firms API
-  async getFirms(page = 1, size = 100): Promise<ApiResponse<any>> {
+  async getFirms(page = 1, size = 20): Promise<ApiResponse<any>> {
     return this.request(`/firms?page=${page}&size=${size}`);
   }
 
@@ -84,7 +84,7 @@ class ApiClient {
   }
 
   // Services API
-  async getServices(page = 1, size = 100): Promise<ApiResponse<any>> {
+  async getServices(page = 1, size = 20): Promise<ApiResponse<any>> {
     return this.request(`/services?page=${page}&size=${size}`);
   }
 

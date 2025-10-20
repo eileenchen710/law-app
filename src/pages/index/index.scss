@@ -801,12 +801,15 @@ button,
   .lawfirms-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
     gap: 24px;
     max-width: 1200px;
     margin: 0 auto 48px;
     .firm-card {
       position: relative;
       padding: 32px;
+      display: flex;
+      flex-direction: column;
       background: $bg-white-5;
       backdrop-filter: blur(8px);
       border: 1px solid $border-white-10;
@@ -971,6 +974,7 @@ button,
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-top: auto;
 
         &:hover {
           box-shadow: 0 10px 15px -3px rgba(241, 196, 152, 0.3);

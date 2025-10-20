@@ -902,8 +902,12 @@ export default function Me() {
                   {formatDateTime(item.time)}
                 </Text>
                 <Text className="appointment-field">
-                  <Text className="appointment-label">律所 / 服务：</Text>
+                  <Text className="appointment-label">律所：</Text>
                   {item.firm_name || "-"}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">服务：</Text>
+                  {item.service_name || "-"}
                 </Text>
                 <Text className="appointment-field">
                   <Text className="appointment-label">备注：</Text>
@@ -974,8 +978,12 @@ export default function Me() {
                   {formatDateTime(item.time)}
                 </Text>
                 <Text className="appointment-field">
-                  <Text className="appointment-label">律所 / 服务：</Text>
+                  <Text className="appointment-label">律所：</Text>
                   {item.firm_name || "-"}
+                </Text>
+                <Text className="appointment-field">
+                  <Text className="appointment-label">服务：</Text>
+                  {item.service_name || "-"}
                 </Text>
                 <Text className="appointment-field">
                   <Text className="appointment-label">备注：</Text>

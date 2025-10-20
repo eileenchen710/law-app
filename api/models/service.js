@@ -55,10 +55,6 @@ const ServiceSchema = new Schema(
       default: 'active',
       trim: true,
     },
-    available_times: {
-      type: [Date],
-      default: [],
-    },
   },
   {
     collection: "services",

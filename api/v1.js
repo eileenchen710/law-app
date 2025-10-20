@@ -222,10 +222,7 @@ async function handleServicesList(req, res) {
     law_firm_id: service.law_firm_id,
     firm_name: service.firm?.name || null,
     firm_address: service.firm?.address || null,
-    status: service.status || 'active',
-    available_times: (service.available_times || [])
-      .filter(time => new Date(time) > new Date())
-      .map(time => new Date(time).toISOString())
+    status: service.status || 'active'
   }));
   
   res.json({
@@ -276,9 +273,6 @@ async function handleServiceDetail(req, res, id) {
     law_firm_id: service.law_firm_id,
     firm_name: firm?.name || null,
     firm_address: firm?.address || null,
-    status: service.status || 'active',
-    available_times: (service.available_times || [])
-      .filter(time => new Date(time) > new Date())
-      .map(time => new Date(time).toISOString())
+    status: service.status || 'active'
   });
 }

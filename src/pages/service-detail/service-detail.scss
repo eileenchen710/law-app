@@ -216,6 +216,44 @@
   margin-bottom: 16px;
 }
 
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  color: rgba(223, 230, 255, 0.88);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.available-times-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.available-time-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(120, 131, 255, 0.18);
+  color: rgba(240, 244, 255, 0.92);
+  font-size: 12px;
+}
+
+.available-time-more {
+  font-size: 12px;
+  color: rgba(194, 204, 255, 0.8);
+  align-self: center;
+}
+
+.available-times-empty {
+  font-size: 12px;
+  color: rgba(194, 204, 255, 0.6);
+}
+
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: rgba(194, 204, 255, 0.6);

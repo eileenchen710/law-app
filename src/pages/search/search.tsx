@@ -322,23 +322,26 @@ export default function Search() {
       });
     };
 
-    collect(selectedService?.availableTimes || []);
+    // Only collect times from the firm
+    console.log("=== Available Times Debug ===");
+    console.log("Selected Firm:", selectedFirm?.name);
+    console.log("Selected Firm availableTimes:", selectedFirm?.availableTimes);
+    collect(selectedFirm?.availableTimes || []);
 
-    if (times.length === 0) {
-      collect(selectedFirm?.availableTimes || []);
-      if (selectedFirmId) {
-        legalServices.forEach((service) => {
-          if (service.lawFirmId === selectedFirmId) {
-            collect(service.availableTimes || []);
-          }
-        });
-      }
+    // If no firm is selected but a service is selected, get times from the service's firm
+    if (!selectedFirm && selectedService) {
+      const serviceFirm = lawFirms.find(f => f.id === selectedService.lawFirmId);
+      console.log("Service Firm:", serviceFirm?.name);
+      console.log("Service Firm availableTimes:", serviceFirm?.availableTimes);
+      collect(serviceFirm?.availableTimes || []);
     }
+
+    console.log("Collected times before filtering:", times);
 
     const unique = Array.from(new Set(times));
     const now = dayjs();
 
-    return unique
+    const filtered = unique
       .filter((time) => {
         const parsed = dayjs(time);
         return parsed.isValid() ? parsed.isAfter(now) : true;
@@ -351,12 +354,43 @@ export default function Search() {
         }
         return a.localeCompare(b);
       });
-  }, [selectedService, selectedFirm, selectedFirmId, legalServices]);
+
+    console.log("Final available times:", filtered);
+    console.log("===========================");
+
+    return filtered;
+  }, [selectedService, selectedFirm, lawFirms]);
 
   const formattedAvailableTimes = useMemo(
     () => availableTimes.map((time) => formatBookingTime(time)),
     [availableTimes]
   );
+
+  const renderAvailableTimesPreview = (times: string[]) => {
+    if (times.length === 0) {
+      return (
+        <Text className="available-times-empty">
+          暂未配置可预约时间
+        </Text>
+      );
+    }
+
+    const preview = times.slice(0, 3);
+    const extraCount = Math.max(times.length - preview.length, 0);
+
+    return (
+      <View className="available-times-preview">
+        {preview.map((time) => (
+          <Text key={time} className="available-time-chip">
+            {formatBookingTime(time)}
+          </Text>
+        ))}
+        {extraCount > 0 ? (
+          <Text className="available-time-more">等{extraCount}个时段</Text>
+        ) : null}
+      </View>
+    );
+  };
 
   const selectedTimeIndex = useMemo(() => {
     if (!formData.preferredTime) {
@@ -432,7 +466,10 @@ export default function Search() {
           setFormData({ ...formData, phone: e.detail.value })
         }
       />
-      {renderPreferredTimePicker()}
+      <View className="form-group">
+        <Text className="form-label">可预约时间</Text>
+        {renderPreferredTimePicker()}
+      </View>
       <Textarea
         className="form-textarea"
         placeholder="请描述您的法律问题（选填）"
@@ -541,6 +578,11 @@ export default function Search() {
               </View>
             )}
           </View>
+        </View>
+
+        <View className="detail-section">
+          <Text className="section-title">可预约时间</Text>
+          {renderAvailableTimesPreview(availableTimes)}
         </View>
 
         {selectedFirm.practiceAreas && selectedFirm.practiceAreas.length > 0 && (
@@ -799,6 +841,10 @@ export default function Search() {
                   setFormData({ ...formData, phone: e.detail.value })
                 }
               />
+              <View className="form-group">
+                <Text className="form-label">可预约时间</Text>
+                {renderPreferredTimePicker()}
+              </View>
               <Textarea
                 className="form-textarea"
                 placeholder="请描述您的法律问题（选填）"

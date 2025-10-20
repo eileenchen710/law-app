@@ -85,7 +85,6 @@ interface ApiService {
   duration?: string;
   lawyer_name?: string;
   lawyer_title?: string;
-  available_times?: RawAvailableTime[];
 }
 
 // 将 API 律所数据转换为前端格式
@@ -151,7 +150,6 @@ export function adaptServiceFromApi(apiService: ApiService): LegalServiceMock {
     duration: apiService.duration || "待沟通",
     lawyerName: apiService.lawyer_name || "待定律师",
     lawyerTitle: apiService.lawyer_title || "",
-    availableTimes: normalizeAvailableTimes(apiService.available_times),
   };
 }
 
@@ -168,6 +166,5 @@ export function adaptServiceToApi(
     duration: service.duration,
     lawyer_name: service.lawyerName,
     lawyer_title: service.lawyerTitle,
-    available_times: serializeAvailableTimes(service.availableTimes),
   };
 }

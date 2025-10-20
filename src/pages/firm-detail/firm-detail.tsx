@@ -72,6 +72,30 @@ export default function FirmDetail() {
     [availableTimes]
   );
 
+  const renderAvailableTimesPreview = () => {
+    if (availableTimes.length === 0) {
+      return (
+        <Text className="available-times-empty">暂未配置可预约时间</Text>
+      );
+    }
+
+    const preview = availableTimes.slice(0, 3);
+    const extraCount = Math.max(availableTimes.length - preview.length, 0);
+
+    return (
+      <View className="available-times-preview">
+        {preview.map((time) => (
+          <Text key={time} className="available-time-chip">
+            {formatBookingTime(time)}
+          </Text>
+        ))}
+        {extraCount > 0 ? (
+          <Text className="available-time-more">等{extraCount}个时段</Text>
+        ) : null}
+      </View>
+    );
+  };
+
   const selectedTimeIndex = useMemo(() => {
     if (!formData.preferredTime) {
       return -1;
@@ -233,6 +257,11 @@ export default function FirmDetail() {
         </View>
       </View>
 
+      <View className="firm-section">
+        <Text className="section-title">可预约时间</Text>
+        {renderAvailableTimesPreview()}
+      </View>
+
       {firm.services && firm.services.length > 0 && (
         <View className="firm-section">
           <Text className="section-title">业务领域</Text>
@@ -314,7 +343,10 @@ export default function FirmDetail() {
                 setFormData({ ...formData, phone: e.detail.value })
               }
             />
-            {renderPreferredTimePicker()}
+            <View className="form-group">
+              <Text className="form-label">可预约时间</Text>
+              {renderPreferredTimePicker()}
+            </View>
             <Textarea
               className="form-textarea"
               placeholder="请描述您的法律问题（选填）"

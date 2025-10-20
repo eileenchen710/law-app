@@ -44,7 +44,7 @@ export default function ServiceDetail() {
       });
     };
 
-    collect(service?.availableTimes || []);
+    // Only collect times from the firm (not from service)
     collect(firm?.availableTimes || []);
 
     const unique = Array.from(new Set(times));
@@ -63,12 +63,36 @@ export default function ServiceDetail() {
         }
         return a.localeCompare(b);
       });
-  }, [service, firm]);
+  }, [firm]);
 
   const formattedAvailableTimes = useMemo(
     () => availableTimes.map((time) => formatBookingTime(time)),
     [availableTimes]
   );
+
+  const renderAvailableTimesPreview = () => {
+    if (availableTimes.length === 0) {
+      return (
+        <Text className="available-times-empty">暂未配置可预约时间</Text>
+      );
+    }
+
+    const preview = availableTimes.slice(0, 3);
+    const extraCount = Math.max(availableTimes.length - preview.length, 0);
+
+    return (
+      <View className="available-times-preview">
+        {preview.map((time) => (
+          <Text key={time} className="available-time-chip">
+            {formatBookingTime(time)}
+          </Text>
+        ))}
+        {extraCount > 0 ? (
+          <Text className="available-time-more">等{extraCount}个时段</Text>
+        ) : null}
+      </View>
+    );
+  };
 
   const selectedTimeIndex = useMemo(() => {
     if (!formData.preferredTime) {
@@ -249,6 +273,11 @@ export default function ServiceDetail() {
         </View>
       </View>
 
+      <View className="service-section">
+        <Text className="section-title">可预约时间</Text>
+        {renderAvailableTimesPreview()}
+      </View>
+
       {firm && (
         <View className="service-section">
           <Text className="section-title">所属律所</Text>
@@ -309,7 +338,10 @@ export default function ServiceDetail() {
                 setFormData({ ...formData, phone: e.detail.value })
               }
             />
-            {renderPreferredTimePicker()}
+            <View className="form-group">
+              <Text className="form-label">可预约时间</Text>
+              {renderPreferredTimePicker()}
+            </View>
             <Textarea
               className="form-textarea"
               placeholder="请描述您的法律问题（选填）"

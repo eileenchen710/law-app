@@ -155,7 +155,6 @@ const createEmptyServiceForm = (lawFirmId?: string): ServiceFormState => ({
   duration: "",
   lawyerName: "",
   lawyerTitle: "",
-  availableTimesText: "",
 });
 
 const storeAuthToken = (token?: string) => {
@@ -792,7 +791,6 @@ export default function Me() {
 
   const handleServiceSubmit = async () => {
     const svc = serviceForm;
-    const parsedTimes = parseAvailableTimesInput(svc.availableTimesText);
 
     if (!svc.title?.trim() || !svc.lawFirmId) {
       Taro.showToast({ title: "请填写必填字段", icon: "none" });
@@ -810,7 +808,6 @@ export default function Me() {
           duration: svc.duration.trim() || undefined,
           lawyer_name: svc.lawyerName.trim() || undefined,
           lawyer_title: svc.lawyerTitle.trim() || undefined,
-          available_times: parsedTimes,
         });
         Taro.showToast({ title: "服务已更新", icon: "success" });
       } else {
@@ -823,7 +820,6 @@ export default function Me() {
           duration: svc.duration.trim() || "1-2小时",
           lawyer_name: svc.lawyerName.trim() || "专业律师",
           lawyer_title: svc.lawyerTitle.trim() || "资深律师",
-          available_times: parsedTimes,
         });
         Taro.showToast({ title: "服务已创建", icon: "success" });
       }
@@ -848,10 +844,6 @@ export default function Me() {
       duration: service.duration || "",
       lawyerName: service.lawyerName || "",
       lawyerTitle: service.lawyerTitle || "",
-      availableTimesText:
-        service.availableTimes && service.availableTimes.length > 0
-          ? service.availableTimes.map((time) => formatAvailableTime(time)).join("\n")
-          : "",
     });
   };
 
@@ -1411,17 +1403,6 @@ export default function Me() {
           </View>
         </View>
 
-
-        <View className="form-row">
-          <Text className="form-label">可预约时间</Text>
-          <Textarea
-            className="form-textarea"
-            placeholder="请输入可预约时间，每行一个，例如 2025-10-21 14:00"
-            value={serviceForm.availableTimesText}
-            onInput={handleServiceInput("availableTimesText")}
-          />
-        </View>
-
         <View className="form-row">
           <Button className="submit-btn" onClick={handleServiceSubmit}>
             {editingServiceId ? "更新服务" : "添加服务"}
@@ -1464,14 +1445,6 @@ export default function Me() {
               <Text className="list-card-desc">{service.description}</Text>
               <Text className="list-card-meta">
                 律所：{firm?.name || "未关联"} | 律师：{service.lawyerName}
-              </Text>
-              <Text className="list-card-meta">
-                {service.availableTimes && service.availableTimes.length > 0
-                  ? `可预约时间：${service.availableTimes
-                      .slice(0, 3)
-                      .map((time) => formatAvailableTime(time))
-                      .join("、")}${service.availableTimes.length > 3 ? " 等更多..." : ""}`
-                  : "可预约时间：暂未设置"}
               </Text>
               <View className="list-card-actions">
                 <Button

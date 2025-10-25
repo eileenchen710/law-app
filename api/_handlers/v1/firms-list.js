@@ -63,52 +63,30 @@ module.exports = async function handler(req, res) {
 
     // 格式化响应数据
     const now = new Date();
-    console.log('[firms-list] Current server time:', now.toISOString());
-
-    const items = firms.map(firm => {
-      const rawTimes = firm.available_times || [];
-      console.log(`[firms-list] Firm: ${firm.name}, Raw times count: ${rawTimes.length}`);
-      if (rawTimes.length > 0) {
-        console.log(`[firms-list] First raw time:`, rawTimes[0]);
-        console.log(`[firms-list] First raw time type:`, typeof rawTimes[0]);
-      }
-
-      const futureTimes = rawTimes
-        .filter(time => {
-          const timeDate = new Date(time);
-          const isFuture = timeDate > now;
-          if (rawTimes.indexOf(time) < 2) {
-            console.log(`[firms-list] Checking time: ${time}, Date: ${timeDate.toISOString()}, Is future: ${isFuture}`);
-          }
-          return isFuture;
-        })
-        .map(time => new Date(time).toISOString());
-
-      console.log(`[firms-list] Future times count: ${futureTimes.length}`);
-
-      return {
-        id: firm._id.toString(),
-        name: firm.name,
-        slug: firm.slug,
-        description: firm.description,
-        address: firm.address,
-        city: firm.city,
-        phone: firm.phone,
-        email: firm.email,
-        website: firm.website,
-        contact_email: firm.contact_email || firm.email,
-        contact_phone: firm.contact_phone || firm.phone,
-        services: firm.services || [],
-        practice_areas: firm.practice_areas || firm.practiceAreas || [],
-        tags: firm.tags || [],
-        lawyers: firm.lawyers || [],
-        price: firm.price,
-        rating: firm.rating,
-        cases: firm.cases,
-        recommended: firm.recommended || false,
-        available_times: futureTimes
-      };
-    });
+    const items = firms.map(firm => ({
+      id: firm._id.toString(),
+      name: firm.name,
+      slug: firm.slug,
+      description: firm.description,
+      address: firm.address,
+      city: firm.city,
+      phone: firm.phone,
+      email: firm.email,
+      website: firm.website,
+      contact_email: firm.contact_email || firm.email,
+      contact_phone: firm.contact_phone || firm.phone,
+      services: firm.services || [],
+      practice_areas: firm.practice_areas || firm.practiceAreas || [],
+      tags: firm.tags || [],
+      lawyers: firm.lawyers || [],
+      price: firm.price,
+      rating: firm.rating,
+      cases: firm.cases,
+      recommended: firm.recommended || false,
+      available_times: (firm.available_times || [])
+        .filter(time => new Date(time) > now)
+        .map(time => new Date(time).toISOString())
+    }));
 
     res.status(200).json({
       items,

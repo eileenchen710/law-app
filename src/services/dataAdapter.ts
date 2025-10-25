@@ -97,18 +97,7 @@ export function adaptFirmFromApi(apiFirm: ApiFirm): LawFirmMock {
     id = id.toString();
   }
 
-  // Debug logging for available_times
-  console.log('[dataAdapter] Firm:', apiFirm.name);
-  console.log('[dataAdapter] Raw available_times:', apiFirm.available_times);
-  console.log('[dataAdapter] Type:', typeof apiFirm.available_times);
-  console.log('[dataAdapter] Is Array:', Array.isArray(apiFirm.available_times));
-  if (Array.isArray(apiFirm.available_times)) {
-    console.log('[dataAdapter] Length:', apiFirm.available_times.length);
-    console.log('[dataAdapter] Sample values:', apiFirm.available_times.slice(0, 3));
-  }
-
   const normalizedTimes = normalizeAvailableTimes(apiFirm.available_times);
-  console.log('[dataAdapter] Normalized available_times:', normalizedTimes.length, normalizedTimes.slice(0, 3));
 
   return {
     id: id as string,

@@ -41,16 +41,7 @@ const loadAppointmentsForUser = async (user) => {
     .limit(100)
     .lean();
 
-  console.log('[users-me] Raw consultations from DB:', consultations.length);
-  if (consultations.length > 0) {
-    console.log('[users-me] Sample consultation:', {
-      id: consultations[0]._id,
-      firm_id: consultations[0].firm_id,
-      firm_name: consultations[0].firm_name,
-      service_id: consultations[0].service_id,
-      service_name: consultations[0].service_name
-    });
-  }
+  // Removed verbose logging - keeping it clean
 
   // Get unique service IDs to lookup firm info from services
   const Service = require('../../models/service');
@@ -81,69 +72,22 @@ const loadAppointmentsForUser = async (user) => {
     ...Array.from(serviceMap.values())
   ];
 
-  // Debug: Try to find the specific firm directly
-  const testFirmId = '68dd0de11f8a0e63c6dc1080';
-  console.log('[users-me] DEBUG: Attempting direct lookup of firm:', testFirmId);
+  // Debug: List all firms in database to help identify the issue
   try {
-    const testFirm = await Firm.findById(testFirmId).lean();
-    console.log('[users-me] DEBUG: Direct findById result:', testFirm ? { id: testFirm._id.toString(), name: testFirm.name } : 'NULL');
-
-    // Also try with ObjectId
-    const mongoose = require('mongoose');
-    const testFirm2 = await Firm.findById(new mongoose.Types.ObjectId(testFirmId)).lean();
-    console.log('[users-me] DEBUG: Direct findById with ObjectId result:', testFirm2 ? { id: testFirm2._id.toString(), name: testFirm2.name } : 'NULL');
-
-    // Try with find
-    const testFirm3 = await Firm.findOne({ _id: testFirmId }).lean();
-    console.log('[users-me] DEBUG: findOne result:', testFirm3 ? { id: testFirm3._id.toString(), name: testFirm3.name } : 'NULL');
-
-    // Count all firms
-    const totalFirms = await Firm.countDocuments();
-    console.log('[users-me] DEBUG: Total firms in database:', totalFirms);
+    const allFirms = await Firm.find().select('_id name').lean();
+    console.log('[users-me] All firms in database:', allFirms.map(f => ({ id: f._id.toString(), name: f.name })));
   } catch (err) {
-    console.log('[users-me] DEBUG: Error in direct lookup:', err.message);
+    console.log('[users-me] Error listing firms:', err.message);
   }
 
   // Batch lookup firms
   const firmMap = new Map();
-  console.log('[users-me] Firm IDs to lookup:', firmIdsToLookup);
-  console.log('[users-me] Firm IDs types:', firmIdsToLookup.map(id => typeof id));
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
-    console.log('[users-me] Unique firm IDs:', uniqueFirmIds);
-
-    // Try different query approaches
-    console.log('[users-me] Attempting Firm.find with string IDs...');
     const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
       .select('name')
       .lean();
-    console.log('[users-me] Firms found:', firms.length, firms.map(f => ({ id: f._id.toString(), name: f.name })));
-
-    if (firms.length === 0 && uniqueFirmIds.length > 0) {
-      // Try converting to ObjectId explicitly
-      console.log('[users-me] No firms found with string IDs, trying ObjectId conversion...');
-      const mongoose = require('mongoose');
-      const objectIds = uniqueFirmIds.map(id => {
-        try {
-          return new mongoose.Types.ObjectId(id);
-        } catch (e) {
-          console.log('[users-me] Failed to convert to ObjectId:', id, e.message);
-          return null;
-        }
-      }).filter(Boolean);
-
-      console.log('[users-me] ObjectIds for query:', objectIds.map(id => id.toString()));
-      const firmsWithObjectId = await Firm.find({ _id: { $in: objectIds } })
-        .select('name')
-        .lean();
-      console.log('[users-me] Firms found with ObjectId:', firmsWithObjectId.length, firmsWithObjectId.map(f => ({ id: f._id.toString(), name: f.name })));
-
-      firmsWithObjectId.forEach(f => firmMap.set(f._id.toString(), f.name));
-    } else {
-      firms.forEach(f => firmMap.set(f._id.toString(), f.name));
-    }
-
-    console.log('[users-me] Firm map entries:', Array.from(firmMap.entries()));
+    firms.forEach(f => firmMap.set(f._id.toString(), f.name));
   }
 
   const results = consultations.map((consultation) => {
@@ -178,23 +122,14 @@ const loadAppointmentsForUser = async (user) => {
       created_at: consultation.createdAt
     };
 
-    if (!result.firm_name) {
-      console.log('[users-me] Missing firm_name for consultation:', {
-        id: result.id,
-        consultation_firm_id: consultationFirmId,
-        consultation_firm_name: consultation.firm_name,
-        service_id: consultation.service_id?.toString(),
-        service_firm_id: serviceFirmId,
-        effective_firm_id: effectiveFirmId,
-        firm_map_keys: Array.from(firmMap.keys()),
-        lookup_result: effectiveFirmId ? firmMap.get(effectiveFirmId) : 'no effective firm id'
-      });
+    // Simplified logging - only log if truly missing (no firm_id at all)
+    if (!result.firm_name && !effectiveFirmId) {
+      console.log('[users-me] Consultation with no firm reference:', result.id);
     }
 
     return result;
   });
 
-  console.log('[users-me] Returning appointments:', results.length, 'items');
   return results;
 };
 

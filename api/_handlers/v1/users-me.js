@@ -41,6 +41,17 @@ const loadAppointmentsForUser = async (user) => {
     .limit(100)
     .lean();
 
+  console.log('[users-me] Raw consultations from DB:', consultations.length);
+  if (consultations.length > 0) {
+    console.log('[users-me] Sample consultation:', {
+      id: consultations[0]._id,
+      firm_id: consultations[0].firm_id,
+      firm_name: consultations[0].firm_name,
+      service_id: consultations[0].service_id,
+      service_name: consultations[0].service_name
+    });
+  }
+
   // Get unique service IDs to lookup firm info from services
   const Service = require('../../models/service');
   const Firm = require('../../models/firm');
@@ -80,12 +91,12 @@ const loadAppointmentsForUser = async (user) => {
     firms.forEach(f => firmMap.set(f._id.toString(), f.name));
   }
 
-  return consultations.map((consultation) => {
+  const results = consultations.map((consultation) => {
     const consultationFirmId = consultation.firm_id?.toString();
     const serviceFirmId = consultation.service_id ? serviceMap.get(consultation.service_id.toString()) : null;
     const effectiveFirmId = consultationFirmId || serviceFirmId;
 
-    return {
+    const result = {
       id: consultation._id.toString(),
       user_id: consultation.user_id?.toString() || null,
       name: consultation.name,
@@ -102,7 +113,25 @@ const loadAppointmentsForUser = async (user) => {
       status: consultation.status,
       created_at: consultation.createdAt
     };
+
+    if (!result.firm_name) {
+      console.log('[users-me] Missing firm_name for consultation:', {
+        id: result.id,
+        consultation_firm_id: consultationFirmId,
+        consultation_firm_name: consultation.firm_name,
+        service_id: consultation.service_id?.toString(),
+        service_firm_id: serviceFirmId,
+        effective_firm_id: effectiveFirmId,
+        firm_map_keys: Array.from(firmMap.keys()),
+        lookup_result: effectiveFirmId ? firmMap.get(effectiveFirmId) : 'no effective firm id'
+      });
+    }
+
+    return result;
   });
+
+  console.log('[users-me] Returning appointments:', results.length, 'items');
+  return results;
 };
 
 module.exports = async function handler(req, res) {

@@ -80,17 +80,44 @@ const loadAppointmentsForUser = async (user) => {
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
 
-    // Query with string IDs directly (no ObjectId conversion needed)
-    const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
+    console.log('[users-me] firmIdsToLookup:', firmIdsToLookup);
+    console.log('[users-me] uniqueFirmIds:', uniqueFirmIds);
+    console.log('[users-me] uniqueFirmIds types:', uniqueFirmIds.map(id => typeof id));
+
+    // First, get all firms to compare
+    const allFirms = await Firm.find().lean();
+    console.log('[users-me] All firms _ids:', allFirms.map(f => f._id));
+    console.log('[users-me] All firms _id types:', allFirms.map(f => typeof f._id));
+
+    // Try the query
+    const queryObj = { _id: { $in: uniqueFirmIds } };
+    console.log('[users-me] Query object:', JSON.stringify(queryObj));
+
+    const firms = await Firm.find(queryObj)
       .select('name')
       .lean();
 
     console.log('[users-me] Firms found in batch query:', firms.length, firms.map(f => ({ id: f._id, name: f.name })));
 
+    // Try manual comparison
+    if (firms.length === 0 && allFirms.length > 0) {
+      console.log('[users-me] Manual comparison:');
+      allFirms.forEach(firm => {
+        const matches = uniqueFirmIds.includes(firm._id);
+        console.log(`  Firm ${firm._id} matches: ${matches}`);
+        if (matches) {
+          firmMap.set(firm._id.toString(), firm.name);
+        }
+      });
+    }
+
     firms.forEach(f => {
       const idStr = typeof f._id === 'string' ? f._id : f._id.toString();
       firmMap.set(idStr, f.name);
     });
+
+    console.log('[users-me] firmMap size:', firmMap.size);
+    console.log('[users-me] firmMap keys:', Array.from(firmMap.keys()));
   }
 
   const results = consultations.map((consultation) => {

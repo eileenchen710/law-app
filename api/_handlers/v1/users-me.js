@@ -83,12 +83,16 @@ const loadAppointmentsForUser = async (user) => {
 
   // Batch lookup firms
   const firmMap = new Map();
+  console.log('[users-me] Firm IDs to lookup:', firmIdsToLookup);
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
+    console.log('[users-me] Unique firm IDs:', uniqueFirmIds);
     const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
       .select('name')
       .lean();
+    console.log('[users-me] Firms found:', firms.length, firms.map(f => ({ id: f._id.toString(), name: f.name })));
     firms.forEach(f => firmMap.set(f._id.toString(), f.name));
+    console.log('[users-me] Firm map entries:', Array.from(firmMap.entries()));
   }
 
   const results = consultations.map((consultation) => {

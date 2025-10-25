@@ -84,9 +84,27 @@ const loadAppointmentsForUser = async (user) => {
   const firmMap = new Map();
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
-    const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
+
+    console.log('[users-me] Looking up firms with string IDs:', uniqueFirmIds);
+
+    // Convert string IDs to ObjectId for MongoDB query
+    const mongoose = require('mongoose');
+    const objectIds = uniqueFirmIds.map(id => {
+      try {
+        return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+      } catch (e) {
+        console.log('[users-me] Invalid ObjectId:', id);
+        return id;
+      }
+    });
+
+    console.log('[users-me] Converted to ObjectIds:', objectIds);
+
+    const firms = await Firm.find({ _id: { $in: objectIds } })
       .select('name')
       .lean();
+    console.log('[users-me] Firms found in batch query:', firms.length, firms.map(f => ({ id: f._id.toString(), name: f.name })));
+
     firms.forEach(f => firmMap.set(f._id.toString(), f.name));
   }
 

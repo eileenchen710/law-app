@@ -171,7 +171,18 @@ const handleGetAppointments = async (req, res) => {
     const firmMap = new Map();
     if (firmIdsToLookup.length > 0) {
       const uniqueFirmIds = [...new Set(firmIdsToLookup)];
-      const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
+
+      // Convert string IDs to ObjectId for MongoDB query
+      const mongoose = require('mongoose');
+      const objectIds = uniqueFirmIds.map(id => {
+        try {
+          return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+        } catch (e) {
+          return id;
+        }
+      });
+
+      const firms = await Firm.find({ _id: { $in: objectIds } })
         .select('name')
         .lean();
       firms.forEach(f => firmMap.set(f._id.toString(), f.name));

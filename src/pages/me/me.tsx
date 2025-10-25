@@ -224,12 +224,11 @@ export default function Me() {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
   useLoad(() => {
-    console.log("Me page loaded.");
+    // Me page loaded
   });
 
   // 页面每次显示时刷新数据
   useDidShow(() => {
-    console.log("Me page shown, refreshing profile data...");
     // 如果已经初始化过且有token，则刷新数据
     const token = (() => {
       try {
@@ -249,14 +248,6 @@ export default function Me() {
 
   const isAdmin = useMemo(() => {
     const admin = user?.role === "admin";
-    console.log("[ME PAGE] isAdmin check:", {
-      hasUser: !!user,
-      userId: user?.id,
-      userRole: user?.role,
-      roleType: typeof user?.role,
-      isAdmin: admin,
-      fullUser: JSON.stringify(user),
-    });
     return admin;
   }, [user]);
 
@@ -267,7 +258,6 @@ export default function Me() {
       { key: "firms", label: "律所管理", visible: isAdmin },
       { key: "services", label: "服务管理", visible: isAdmin },
     ];
-    console.log("[ME PAGE] Tabs generated:", tabsArray, "isAdmin:", isAdmin);
     return tabsArray;
   }, [isAdmin]);
 
@@ -320,8 +310,6 @@ export default function Me() {
       const response = await apiClient.getAllAppointments();
       const items = response.items || [];
       setAllAppointments(items);
-      console.log("[ME PAGE] Loaded all appointments:", items.length);
-      console.log("[ME PAGE] Sample appointment:", items[0]);
     } catch (error) {
       console.error("Failed to load all appointments:", error);
       const apiError = error as any;
@@ -333,7 +321,6 @@ export default function Me() {
   // 当用户信息更新且用户是管理员时，加载所有预约
   useEffect(() => {
     if (user && isAdmin && !loading) {
-      console.log("[ME PAGE] User is admin, loading all appointments");
       loadAllAppointments();
     }
   }, [user, isAdmin, loading, loadAllAppointments]);
@@ -376,43 +363,6 @@ export default function Me() {
   const refreshProfile = useCallback(async () => {
     try {
       const response = await fetchCurrentUser();
-      console.log("Current user data:", response.user);
-      console.log("User role:", response.user?.role);
-      console.log("Is admin?", response.user?.role === "admin");
-      console.log("Full user object:", JSON.stringify(response.user));
-      console.log(
-        "User object keys:",
-        response.user ? Object.keys(response.user) : "null"
-      );
-
-      // 添加预约记录的详细日志
-      console.log("=== Appointments Debug ===");
-      console.log(
-        "Number of appointments returned:",
-        response.appointments?.length || 0
-      );
-      console.log("User ID:", response.user?.id);
-      console.log("User provider:", response.user?.provider);
-
-      if (response.appointments && response.appointments.length > 0) {
-        console.log(
-          "All appointments:",
-          JSON.stringify(response.appointments, null, 2)
-        );
-        response.appointments.forEach((apt, index) => {
-          console.log(`Appointment ${index + 1}:`, {
-            id: apt.id,
-            user_id: (apt as any).user_id,
-            service_name: apt.service_name,
-            status: apt.status,
-            created_at: apt.created_at,
-          });
-        });
-      } else {
-        console.log("No appointments returned from API");
-      }
-      console.log("=== End Appointments Debug ===");
-
       setUser(response.user);
       setAppointments(response.appointments || []);
     } catch (error) {
@@ -451,30 +401,16 @@ export default function Me() {
               string,
               unknown
             >;
-            console.log("获取到的微信用户信息:", userProfile);
-            console.log(
-              "微信用户信息字段:",
-              userProfile ? Object.keys(userProfile) : "null"
-            );
-            console.log(
-              "nickName:",
-              userProfile?.nickName,
-              "avatarUrl:",
-              userProfile?.avatarUrl
-            );
           } catch (profileError) {
             console.warn("用户拒绝授权获取个人信息", profileError);
             // 即使用户拒绝授权，也继续登录流程
           }
         }
 
-        console.log("准备发送登录请求，userInfo:", userProfile);
         const authRes = await loginWithWechat({
           code: loginRes.code,
           userInfo: userProfile,
         });
-
-        console.log("微信登录API响应:", authRes);
 
         if (!authRes?.token) {
           throw new Error("登录响应中缺少 token");
@@ -485,12 +421,6 @@ export default function Me() {
         }
 
         storeAuthToken(authRes.token);
-        console.log("微信登录成功:", {
-          userId: authRes.user.id,
-          displayName: authRes.user.displayName,
-          role: authRes.user.role,
-          provider: authRes.user.provider,
-        });
 
         if (userProfile) {
           Taro.showToast({
@@ -915,18 +845,22 @@ export default function Me() {
                 </Text>
               </View>
               <View className="appointment-footer">
-                <Text className="appointment-meta">
-                  提交时间：{formatDateTime(item.created_at)}
-                </Text>
+                <View className="appointment-meta-wrapper">
+                  <Text className="appointment-meta">
+                    提交时间：{formatDateTime(item.created_at)}
+                  </Text>
+                </View>
                 {item.status !== "cancelled" && (
-                  <Button
-                    className="cancel-btn"
-                    size="mini"
-                    disabled={cancellingId === item.id}
-                    onClick={() => handleCancelAppointment(item.id)}
-                  >
-                    {cancellingId === item.id ? "取消中..." : "取消预约"}
-                  </Button>
+                  <View className="cancel-btn-wrapper">
+                    <Button
+                      className="cancel-btn"
+                      size="mini"
+                      disabled={cancellingId === item.id}
+                      onClick={() => handleCancelAppointment(item.id)}
+                    >
+                      {cancellingId === item.id ? "取消中..." : "取消预约"}
+                    </Button>
+                  </View>
                 )}
               </View>
             </View>
@@ -991,18 +925,22 @@ export default function Me() {
                 </Text>
               </View>
               <View className="appointment-footer">
-                <Text className="appointment-meta">
-                  提交时间：{formatDateTime(item.created_at)}
-                </Text>
+                <View className="appointment-meta-wrapper">
+                  <Text className="appointment-meta">
+                    提交时间：{formatDateTime(item.created_at)}
+                  </Text>
+                </View>
                 {item.status !== "cancelled" && (
-                  <Button
-                    className="cancel-btn"
-                    size="mini"
-                    disabled={cancellingId === item.id}
-                    onClick={() => handleCancelAppointment(item.id)}
-                  >
-                    {cancellingId === item.id ? "取消中..." : "取消预约"}
-                  </Button>
+                  <View className="cancel-btn-wrapper">
+                    <Button
+                      className="cancel-btn"
+                      size="mini"
+                      disabled={cancellingId === item.id}
+                      onClick={() => handleCancelAppointment(item.id)}
+                    >
+                      {cancellingId === item.id ? "取消中..." : "取消预约"}
+                    </Button>
+                  </View>
                 )}
               </View>
             </View>

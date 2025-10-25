@@ -1,4 +1,5 @@
 import { View, Text, Button } from "@tarojs/components";
+import { memo } from "react";
 import type { FC } from "react";
 import type { LegalServiceMock } from "../../../mock/types";
 
@@ -13,7 +14,7 @@ interface ServiceCardProps {
   onConsult: (service: ServiceCardService) => void;
 }
 
-const ServiceCard: FC<ServiceCardProps> = ({ service, lawFirmMeta, onConsult }) => {
+const ServiceCard: FC<ServiceCardProps> = memo(({ service, lawFirmMeta, onConsult }) => {
   const initials = service.lawyerName?.slice(0, 1) || "律";
 
   return (
@@ -58,6 +59,8 @@ const ServiceCard: FC<ServiceCardProps> = ({ service, lawFirmMeta, onConsult }) 
       </View>
     </View>
   );
-};
+});
+
+ServiceCard.displayName = 'ServiceCard';
 
 export default ServiceCard;

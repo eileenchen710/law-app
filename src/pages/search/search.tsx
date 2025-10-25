@@ -1,7 +1,7 @@
 import { Button, Input, Picker, ScrollView, Text, Textarea, View } from "@tarojs/components";
 import type { ITouchEvent } from "@tarojs/components";
 import Taro, { useLoad } from "@tarojs/taro";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import "./search.scss";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
@@ -13,8 +13,10 @@ import type {
 import { getSnapshot, onMockDataChange, initializeDataStore } from "../../services/dataStore";
 import AppHeader from "../index/components/AppHeader";
 import Loading from "../../components/Loading";
-import { fetchCurrentUser, submitConsultationRequest } from "../../services/api";
-import type { UserProfile, ConsultationPayload } from "../../services/types";
+import { submitConsultationRequest } from "../../services/api";
+import type { ConsultationPayload } from "../../services/types";
+import { useUser } from "../../contexts/UserContext";
+import { useDebounce } from "../../hooks/useDebounce";
 
 const TABS = [
   { id: "firms", label: "律所" },
@@ -52,7 +54,6 @@ export default function Search() {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -62,29 +63,16 @@ export default function Search() {
   });
   const [submittingBooking, setSubmittingBooking] = useState(false);
 
+  // Use centralized user context
+  const { user } = useUser();
   const isAdmin = useMemo(() => user?.role === "admin", [user]);
 
+  // Debounce search query for better performance
+  const debouncedQuery = useDebounce(query, 300);
+
   useLoad(() => {
-    console.log("Search page loaded.");
+    // Search page loaded
   });
-
-  // 获取当前用户信息
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const token = Taro.getStorageSync("auth_token");
-        if (token) {
-          const response = await fetchCurrentUser();
-          setUser(response.user);
-        }
-      } catch (error) {
-        console.log("User not logged in or session expired");
-        setUser(null);
-      }
-    };
-
-    loadUser();
-  }, []);
 
   useEffect(() => {
     const applySnapshot = (snapshot: MockDataSnapshot) => {
@@ -115,7 +103,7 @@ export default function Search() {
     };
   }, []);
 
-  const normalizedQuery = useMemo(() => normalize(query.trim()), [query]);
+  const normalizedQuery = useMemo(() => normalize(debouncedQuery.trim()), [debouncedQuery]);
 
   const firmResults = useMemo(() => {
     if (!normalizedQuery) {
@@ -164,44 +152,44 @@ export default function Search() {
 
   const activeResults = activeTab === "firms" ? firmResults : serviceResults;
 
-  const handleTabClick = (tab: TabId) => {
+  const handleTabClick = useCallback((tab: TabId) => {
     setActiveTab(tab);
     if (tab === "firms") {
       setSelectedCategory("all");
     }
-  };
+  }, []);
 
-  const handleClearQuery = (event: ITouchEvent) => {
+  const handleClearQuery = useCallback((event: ITouchEvent) => {
     event.stopPropagation();
     setQuery("");
-  };
+  }, []);
 
-  const handleCategorySelect = (categoryId: string) => {
+  const handleCategorySelect = useCallback((categoryId: string) => {
     setSelectedCategory((current) =>
       current === categoryId ? "all" : categoryId
     );
-  };
+  }, []);
 
-  const handleFirmClick = (firmId: string) => {
+  const handleFirmClick = useCallback((firmId: string) => {
     setSelectedFirmId(firmId);
     setSelectedServiceId(null);
     setShowBookingForm(false);
-  };
+  }, []);
 
-  const handleServiceClick = (serviceId: string) => {
+  const handleServiceClick = useCallback((serviceId: string) => {
     setSelectedServiceId(serviceId);
     setSelectedFirmId(null);
     setShowBookingForm(false);
-  };
+  }, []);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setSelectedFirmId(null);
     setSelectedServiceId(null);
     setShowBookingForm(false);
     setFormData({ name: "", phone: "", email: "", description: "", preferredTime: "" });
-  };
+  }, []);
 
-  const handleSubmitBooking = async () => {
+  const handleSubmitBooking = useCallback(async () => {
     if (submittingBooking) return;
 
     const trimmedName = formData.name.trim();
@@ -281,7 +269,7 @@ export default function Search() {
     } finally {
       setSubmittingBooking(false);
     }
-  };
+  }, [submittingBooking, formData, selectedServiceId, selectedFirmId, legalServices, lawFirms]);
 
   const menuItems = [
     {
@@ -323,20 +311,13 @@ export default function Search() {
     };
 
     // Only collect times from the firm
-    console.log("=== Available Times Debug ===");
-    console.log("Selected Firm:", selectedFirm?.name);
-    console.log("Selected Firm availableTimes:", selectedFirm?.availableTimes);
     collect(selectedFirm?.availableTimes || []);
 
     // If no firm is selected but a service is selected, get times from the service's firm
     if (!selectedFirm && selectedService) {
       const serviceFirm = lawFirms.find(f => f.id === selectedService.lawFirmId);
-      console.log("Service Firm:", serviceFirm?.name);
-      console.log("Service Firm availableTimes:", serviceFirm?.availableTimes);
       collect(serviceFirm?.availableTimes || []);
     }
-
-    console.log("Collected times before filtering:", times);
 
     const unique = Array.from(new Set(times));
     const now = dayjs();
@@ -354,9 +335,6 @@ export default function Search() {
         }
         return a.localeCompare(b);
       });
-
-    console.log("Final available times:", filtered);
-    console.log("===========================");
 
     return filtered;
   }, [selectedService, selectedFirm, lawFirms]);

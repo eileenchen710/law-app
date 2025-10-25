@@ -72,12 +72,37 @@ const loadAppointmentsForUser = async (user) => {
     ...Array.from(serviceMap.values())
   ];
 
-  // Debug: List all firms in database to help identify the issue
+  // Debug: List all firms and test specific queries
   try {
     const allFirms = await Firm.find().select('_id name').lean();
     console.log('[users-me] All firms in database:', allFirms.map(f => ({ id: f._id.toString(), name: f.name })));
+
+    // Test query with the specific ID
+    const mongoose = require('mongoose');
+    const testId = '68dd0de11f8a0e63c6dc1080';
+    const testObjId = new mongoose.Types.ObjectId(testId);
+
+    // Try multiple query approaches
+    const test1 = await Firm.findById(testObjId).select('name').lean();
+    console.log('[users-me] TEST findById with ObjectId:', test1 ? test1.name : 'NOT FOUND');
+
+    const test2 = await Firm.findOne({ _id: testObjId }).select('name').lean();
+    console.log('[users-me] TEST findOne with ObjectId:', test2 ? test2.name : 'NOT FOUND');
+
+    const test3 = await Firm.find({ _id: { $in: [testObjId] } }).select('name').lean();
+    console.log('[users-me] TEST find with $in [ObjectId]:', test3.length, test3.map(f => f.name));
+
+    const test4 = await Firm.find({ _id: testObjId }).select('name').lean();
+    console.log('[users-me] TEST find with _id: ObjectId:', test4.length, test4.map(f => f.name));
+
+    // Compare ObjectId representations
+    const firstFirm = allFirms[0];
+    console.log('[users-me] First firm _id type:', typeof firstFirm._id, firstFirm._id.constructor.name);
+    console.log('[users-me] First firm _id equals testObjId:', firstFirm._id.equals(testObjId));
+    console.log('[users-me] First firm _id toString:', firstFirm._id.toString());
+    console.log('[users-me] testObjId toString:', testObjId.toString());
   } catch (err) {
-    console.log('[users-me] Error listing firms:', err.message);
+    console.log('[users-me] Error in debug:', err.message);
   }
 
   // Batch lookup firms

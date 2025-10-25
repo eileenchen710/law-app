@@ -168,24 +168,20 @@ const handleGetAppointments = async (req, res) => {
     ];
 
     // Batch lookup firms
+    // Note: The firms collection stores _id as strings, not ObjectIds
     const firmMap = new Map();
     if (firmIdsToLookup.length > 0) {
       const uniqueFirmIds = [...new Set(firmIdsToLookup)];
 
-      // Convert string IDs to ObjectId for MongoDB query
-      const mongoose = require('mongoose');
-      const objectIds = uniqueFirmIds.map(id => {
-        try {
-          return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
-        } catch (e) {
-          return id;
-        }
-      });
-
-      const firms = await Firm.find({ _id: { $in: objectIds } })
+      // Query with string IDs directly (no ObjectId conversion needed)
+      const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
         .select('name')
         .lean();
-      firms.forEach(f => firmMap.set(f._id.toString(), f.name));
+
+      firms.forEach(f => {
+        const idStr = typeof f._id === 'string' ? f._id : f._id.toString();
+        firmMap.set(idStr, f.name);
+      });
     }
 
     const items = consultations.map((consultation) => {

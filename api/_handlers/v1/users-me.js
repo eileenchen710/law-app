@@ -72,65 +72,25 @@ const loadAppointmentsForUser = async (user) => {
     ...Array.from(serviceMap.values())
   ];
 
-  // Debug: List all firms and test specific queries
-  try {
-    const allFirms = await Firm.find().select('_id name').lean();
-    console.log('[users-me] All firms in database:', allFirms.map(f => ({ id: f._id.toString(), name: f.name })));
-
-    // Test query with the specific ID
-    const mongoose = require('mongoose');
-    const testId = '68dd0de11f8a0e63c6dc1080';
-    const testObjId = new mongoose.Types.ObjectId(testId);
-
-    // Try multiple query approaches
-    const test1 = await Firm.findById(testObjId).select('name').lean();
-    console.log('[users-me] TEST findById with ObjectId:', test1 ? test1.name : 'NOT FOUND');
-
-    const test2 = await Firm.findOne({ _id: testObjId }).select('name').lean();
-    console.log('[users-me] TEST findOne with ObjectId:', test2 ? test2.name : 'NOT FOUND');
-
-    const test3 = await Firm.find({ _id: { $in: [testObjId] } }).select('name').lean();
-    console.log('[users-me] TEST find with $in [ObjectId]:', test3.length, test3.map(f => f.name));
-
-    const test4 = await Firm.find({ _id: testObjId }).select('name').lean();
-    console.log('[users-me] TEST find with _id: ObjectId:', test4.length, test4.map(f => f.name));
-
-    // Compare ObjectId representations
-    const firstFirm = allFirms[0];
-    console.log('[users-me] First firm _id type:', typeof firstFirm._id, firstFirm._id.constructor.name);
-    console.log('[users-me] First firm _id equals testObjId:', firstFirm._id.equals(testObjId));
-    console.log('[users-me] First firm _id toString:', firstFirm._id.toString());
-    console.log('[users-me] testObjId toString:', testObjId.toString());
-  } catch (err) {
-    console.log('[users-me] Error in debug:', err.message);
-  }
+  // Removed debug code - issue identified: firms collection uses string _id instead of ObjectId
 
   // Batch lookup firms
+  // Note: The firms collection stores _id as strings, not ObjectIds
   const firmMap = new Map();
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
 
-    console.log('[users-me] Looking up firms with string IDs:', uniqueFirmIds);
-
-    // Convert string IDs to ObjectId for MongoDB query
-    const mongoose = require('mongoose');
-    const objectIds = uniqueFirmIds.map(id => {
-      try {
-        return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
-      } catch (e) {
-        console.log('[users-me] Invalid ObjectId:', id);
-        return id;
-      }
-    });
-
-    console.log('[users-me] Converted to ObjectIds:', objectIds);
-
-    const firms = await Firm.find({ _id: { $in: objectIds } })
+    // Query with string IDs directly (no ObjectId conversion needed)
+    const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
       .select('name')
       .lean();
-    console.log('[users-me] Firms found in batch query:', firms.length, firms.map(f => ({ id: f._id.toString(), name: f.name })));
 
-    firms.forEach(f => firmMap.set(f._id.toString(), f.name));
+    console.log('[users-me] Firms found in batch query:', firms.length, firms.map(f => ({ id: f._id, name: f.name })));
+
+    firms.forEach(f => {
+      const idStr = typeof f._id === 'string' ? f._id : f._id.toString();
+      firmMap.set(idStr, f.name);
+    });
   }
 
   const results = consultations.map((consultation) => {

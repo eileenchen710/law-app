@@ -168,19 +168,22 @@ const handleGetAppointments = async (req, res) => {
     ];
 
     // Batch lookup firms
-    // Note: The firms collection stores _id as strings, not ObjectIds
+    // Note: MongoDB $in query with string IDs doesn't work reliably in this environment
+    // Using manual filtering as the primary approach
     const firmMap = new Map();
     if (firmIdsToLookup.length > 0) {
       const uniqueFirmIds = [...new Set(firmIdsToLookup)];
 
-      // Query with string IDs directly (no ObjectId conversion needed)
-      const firms = await Firm.find({ _id: { $in: uniqueFirmIds } })
-        .select('name')
-        .lean();
+      // Get all firms and filter manually
+      const allFirms = await Firm.find().lean();
+      const matchingFirms = allFirms.filter(firm =>
+        uniqueFirmIds.includes(firm._id) ||
+        uniqueFirmIds.includes(firm._id.toString())
+      );
 
-      firms.forEach(f => {
-        const idStr = typeof f._id === 'string' ? f._id : f._id.toString();
-        firmMap.set(idStr, f.name);
+      matchingFirms.forEach(firm => {
+        const idStr = typeof firm._id === 'string' ? firm._id : firm._id.toString();
+        firmMap.set(idStr, firm.name);
       });
     }
 

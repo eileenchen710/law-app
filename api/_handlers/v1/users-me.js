@@ -75,49 +75,23 @@ const loadAppointmentsForUser = async (user) => {
   // Removed debug code - issue identified: firms collection uses string _id instead of ObjectId
 
   // Batch lookup firms
-  // Note: The firms collection stores _id as strings, not ObjectIds
+  // Note: MongoDB $in query with string IDs doesn't work reliably in this environment
+  // Using manual filtering as the primary approach
   const firmMap = new Map();
   if (firmIdsToLookup.length > 0) {
     const uniqueFirmIds = [...new Set(firmIdsToLookup)];
 
-    console.log('[users-me] firmIdsToLookup:', firmIdsToLookup);
-    console.log('[users-me] uniqueFirmIds:', uniqueFirmIds);
-    console.log('[users-me] uniqueFirmIds types:', uniqueFirmIds.map(id => typeof id));
-
-    // First, get all firms to compare
+    // Get all firms and filter manually
     const allFirms = await Firm.find().lean();
-    console.log('[users-me] All firms _ids:', allFirms.map(f => f._id));
-    console.log('[users-me] All firms _id types:', allFirms.map(f => typeof f._id));
+    const matchingFirms = allFirms.filter(firm =>
+      uniqueFirmIds.includes(firm._id) ||
+      uniqueFirmIds.includes(firm._id.toString())
+    );
 
-    // Try the query
-    const queryObj = { _id: { $in: uniqueFirmIds } };
-    console.log('[users-me] Query object:', JSON.stringify(queryObj));
-
-    const firms = await Firm.find(queryObj)
-      .select('name')
-      .lean();
-
-    console.log('[users-me] Firms found in batch query:', firms.length, firms.map(f => ({ id: f._id, name: f.name })));
-
-    // Try manual comparison
-    if (firms.length === 0 && allFirms.length > 0) {
-      console.log('[users-me] Manual comparison:');
-      allFirms.forEach(firm => {
-        const matches = uniqueFirmIds.includes(firm._id);
-        console.log(`  Firm ${firm._id} matches: ${matches}`);
-        if (matches) {
-          firmMap.set(firm._id.toString(), firm.name);
-        }
-      });
-    }
-
-    firms.forEach(f => {
-      const idStr = typeof f._id === 'string' ? f._id : f._id.toString();
-      firmMap.set(idStr, f.name);
+    matchingFirms.forEach(firm => {
+      const idStr = typeof firm._id === 'string' ? firm._id : firm._id.toString();
+      firmMap.set(idStr, firm.name);
     });
-
-    console.log('[users-me] firmMap size:', firmMap.size);
-    console.log('[users-me] firmMap keys:', Array.from(firmMap.keys()));
   }
 
   const results = consultations.map((consultation) => {

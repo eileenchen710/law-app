@@ -56,13 +56,18 @@ async function listFirms(req, res) {
       .sort({ createdAt: -1 })
       .toArray();
 
-    // 确保 _id 转换为字符串
+    // 确保 _id 转换为字符串，并处理 available_times
     const firmsWithStringIds = firms.map(firm => ({
       ...firm,
-      _id: firm._id.toString()
+      _id: firm._id.toString(),
+      available_times: normalizeAvailableTimes(firm.available_times)
     }));
 
-    console.log('Listing firms, sample ID:', firmsWithStringIds[0]?._id);
+    console.log('Listing firms, sample:', {
+      id: firmsWithStringIds[0]?._id,
+      name: firmsWithStringIds[0]?.name,
+      available_times_count: firmsWithStringIds[0]?.available_times?.length || 0
+    });
 
     res.status(200).json({
       success: true,

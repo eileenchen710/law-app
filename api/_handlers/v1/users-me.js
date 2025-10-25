@@ -100,6 +100,17 @@ const loadAppointmentsForUser = async (user) => {
     const serviceFirmId = consultation.service_id ? serviceMap.get(consultation.service_id.toString()) : null;
     const effectiveFirmId = consultationFirmId || serviceFirmId;
 
+    // Determine firm name with fallback for deleted/missing firms
+    let firmName = consultation.firm_name;
+    if (!firmName && effectiveFirmId) {
+      firmName = firmMap.get(effectiveFirmId);
+      // If firm_id exists but firm not found in database, use a fallback name
+      if (!firmName) {
+        firmName = '律所（已删除）';
+        console.log('[users-me] Firm not found for ID:', effectiveFirmId, '- using fallback name');
+      }
+    }
+
     const result = {
       id: consultation._id.toString(),
       user_id: consultation.user_id?.toString() || null,
@@ -107,9 +118,7 @@ const loadAppointmentsForUser = async (user) => {
       phone: consultation.phone,
       email: consultation.email,
       firm_id: effectiveFirmId || null,
-      firm_name: consultation.firm_name ||
-        (effectiveFirmId ? firmMap.get(effectiveFirmId) : null) ||
-        null,
+      firm_name: firmName || null,
       service_id: consultation.service_id?.toString() || null,
       service_name: consultation.service_name || '在线咨询',
       time: consultation.preferred_time || consultation.createdAt,

@@ -51,7 +51,7 @@ module.exports = function (merge, { command, mode }) {
       publicPath: '/',
       staticDirectory: 'static',
       router: {
-        mode: 'hash',
+        mode: 'browser',
         customRoutes: {
           '/': '/pages/index/index',
           '/search': '/pages/search/search',

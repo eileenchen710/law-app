@@ -51,7 +51,7 @@ module.exports = function (merge, { command, mode }) {
       publicPath: '/',
       staticDirectory: 'static',
       router: {
-        mode: 'browser'
+        mode: 'hash'
       },
       output: {
         filename: 'js/[name].[hash:8].js',
@@ -100,7 +100,7 @@ module.exports = function (merge, { command, mode }) {
         port: 10086,
         proxy: {
           '/api': {
-            target: 'https://www.goldenfirmiana.com.au',
+            target: 'https://www.fudulegal.com',
             changeOrigin: true,
             secure: true,
             pathRewrite: {

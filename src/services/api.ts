@@ -37,7 +37,7 @@ const getApiBaseUrl = () => {
 
   // 生产环境或微信小程序环境都使用完整 URL
   if (process.env.NODE_ENV === "production" || process.env.TARO_ENV === "weapp") {
-    return `https://www.goldenfirmiana.com.au${envPrefix}`;
+    return `https://www.fudulegal.com${envPrefix}`;
   }
 
   // H5 开发环境可以使用相对路径

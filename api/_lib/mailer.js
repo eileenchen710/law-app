@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const DEFAULT_NOTIFICATION_EMAIL = 'info@goldenfirmiana.com.au';
+const DEFAULT_NOTIFICATION_EMAIL = 'info@fudulegal.com';
 
 let cachedTransporter;
 

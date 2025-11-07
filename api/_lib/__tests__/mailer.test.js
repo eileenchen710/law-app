@@ -51,7 +51,7 @@ test('sends notifications to firm and default admin email', async () => {
 
     const recipients = transporter.sent.map((mail) => mail.to).sort();
 
-    assert.deepStrictEqual(recipients.sort(), ['contact@firm.com', 'info@goldenfirmiana.com.au', 'client@example.com'].sort());
+    assert.deepStrictEqual(recipients.sort(), ['contact@firm.com', 'info@fudulegal.com', 'client@example.com'].sort());
     assert.strictEqual(summary.notifications.length, 2);
     assert.strictEqual(summary.clientConfirmation.status, 'fulfilled');
   } finally {

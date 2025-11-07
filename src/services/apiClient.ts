@@ -1,7 +1,7 @@
 import Taro from "@tarojs/taro";
 
-const API_BASE_URL = "https://www.goldenfirmiana.com.au/api/v1";
-const ADMIN_API_BASE_URL = "https://www.goldenfirmiana.com.au/api/admin";
+const API_BASE_URL = "https://www.fudulegal.com/api/v1";
+const ADMIN_API_BASE_URL = "https://www.fudulegal.com/api/admin";
 
 interface ApiResponse<T> {
   items?: T[];

@@ -53,12 +53,12 @@ module.exports = function (merge, { command, mode }) {
       router: {
         mode: 'browser',
         customRoutes: {
-          '/': '/pages/index/index',
-          '/search': '/pages/search/search',
-          '/me': '/pages/me/me',
-          '/login': '/pages/login/login',
-          '/firm/:id': '/pages/firm-detail/firm-detail',
-          '/service/:id': '/pages/service-detail/service-detail'
+          '/pages/index/index': '/',
+          '/pages/search/search': '/search',
+          '/pages/me/me': '/me',
+          '/pages/login/login': '/login',
+          '/pages/firm-detail/firm-detail': '/firm/:id',
+          '/pages/service-detail/service-detail': '/service/:id'
         }
       },
       output: {

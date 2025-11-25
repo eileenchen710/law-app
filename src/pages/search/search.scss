@@ -77,7 +77,8 @@
 
 .tab-item {
   flex: 1;
-  padding: 8px 12px;
+  padding: 0;
+  min-height: 44px;
   text-align: center;
   border-radius: 12px;
   border: 1px solid rgba(86, 105, 255, 0.18);
@@ -86,6 +87,9 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.active {
     background: linear-gradient(110deg, #2563eb, #7c3aed);
@@ -96,9 +100,11 @@
 }
 
 .tab-label {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .category-bar {

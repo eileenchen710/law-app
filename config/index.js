@@ -27,7 +27,7 @@ module.exports = function (merge, { command, mode }) {
     framework: 'react',
     compiler: 'webpack5',
     cache: {
-      enable: false
+      enable: true
     },
     mini: {
       postcss: {

@@ -8,7 +8,7 @@ import {
   Textarea,
 } from "@tarojs/components";
 import type { ITouchEvent } from "@tarojs/components";
-import Taro, { useLoad, usePageScroll } from "@tarojs/taro";
+import Taro, { useLoad, usePageScroll, useDidShow } from "@tarojs/taro";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./index.scss";
 import logo from "../../assets/logo.png";
@@ -150,7 +150,9 @@ export default function Index() {
           if (current && firms.some((firm) => firm.id === current)) {
             return current;
           }
-          return firms[0]?.id ?? null;
+          // 默认选中中间那家律所
+          const middleIndex = Math.floor(firms.length / 2);
+          return firms[middleIndex]?.id ?? firms[0]?.id ?? null;
         });
 
         console.log("✅ 首页数据加载成功:", {
@@ -165,7 +167,9 @@ export default function Index() {
         const snapshot = getSnapshot();
         setLawFirms(snapshot.lawFirms);
         setLegalServices(snapshot.legalServices);
-        setActiveFirm(snapshot.lawFirms[0]?.id ?? null);
+        // 默认选中中间那家律所
+        const middleIndex = Math.floor(snapshot.lawFirms.length / 2);
+        setActiveFirm(snapshot.lawFirms[middleIndex]?.id ?? snapshot.lawFirms[0]?.id ?? null);
       }
     };
 
@@ -197,6 +201,22 @@ export default function Index() {
 
   useLoad(() => {
     console.log("Page loaded.");
+  });
+
+  // 监听页面显示，处理从其他页面跳转过来的滚动
+  useDidShow(() => {
+    try {
+      const sectionId = Taro.getStorageSync("scrollToSection");
+      if (sectionId) {
+        Taro.removeStorageSync("scrollToSection");
+        // 延迟执行滚动，确保页面已渲染
+        setTimeout(() => {
+          triggerScrollTo(sectionId);
+        }, 300);
+      }
+    } catch (error) {
+      console.warn("Failed to get scrollToSection", error);
+    }
   });
 
   usePageScroll((res) => {
@@ -426,10 +446,13 @@ export default function Index() {
     [serviceItems, selectedCategory]
   );
 
+  // 桌面端导航（替代底部 tabBar）
   const menuItems = [
-    { label: "法律服务", onClick: () => handleNavClick("services") },
+    { label: "首页", onClick: () => Taro.switchTab({ url: "/pages/index/index" }) },
+    { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
     { label: "合作律所", onClick: () => handleNavClick("lawfirms") },
     { label: "联系我们", onClick: () => handleNavClick("contact") },
+    { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
   ];
 
   return (
@@ -453,7 +476,6 @@ export default function Index() {
           <View className="mobile-nav-header">
             <View className="mobile-brand">
               <Image src={logo} className="mobile-logo" mode="aspectFit" />
-              <Text className="mobile-name">法律服务</Text>
             </View>
             <View className="mobile-close" onClick={closeMobileMenu}>
               <Text className="close-icon">×</Text>

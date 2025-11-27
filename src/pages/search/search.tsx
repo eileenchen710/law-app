@@ -70,6 +70,23 @@ export default function Search() {
   // Debounce search query for better performance
   const debouncedQuery = useDebounce(query, 300);
 
+  // 跳转到首页并滚动到指定区域
+  const goToIndexSection = (sectionId?: string) => {
+    if (sectionId) {
+      Taro.setStorageSync("scrollToSection", sectionId);
+    }
+    Taro.switchTab({ url: "/pages/index/index" });
+  };
+
+  // 桌面端导航（替代底部 tabBar）
+  const menuItems = [
+    { label: "首页", onClick: () => goToIndexSection() },
+    { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
+    { label: "合作律所", onClick: () => goToIndexSection("lawfirms") },
+    { label: "联系我们", onClick: () => goToIndexSection("contact") },
+    { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
+  ];
+
   useLoad(() => {
     // Search page loaded
   });
@@ -271,17 +288,6 @@ export default function Search() {
     }
   }, [submittingBooking, formData, selectedServiceId, selectedFirmId, legalServices, lawFirms]);
 
-  const menuItems = [
-    {
-      label: "首页",
-      onClick: () => Taro.switchTab({ url: "/pages/index/index" }),
-    },
-    {
-      label: "后台",
-      onClick: () => Taro.navigateTo({ url: "/pages/admin/index" }),
-    },
-  ];
-
   // Get selected firm or service
   const selectedFirm = selectedFirmId
     ? lawFirms.find((f) => f.id === selectedFirmId)
@@ -480,7 +486,7 @@ export default function Search() {
   if (selectedFirm) {
     return (
       <ScrollView className="search-page search-detail-page" scrollY>
-        <AppHeader showActions={false} scrolled={false} />
+        <AppHeader scrolled={false} menuItems={menuItems} onConsultClick={() => goToIndexSection("contact")} />
 
         <View className="back-button" onClick={handleBackToList}>
           <Text>← 返回搜索</Text>
@@ -697,7 +703,7 @@ export default function Search() {
 
     return (
       <ScrollView className="search-page search-detail-page" scrollY>
-        <AppHeader showActions={false} scrolled={false} />
+        <AppHeader scrolled={false} menuItems={menuItems} onConsultClick={() => goToIndexSection("contact")} />
 
         <View className="back-button" onClick={handleBackToList}>
           <Text>← 返回搜索</Text>
@@ -852,7 +858,7 @@ export default function Search() {
   // Show list view
   return (
     <ScrollView className="search-page" scrollY>
-      <AppHeader showActions={false} scrolled={false} />
+      <AppHeader scrolled={false} menuItems={menuItems} onConsultClick={() => goToIndexSection("contact")} />
 
       <View className="search-hero">
         <Text className="hero-title metallic-gradient-text">智能检索</Text>

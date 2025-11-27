@@ -62,14 +62,30 @@ $border-color: rgba(255, 255, 255, 0.12);
 
 @media (max-width: 768px) {
   .tab-bar {
-    padding: 12px 16px;
-    gap: 6px;
+    padding: 16px 20px;
+    gap: 8px;
 
     .tab-item {
-      padding: 6px 14px;
+      padding: 12px 16px;
 
       .tab-label {
-        font-size: 12px;
+        font-size: 24px;
+      }
+    }
+  }
+}
+
+// 桌面端固定尺寸（大写PX不转换）
+@media (min-width: 769px) {
+  .tab-bar {
+    padding: 12PX 16PX;
+    gap: 6PX;
+
+    .tab-item {
+      padding: 6PX 14PX;
+
+      .tab-label {
+        font-size: 12PX;
       }
     }
   }

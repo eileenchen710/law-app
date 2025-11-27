@@ -10,10 +10,6 @@ $border-white-10: rgba(255, 255, 255, 0.1);
 $bg-white-5: rgba(255, 255, 255, 0.05);
 $bg-white-10: rgba(255, 255, 255, 0.1);
 
-:root {
-  // 控制首页整体字体放大的比例，随视口动态调整
-  --home-font-scale: clamp(1.05, 0.35vw + 0.9, 1.18);
-}
 
 @mixin metallic-text-gradient($fallback-color: $text-white) {
   color: $fallback-color;
@@ -69,7 +65,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   background: $bg-dark;
   min-height: 100vh;
   position: relative;
-  font-size: calc(16px * var(--home-font-scale));
+  font-size: 28px;
   line-height: 1.65;
 
   // 隐藏滚动条但保持功能
@@ -289,24 +285,24 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   .mobile-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
 
     .mobile-logo {
-      width: 32px;
-      height: 32px;
+      width: 56px;
+      height: 56px;
     }
 
     .mobile-name {
       color: #ffffff;
-      font-size: 14px;
+      font-size: 28px;
       font-weight: 600;
       letter-spacing: 0.8px;
     }
   }
 
   .mobile-close {
-    width: 34px;
-    height: 34px;
+    width: 56px;
+    height: 56px;
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
@@ -321,21 +317,37 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
     .close-icon {
       color: rgba(255, 255, 255, 0.8);
-      font-size: 20px;
+      font-size: 32px;
     }
   }
 
   .mobile-menu {
+    // 覆盖 AppHeader.scss 中的全局 .mobile-menu 样式
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-left: none !important;
+    z-index: auto !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+
     display: flex;
     flex-direction: column;
     gap: 24px;
 
     .mobile-menu-item {
       color: rgba(255, 255, 255, 0.78);
-      font-size: 14px;
+      font-size: 28px;
       letter-spacing: 0.6px;
       position: relative;
-      padding-bottom: 6px;
+      padding-bottom: 12px;
       cursor: pointer;
       transition: color 0.3s ease;
 
@@ -363,7 +375,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
   .mobile-consult-btn {
     margin-top: auto;
     width: 100%;
-    height: 44px;
+    height: 80px;
     background: linear-gradient(120deg, #2563eb, #7c3aed);
     color: #ffffff;
     border-radius: 9999px;
@@ -371,7 +383,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 28px;
     font-weight: 500;
   }
 }
@@ -484,7 +496,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
         .badge-text {
           color: rgba(255, 255, 255, 0.92);
-          font-size: clamp(15px, 0.45vw + 13px, 18px);
+          font-size: 14px;
           font-weight: 500;
           letter-spacing: 1px;
         }
@@ -498,7 +510,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
         .title-main {
           display: block;
-          font-size: clamp(46px, 4.5vw, 68px);
+          font-size: clamp(28px, 4vw, 42px);
           font-weight: 500;
           line-height: 1.2;
           letter-spacing: -0.5px;
@@ -508,7 +520,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
         .title-sub {
           display: block;
-          font-size: clamp(44px, 4.2vw, 64px);
+          font-size: clamp(26px, 3.8vw, 38px);
           font-weight: 400;
           line-height: 1.2;
           color: $text-white;
@@ -517,7 +529,7 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
       .hero-desc {
         display: block;
-        font-size: clamp(20px, 0.8vw + 16px, 24px);
+        font-size: 16px;
         width: 100%;
         max-width: 100%;
         margin: 0;
@@ -566,10 +578,10 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
       opacity: 0;
 
       .action-btn {
-        min-width: 130px;
-        height: 48px;
-        padding: 0 28px !important;
-        font-size: clamp(15px, 0.4vw + 14px, 18px) !important;
+        min-width: 120px;
+        height: 44px;
+        padding: 0 24px !important;
+        font-size: 14px !important;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -620,13 +632,13 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
           color: $text-white;
           font-weight: 600;
           margin-bottom: 8px;
-          font-size: clamp(17px, 0.5vw + 15px, 22px);
+          font-size: 15px;
         }
 
         .feature-desc {
           display: block;
           color: $text-white-60;
-          font-size: clamp(15px, 0.3vw + 13px, 19px);
+          font-size: 13px;
         }
       }
     }
@@ -669,10 +681,10 @@ $bg-white-10: rgba(255, 255, 255, 0.1);
 
         .action-btn {
           width: auto;
-          min-width: 110px;
-          height: 40px;
+          min-width: 200px;
+          height: 72px;
           flex: 0 0 auto;
-          font-size: 13px !important;
+          font-size: 26px !important;
         }
       }
 
@@ -774,13 +786,14 @@ button,
     margin-bottom: 48px;
 
     .section-title {
-      font-size: clamp(38px, 3vw, 54px);
+      font-size: clamp(32px, 3vw, 42px);
       font-weight: 700;
       margin-bottom: 16px;
       color: $text-white;
       display: flex;
       flex-direction: column;
       align-items: center;
+      @include metallic-text-gradient();
 
       .title-line {
         display: block;
@@ -795,7 +808,7 @@ button,
 
     .section-desc {
       display: block;
-      font-size: clamp(18px, 0.6vw + 15px, 22px);
+      font-size: 16px;
       color: $text-white-60;
       max-width: 768px;
       margin: 0 auto;
@@ -810,22 +823,23 @@ button,
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: stretch;
-    gap: 24px;
-    max-width: 1200px;
+    gap: 20px;
+    max-width: 60%;
     margin: 0 auto 48px;
     .firm-card {
       position: relative;
-      padding: 32px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       background: $bg-white-5;
       backdrop-filter: blur(8px);
       border: 1px solid $border-white-10;
-      border-radius: 16px;
+      border-radius: 14px;
       transition: all 0.3s;
       cursor: pointer;
       animation: fadeIn 0.8s ease forwards;
       opacity: 0;
+      margin-top: 16px;
 
       &:nth-child(1) {
         animation-delay: 0.2s;
@@ -837,40 +851,52 @@ button,
         animation-delay: 0.4s;
       }
 
-      &.active,
       &:hover {
-        border-color: $primary-color;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        transform: scale(1.02);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 16px 20px -5px rgba(0, 0, 0, 0.1);
+        transform: scale(1.01);
       }
 
-      &.recommended {
-        .recommend-badge {
+      &.active {
+        border-color: $primary-color;
+        box-shadow: 0 20px 25px -5px rgba(241, 196, 152, 0.2);
+        transform: scale(1.02);
+
+        &::before {
+          content: "推荐律所";
           position: absolute;
           top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          padding: 4px 16px;
-          background: $primary-color;
+          padding: 4px 14px;
+          background: linear-gradient(135deg, $primary-color, color.adjust($primary-color, $lightness: 10%));
           color: #000;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
           border-radius: 9999px;
+          white-space: nowrap;
+          box-shadow: 0 4px 12px rgba(241, 196, 152, 0.4);
+        }
+      }
+
+      &.recommended {
+        .recommend-badge {
+          display: none;
         }
       }
 
       .firm-header {
-        margin-bottom: 24px;
+        margin-bottom: 16px;
 
         .firm-logo-section {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 16px;
+          gap: 10px;
+          margin-bottom: 12px;
 
           .firm-logo {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             padding: 4px;
@@ -884,7 +910,7 @@ button,
             justify-content: center;
 
             .firm-name {
-              font-size: clamp(20px, 0.8vw + 18px, 26px);
+              font-size: 14px;
               font-weight: 600;
               color: $text-white;
               line-height: 1.3;
@@ -893,8 +919,8 @@ button,
             .firm-stats {
               display: flex;
               align-items: center;
-              gap: 12px;
-              font-size: clamp(13px, 0.3vw + 12px, 16px);
+              gap: 10px;
+              font-size: 11px;
 
               .firm-rating {
                 color: $primary-color;
@@ -911,40 +937,40 @@ button,
 
         .firm-price {
           display: block;
-          font-size: clamp(15px, 0.3vw + 14px, 18px);
+          font-size: 12px;
           font-weight: 700;
           color: $text-white;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
 
         .firm-desc {
           display: block;
-          font-size: clamp(16px, 0.5vw + 15px, 20px);
+          font-size: 12px;
           color: $text-white-60;
-          line-height: 1.7;
+          line-height: 1.6;
         }
       }
 
       .firm-services {
-        margin-bottom: 20px;
+        margin-bottom: 16px;
 
         .service-item {
           display: flex;
           align-items: flex-start;
-          gap: 12px;
-          margin-bottom: 10px;
+          gap: 8px;
+          margin-bottom: 6px;
 
           .service-check {
             color: $primary-color;
-            font-size: 14px;
+            font-size: 11px;
             flex-shrink: 0;
             margin-top: 2px;
           }
 
           .service-text {
             color: $text-white-80;
-            font-size: clamp(18px, 0.35vw + 16px, 22px);
-            line-height: 1.75;
+            font-size: 12px;
+            line-height: 1.6;
           }
         }
       }
@@ -952,19 +978,19 @@ button,
       .firm-practice-areas {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 24px;
+        gap: 6px;
+        margin-bottom: 16px;
 
         .practice-area-tag {
           display: inline-block;
-          padding: 4px 12px;
+          padding: 3px 10px;
           background: rgba(241, 196, 152, 0.15);
           border: 1px solid rgba(241, 196, 152, 0.3);
-          border-radius: 12px;
+          border-radius: 10px;
 
           .practice-area-text {
             color: $primary-color;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
           }
         }
@@ -972,11 +998,11 @@ button,
 
       .firm-btn {
         width: 100%;
-        height: 40px;
+        height: 34px;
         padding: 0;
         background: $primary-color;
         color: #000;
-        font-size: clamp(15px, 0.4vw + 14px, 18px);
+        font-size: 12px;
         font-weight: 600;
         border-radius: 9999px;
         border: none;
@@ -1014,7 +1040,7 @@ button,
 
       .stat-number {
         display: block;
-        font-size: clamp(34px, 1vw + 30px, 46px);
+        font-size: 32px;
         font-weight: 700;
         margin-bottom: 8px;
         @include metallic-text-gradient();
@@ -1022,7 +1048,7 @@ button,
 
       .stat-label {
         display: block;
-        font-size: 14px;
+        font-size: 13px;
         color: $text-white-60;
       }
     }
@@ -1070,7 +1096,7 @@ button,
     margin-bottom: 48px;
 
     .section-title {
-      font-size: clamp(38px, 3vw, 54px);
+      font-size: clamp(32px, 3vw, 42px);
       font-weight: 700;
       margin-bottom: 16px;
       color: $text-white;
@@ -1079,7 +1105,7 @@ button,
 
     .section-desc {
       display: block;
-      font-size: clamp(18px, 0.6vw + 15px, 22px);
+      font-size: 16px;
       color: $text-white-60;
       max-width: 768px;
       margin: 0 auto;
@@ -1094,7 +1120,7 @@ button,
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 48px;
 
     .category-tab {
@@ -1128,11 +1154,11 @@ button,
       }
 
       .category-icon {
-        font-size: 16px;
+        font-size: 14px;
       }
 
       .category-text {
-        font-size: 14px;
+        font-size: 13px;
         color: $text-white-80;
         font-weight: 500;
       }
@@ -1158,19 +1184,19 @@ button,
         padding: 0 18px;
 
         .meta-label {
-          font-size: clamp(13px, 0.2vw + 12px, 16px);
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.45);
           letter-spacing: 0.6px;
         }
 
         .meta-name {
-          font-size: clamp(15px, 0.3vw + 13px, 18px);
+          font-size: 13px;
           color: rgba(255, 255, 255, 0.75);
           font-weight: 500;
         }
 
         .meta-rating {
-          font-size: 12px;
+          font-size: 11px;
           color: $primary-color;
           letter-spacing: 0.6px;
         }
@@ -1178,7 +1204,7 @@ button,
 
       .service-card {
         position: relative;
-        padding: 24px;
+        padding: 18px;
         border-radius: 18px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1228,8 +1254,8 @@ button,
           gap: 16px;
 
           .service-avatar {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             align-self: flex-start;
             border-radius: 50%;
             background: linear-gradient(
@@ -1245,7 +1271,7 @@ button,
             flex-shrink: 0;
 
             .avatar-text {
-              font-size: clamp(20px, 0.4vw + 18px, 26px);
+              font-size: 16px;
               font-weight: 600;
               color: #fff;
               letter-spacing: 1px;
@@ -1263,7 +1289,7 @@ button,
             justify-content: center;
 
             .service-title {
-              font-size: clamp(20px, 0.8vw + 17px, 26px);
+              font-size: 16px;
               font-weight: 600;
               color: #ffffff;
               margin-bottom: 6px;
@@ -1277,7 +1303,7 @@ button,
 
             .service-lawyer {
               display: block;
-              font-size: clamp(13px, 0.4vw + 12px, 16px);
+              font-size: 13px;
               color: rgba(255, 255, 255, 0.65);
               letter-spacing: 0.4px;
               line-height: 1.5;
@@ -1289,25 +1315,25 @@ button,
         }
 
         .service-description {
-          font-size: clamp(18px, 0.8vw + 16px, 24px);
+          font-size: 14px;
           color: rgba(255, 255, 255, 0.7);
-          line-height: 1.85;
+          line-height: 1.7;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
-          min-height: 56px;
+          min-height: 48px;
         }
 
         .service-meta-row {
           display: flex;
           align-items: center;
           gap: 14px;
-          font-size: clamp(13px, 0.3vw + 12px, 16px);
+          font-size: 13px;
 
           .service-chip {
-            padding: 8px 18px;
+            padding: 6px 14px;
             border-radius: 9999px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1323,12 +1349,12 @@ button,
 
         .service-cta {
           width: 100%;
-          height: 48px;
+          height: 40px;
           margin-top: auto;
           border-radius: 9999px;
           background: linear-gradient(120deg, #2563eb, #7c3aed);
           color: #ffffff;
-          font-size: clamp(15px, 0.4vw + 14px, 18px);
+          font-size: 14px;
           font-weight: 500;
           letter-spacing: 0.4px;
           border: none;
@@ -1369,7 +1395,7 @@ button,
     margin-bottom: 48px;
 
     .section-title {
-      font-size: clamp(38px, 3vw, 54px);
+      font-size: clamp(32px, 3vw, 42px);
       font-weight: 700;
       margin-bottom: 16px;
       color: $text-white;
@@ -1390,7 +1416,7 @@ button,
 
     .section-desc {
       display: block;
-      font-size: clamp(18px, 0.6vw + 15px, 22px);
+      font-size: 16px;
       color: $text-white-60;
       max-width: 768px;
       margin: 0 auto;
@@ -1415,7 +1441,7 @@ button,
 
       .form-title {
         display: block;
-        font-size: clamp(18px, 0.3vw + 16px, 22px);
+        font-size: 18px;
         font-weight: 600;
         color: $text-white;
         margin-bottom: 8px;
@@ -1423,7 +1449,7 @@ button,
 
       .form-desc {
         display: block;
-        font-size: clamp(14px, 0.3vw + 13px, 17px);
+        font-size: 14px;
         color: $text-white-60;
         line-height: 1.5;
         word-wrap: break-word;
@@ -1446,18 +1472,18 @@ button,
       width: fit-content;
 
       .selected-label {
-        font-size: clamp(13px, 0.2vw + 12px, 16px);
+        font-size: 13px;
         color: rgba(255, 255, 255, 0.6);
       }
 
       .selected-value {
-        font-size: clamp(13px, 0.2vw + 12px, 16px);
+        font-size: 13px;
         font-weight: 500;
         letter-spacing: 0.4px;
       }
 
       .selected-clear {
-        font-size: clamp(13px, 0.2vw + 12px, 16px);
+        font-size: 13px;
         color: $primary-color;
         cursor: pointer;
         transition: color 0.3s;
@@ -1481,7 +1507,7 @@ button,
 
         .form-label {
           display: block;
-          font-size: clamp(15px, 0.3vw + 14px, 18px);
+          font-size: 14px;
           color: $text-white;
           margin-bottom: 8px;
 
@@ -1498,7 +1524,7 @@ button,
           border: 1px solid $border-white-10;
           border-radius: 8px;
           transition: all 0.3s;
-          font-size: clamp(14px, 0.3vw + 13px, 17px);
+          font-size: 14px;
           color: $text-white;
 
           &:focus {
@@ -1508,7 +1534,7 @@ button,
 
           .placeholder {
             color: rgba(255, 255, 255, 0.4);
-            font-size: clamp(12px, 0.2vw + 11px, 14px);
+            font-size: 13px;
 
             &.selected {
               color: rgba(255, 255, 255, 0.85);
@@ -1526,7 +1552,7 @@ button,
           width: 100%;
           min-height: 120px;
           padding: 14px;
-          font-size: clamp(14px, 0.3vw + 13px, 17px) !important;
+          font-size: 14px !important;
           line-height: 1.6;
           box-sizing: border-box;
         }
@@ -1534,11 +1560,11 @@ button,
 
       .submit-btn {
         width: 100%;
-        height: 48px;
+        height: 44px;
         padding: 0;
         background: $primary-color;
         color: #000;
-        font-size: clamp(15px, 0.4vw + 14px, 18px);
+        font-size: 14px;
         font-weight: 600;
         border-radius: 9999px;
         border: none;
@@ -1609,6 +1635,13 @@ button,
   }
 }
 
+// 桌面端字体固定（不转换）
+@media (min-width: 769px) {
+  .index {
+    font-size: 14PX;
+  }
+}
+
 // 响应式设计 - 平板端
 @media (max-width: 1024px) {
   .lawfirms-grid {
@@ -1636,52 +1669,52 @@ button,
 
     .navbar-logo {
       .logo-image {
-        height: 48px;
-        width: 48px;
+        height: 96px;
+        width: 96px;
       }
 
       .logo-text {
-        font-size: 12px;
+        font-size: 28px;
       }
     }
 
     .consult-btn {
-      width: 70px !important;
-      height: 26px !important;
-      font-size: 9px !important;
+      width: 140px !important;
+      height: 56px !important;
+      font-size: 24px !important;
     }
   }
 
   // Hero 区域调整
   .hero-section {
-    padding: 80px 0.5rem 40px;
+    padding: 180px 16px 60px;
 
     .hero-content {
       padding: 0;
 
       .hero-text-section {
         .hero-badge {
-          padding: 6px 16px;
-          margin-bottom: 24px;
+          padding: 16px 32px;
+          margin-bottom: 40px;
 
           .badge-text {
-            font-size: 13px;
+            font-size: 28px;
           }
         }
 
         .hero-title {
-          margin-bottom: 12px;
+          margin-bottom: 24px;
 
           .title-main,
           .title-sub {
-            // 继承响应式字体大小，移动端自动缩小
             line-height: 1.2;
           }
         }
 
         .hero-desc {
           display: block;
-          margin-bottom: 24px;
+          font-size: 32px;
+          margin-bottom: 40px;
           padding: 0;
           width: 100%;
           max-width: none;
@@ -1693,21 +1726,21 @@ button,
 
         .hero-actions {
           flex-direction: column;
-          gap: 16px;
+          gap: 24px;
           width: 100%;
           padding: 0;
 
           .action-btn {
             width: 100%;
-            height: 42px;
-            font-size: 14px;
+            height: 80px;
+            font-size: 28px;
           }
         }
       }
 
       .hero-image-section {
         .hero-image-container {
-          margin-bottom: 32px;
+          margin-bottom: 48px;
           padding: 0;
         }
       }
@@ -1716,12 +1749,12 @@ button,
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 32px;
+        gap: 20px;
+        margin-bottom: 48px;
 
         .feature-card {
           flex: 1;
-          padding: 12px;
+          padding: 20px;
           text-align: center;
           display: flex;
           flex-direction: column;
@@ -1729,17 +1762,17 @@ button,
           justify-content: center;
 
           .feature-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
+            font-size: 48px;
+            margin-bottom: 16px;
           }
 
           .feature-title {
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 28px;
+            margin-bottom: 8px;
           }
 
           .feature-desc {
-            font-size: 12px;
+            font-size: 24px;
           }
         }
       }
@@ -1748,94 +1781,127 @@ button,
 
   // 律所展示调整
   .lawfirms-section {
-    padding: 40px 0.5rem;
+    padding: 60px 16px;
 
     .section-header {
-      margin-bottom: 24px;
+      margin-bottom: 40px;
 
       .section-title {
-        font-size: clamp(26px, 5vw, 32px);
-        margin-bottom: 8px;
+        font-size: 48px;
+        margin-bottom: 16px;
       }
 
       .section-desc {
-        font-size: clamp(16px, 2vw, 18px);
+        font-size: 28px;
       }
     }
 
     .lawfirms-grid {
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin: 0 0 32px 0;
+      gap: 24px;
+      margin: 0 0 48px 0;
       max-width: 100%;
 
       .firm-card {
-        padding: 10px;
+        padding: 28px;
+        margin-top: 24px;
+
+        &.active::before {
+          font-size: 24px;
+          padding: 8px 24px;
+          top: -20px;
+        }
+
+        .firm-practice-areas {
+          gap: 12px;
+          margin-bottom: 24px;
+
+          .practice-area-tag {
+            padding: 8px 16px;
+            border-radius: 16px;
+
+            .practice-area-text {
+              font-size: 24px;
+            }
+          }
+        }
 
         .firm-header {
           .firm-logo-section {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 16px;
+            margin-bottom: 16px;
 
             .firm-logo {
-              width: 32px;
-              height: 32px;
+              width: 56px;
+              height: 56px;
+            }
+
+            .firm-name-section {
+              .firm-name {
+                font-size: 30px;
+                line-height: 1.25;
+              }
+
+              .firm-stats {
+                font-size: 24px;
+                gap: 16px;
+
+                .firm-rating,
+                .firm-cases {
+                  font-size: 24px;
+                }
+              }
             }
           }
 
-          .firm-name {
-            font-size: 20px;
-            line-height: 1.25;
-          }
-
           .firm-price {
-            font-size: 20px;
-            margin-bottom: 8px;
+            font-size: 26px;
+            margin-bottom: 12px;
           }
 
           .firm-desc {
-            font-size: 16px;
+            font-size: 26px;
           }
         }
 
         .firm-services {
-          margin-bottom: 20px;
+          margin-bottom: 24px;
 
           .service-item {
-            margin-bottom: 8px;
+            margin-bottom: 12px;
 
             .service-check {
-              font-size: 16px;
+              font-size: 24px;
             }
 
             .service-text {
-              font-size: 16px;
+              font-size: 26px;
             }
           }
         }
 
         .firm-btn {
-          height: 42px;
-          font-size: 14px;
+          height: 72px;
+          font-size: 28px;
         }
       }
     }
 
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 24px;
       margin: 0;
       max-width: 100%;
 
       .stat-item {
         .stat-number {
-          font-size: 28px;
+          font-size: 48px;
         }
 
         .stat-label {
-          font-size: 14px;
+          font-size: 26px;
         }
       }
     }
@@ -1843,79 +1909,79 @@ button,
 
   // 服务部分调整
   .services-section {
-    padding: 40px 0.5rem;
+    padding: 60px 16px;
 
     .section-header {
-      margin-bottom: 24px;
+      margin-bottom: 40px;
 
       .section-title {
-        font-size: clamp(26px, 5vw, 32px);
+        font-size: 48px;
       }
 
       .section-desc {
-        font-size: clamp(16px, 2vw, 18px);
+        font-size: 28px;
       }
     }
 
     .category-tabs {
-      gap: 8px;
-      margin-bottom: 24px;
+      gap: 16px;
+      margin-bottom: 40px;
 
       .category-tab {
-        padding: 4px 8px;
+        padding: 12px 20px;
 
         .category-icon {
-          font-size: 14px;
+          font-size: 28px;
         }
 
         .category-text {
-          font-size: 12px;
+          font-size: 26px;
         }
       }
     }
 
     .services-grid {
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 32px;
       margin: 0;
       max-width: 100%;
 
       .service-card-wrapper {
-        gap: 10px;
+        gap: 16px;
 
         .service-card-meta {
-          padding: 0 12px;
+          padding: 0 20px;
 
           .meta-label,
           .meta-rating {
-            font-size: 12px;
+            font-size: 24px;
           }
 
           .meta-name {
-            font-size: 13px;
+            font-size: 26px;
           }
         }
 
         .service-card {
-          padding: 10px;
-          gap: 12px;
+          padding: 24px;
+          gap: 20px;
 
           .service-card-header {
-            gap: 12px;
+            gap: 20px;
 
             .service-avatar {
-              width: 56px;
-              height: 56px;
+              width: 80px;
+              height: 80px;
               align-self: flex-start;
 
               .avatar-text {
-                font-size: 22px;
+                font-size: 32px;
               }
             }
 
             .service-heading {
               .service-title {
-                font-size: 18px;
+                font-size: 32px;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 white-space: normal;
@@ -1923,7 +1989,7 @@ button,
               }
 
               .service-lawyer {
-                font-size: 13px;
+                font-size: 26px;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 white-space: normal;
@@ -1932,26 +1998,26 @@ button,
           }
 
           .service-description {
-            font-size: 16px;
+            font-size: 28px;
             min-height: auto;
           }
 
           .service-meta-row {
-            gap: 10px;
+            gap: 16px;
 
             .service-chip {
-              padding: 6px 14px;
-              font-size: 13px;
+              padding: 14px 24px;
+              font-size: 26px;
             }
 
             .service-duration {
-              font-size: 13px;
+              font-size: 26px;
             }
           }
 
           .service-cta {
-            height: 42px;
-            font-size: 14px;
+            height: 80px;
+            font-size: 28px;
           }
         }
       }
@@ -1960,34 +2026,34 @@ button,
 
   // 联系表单调整
   .contact-section {
-    padding: 40px 0.5rem;
+    padding: 60px 16px;
 
     .section-header {
-      margin-bottom: 24px;
+      margin-bottom: 40px;
 
       .section-title {
-        font-size: clamp(24px, 4.5vw, 30px);
+        font-size: 48px;
       }
 
       .section-desc {
-        font-size: clamp(16px, 2.5vw, 18px);
+        font-size: 28px;
       }
     }
 
     .contact-form {
-      padding: 10px;
+      padding: 24px;
       margin: 0;
       max-width: 100%;
 
       .form-header {
-        margin-bottom: 20px;
+        margin-bottom: 32px;
 
         .form-title {
-          font-size: clamp(18px, 3vw, 22px);
+          font-size: 36px;
         }
 
         .form-desc {
-          font-size: clamp(14px, 2.5vw, 16px);
+          font-size: 28px;
           line-height: 1.5;
           word-wrap: break-word;
           overflow-wrap: break-word;
@@ -1998,44 +2064,44 @@ button,
       .form-content {
         .form-row {
           grid-template-columns: 1fr !important;
-          gap: 16px;
-          margin-bottom: 16px;
+          gap: 24px;
+          margin-bottom: 24px;
         }
 
         .form-group {
-          margin-bottom: 16px;
+          margin-bottom: 24px;
 
           .form-label {
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 28px;
+            margin-bottom: 8px;
           }
 
           .form-input,
           .form-select,
           .form-textarea {
-            padding: 10px 14px;
-            font-size: 0.55rem !important;
+            padding: 20px 24px;
+            font-size: 28px !important;
 
             .placeholder {
-              font-size: 13px;
+              font-size: 26px;
             }
           }
 
           .form-textarea {
-            min-height: 90px;
-            font-size: 0.55rem !important;
+            min-height: 160px;
+            font-size: 28px !important;
           }
         }
 
         .submit-btn {
-          height: 44px;
-          font-size: 15px;
-          margin-bottom: 16px;
+          height: 80px;
+          font-size: 28px;
+          margin-bottom: 24px;
         }
 
         .form-footer {
           .footer-text {
-            font-size: 13px;
+            font-size: 24px;
           }
         }
       }
@@ -2044,26 +2110,26 @@ button,
 
   // 页脚调整
   .footer {
-    padding: 20px 0.5rem;
+    padding: 32px 16px;
 
     .footer-content {
       flex-direction: column;
-      gap: 12px;
+      gap: 20px;
       text-align: center;
 
       .footer-brand {
         .footer-logo {
-          height: 24px;
-          width: 24px;
+          height: 40px;
+          width: 40px;
         }
 
         .footer-name {
-          font-size: 12px;
+          font-size: 26px;
         }
       }
 
       .footer-copyright {
-        font-size: 11px;
+        font-size: 24px;
       }
     }
   }
@@ -2073,24 +2139,24 @@ button,
   .primary-btn,
   .secondary-btn {
     width: auto;
-    min-width: 80px;
-    height: 32px;
-    font-size: 11px;
+    min-width: 160px;
+    height: 72px;
+    font-size: 28px;
   }
 }
 
 // 小屏手机适配
 @media (max-width: 480px) {
   .stats-grid {
-    gap: 12px;
+    gap: 20px;
 
     .stat-item {
       .stat-number {
-        font-size: 20px;
+        font-size: 44px;
       }
 
       .stat-label {
-        font-size: 11px;
+        font-size: 24px;
       }
     }
   }

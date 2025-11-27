@@ -223,6 +223,23 @@ export default function Me() {
   const [editingFirmId, setEditingFirmId] = useState<string | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
+  // 跳转到首页并滚动到指定区域
+  const goToIndexSection = (sectionId?: string) => {
+    if (sectionId) {
+      Taro.setStorageSync("scrollToSection", sectionId);
+    }
+    Taro.switchTab({ url: "/pages/index/index" });
+  };
+
+  // 桌面端导航（替代底部 tabBar）
+  const menuItems = [
+    { label: "首页", onClick: () => goToIndexSection() },
+    { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
+    { label: "合作律所", onClick: () => goToIndexSection("lawfirms") },
+    { label: "联系我们", onClick: () => goToIndexSection("contact") },
+    { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
+  ];
+
   useLoad(() => {
     // Me page loaded
   });
@@ -1420,7 +1437,7 @@ export default function Me() {
 
   return (
     <ScrollView className="me-page" scrollY>
-      <AppHeader showActions={false} scrolled={false} />
+      <AppHeader scrolled={false} menuItems={menuItems} onConsultClick={() => goToIndexSection("contact")} />
       {(loading || authenticating) && !user ? (
         <Loading text={authenticating ? "正在登录..." : "加载中..."} />
       ) : (

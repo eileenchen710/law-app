@@ -12,7 +12,7 @@ interface AppHeaderProps {
   scrolled?: boolean;
   showActions?: boolean;
   onConsultClick?: () => void;
-  menuItems?: MenuItem[];
+  menuItems?: MenuItem[];  // 桌面端导航菜单
 }
 
 export default function AppHeader({
@@ -22,6 +22,7 @@ export default function AppHeader({
   menuItems = [],
 }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const hasMenuItems = menuItems.length > 0;
 
   const handleMobileMenuToggle = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -42,8 +43,7 @@ export default function AppHeader({
         <View className="app-header-container">
           <View className="app-header-logo">
             <Image src={logo} className="logo-image" mode="aspectFit" />
-            <Text className="logo-text metallic-gradient-text">法律服务</Text>
-            {menuItems.length > 0 && (
+            {hasMenuItems && (
               <View
                 className="mobile-menu-toggle"
                 onClick={handleMobileMenuToggle}
@@ -54,7 +54,8 @@ export default function AppHeader({
               </View>
             )}
           </View>
-          {menuItems.length > 0 && (
+          {/* 桌面端导航区域 */}
+          {hasMenuItems && (
             <View className="app-header-menu">
               {menuItems.map((item, idx) => (
                 <Text key={idx} className="menu-item" onClick={item.onClick}>
@@ -77,7 +78,7 @@ export default function AppHeader({
       </View>
 
       {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && menuItems.length > 0 && (
+      {mobileMenuOpen && hasMenuItems && (
         <>
           <View
             className="mobile-menu-overlay"

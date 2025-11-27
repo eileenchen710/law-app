@@ -1,31 +1,32 @@
 .search-page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 80px 10px 80px;
+  padding: 160px 20px 160px;
   background: #0a0a0a;
   color: rgba(231, 236, 255, 0.92);
+  font-size: 28px;
 }
 
 .search-detail-page {
-  padding-top: 100px;
+  padding-top: 200px;
 }
 
 .search-hero {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
 
   .hero-title {
-    font-size: 26px;
+    font-size: 52px;
     font-weight: 600;
     color: #ffffff;
-    letter-spacing: 0.6px;
+    letter-spacing: 1.2px;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   .hero-desc {
     display: block;
-    font-size: 14px;
+    font-size: 28px;
     color: rgba(206, 213, 255, 0.75);
     line-height: 1.6;
     white-space: normal;
@@ -35,52 +36,54 @@
 
 .search-box {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .search-input {
   width: 100%;
   box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 28px 32px;
+  border-radius: 28px;
   border: 1px solid rgba(120, 131, 255, 0.25);
   background: rgba(17, 25, 48, 0.72);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 28px;
+  line-height: 1.5;
+  min-height: 88px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
 .search-input::placeholder {
   color: rgba(194, 204, 255, 0.6);
-  font-size: 13px;
+  font-size: 26px;
 }
 
 .clear-btn {
   position: absolute;
-  right: 8px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  padding: 0 14px;
+  padding: 0 28px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.25);
   color: rgba(235, 238, 255, 0.92);
   border: none;
-  font-size: 12px;
+  font-size: 24px;
 }
 
 .tab-bar {
   display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .tab-item {
   flex: 1;
   padding: 0;
-  min-height: 44px;
+  min-height: 88px;
   text-align: center;
-  border-radius: 12px;
+  border-radius: 24px;
   border: 1px solid rgba(86, 105, 255, 0.18);
   background: rgba(15, 22, 44, 0.65);
   color: rgba(206, 213, 255, 0.72);
@@ -100,7 +103,7 @@
 }
 
 .tab-label {
-  font-size: 17px;
+  font-size: 34px;
   font-weight: 500;
   line-height: 1;
   display: flex;
@@ -110,20 +113,20 @@
 .category-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 20px;
+  margin-bottom: 36px;
 }
 
 .category-chip {
-  padding: 8px 12px;
-  border-radius: 14px;
+  padding: 16px 24px;
+  border-radius: 28px;
   border: 1px solid rgba(99, 110, 255, 0.18);
   background: rgba(17, 26, 50, 0.6);
   color: rgba(210, 217, 255, 0.78);
-  font-size: 13px;
+  font-size: 26px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   transition: all 0.2s ease;
 
   &.selected {
@@ -134,32 +137,32 @@
 }
 
 .category-icon {
-  font-size: 15px;
+  font-size: 30px;
 }
 
 .result-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
-  margin: 12px 0;
+  gap: 24px;
+  margin: 24px 0;
 }
 
 .result-count {
-  font-size: 14px;
+  font-size: 28px;
   font-weight: 500;
   color: rgba(226, 232, 255, 0.88);
 }
 
 .result-query {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.65);
 }
 
 .result-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 18px;
+  gap: 36px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -167,8 +170,8 @@
 }
 
 .result-card {
-  padding: 18px 20px;
-  border-radius: 18px;
+  padding: 36px 40px;
+  border-radius: 36px;
   background: rgba(15, 22, 44, 0.7);
   border: 1px solid rgba(86, 105, 255, 0.22);
   box-shadow: 0 16px 36px rgba(5, 9, 24, 0.5);
@@ -195,21 +198,21 @@
 .card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   pointer-events: none;
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   color: #ffffff;
 }
 
 .card-tag {
-  font-size: 12px;
-  padding: 2px 10px;
+  font-size: 24px;
+  padding: 4px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.18);
   color: rgba(214, 222, 255, 0.9);
@@ -221,10 +224,10 @@
 }
 
 .card-desc {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(201, 209, 255, 0.78);
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   pointer-events: none;
 }
 
@@ -232,29 +235,29 @@
 .card-footer {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 24px;
   color: rgba(195, 204, 255, 0.72);
-  font-size: 12px;
+  font-size: 24px;
   pointer-events: none;
 }
 
 .meta-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .service-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 20px;
   pointer-events: none;
 }
 
 .chip {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 24px;
+  padding: 8px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.16);
   color: rgba(223, 230, 255, 0.9);
@@ -262,43 +265,43 @@
 }
 
 .empty-state {
-  margin-top: 20px;
-  padding: 24px 20px;
-  border-radius: 18px;
+  margin-top: 40px;
+  padding: 48px 40px;
+  border-radius: 36px;
   background: rgba(20, 28, 54, 0.8);
   border: 1px dashed rgba(99, 110, 255, 0.3);
   text-align: center;
   color: rgba(203, 212, 255, 0.78);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   align-items: center;
 }
 
 .empty-title {
-  font-size: 15px;
+  font-size: 30px;
   font-weight: 600;
   color: rgba(240, 244, 255, 0.95);
 }
 
 .empty-desc {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(196, 205, 255, 0.72);
 }
 
 .empty-btn {
-  padding: 0 22px;
+  padding: 0 44px;
   border-radius: 999px;
   background: linear-gradient(110deg, #2563eb, #7c3aed);
   color: #ffffff;
   border: none;
-  font-size: 13px;
-  height: 34px;
-  line-height: 34px;
+  font-size: 26px;
+  height: 68px;
+  line-height: 68px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 12px;
 }
 
 .glass-header,
@@ -315,7 +318,7 @@
 
 .card-bg-black {
   background: #111 !important;
-  border-radius: 18px;
+  border-radius: 36px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
 }
 
@@ -333,13 +336,13 @@
 .back-button {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px;
-  margin-top: 16px;
-  margin-bottom: 24px;
-  border-radius: 12px;
+  padding: 16px 32px;
+  margin-top: 32px;
+  margin-bottom: 48px;
+  border-radius: 24px;
   background: rgba(79, 109, 255, 0.16);
   color: rgba(223, 230, 255, 0.9);
-  font-size: 14px;
+  font-size: 28px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -351,22 +354,22 @@
 
 .detail-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
 }
 
 .detail-title {
   display: block;
-  font-size: 26px;
+  font-size: 52px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 
 .detail-rating,
 .detail-category-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 12px;
+  padding: 12px 28px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.2);
   border: 1px solid rgba(79, 109, 255, 0.3);
@@ -374,34 +377,34 @@
 
 .rating-text,
 .category-text {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(239, 242, 255, 0.92);
 }
 
 .category-icon {
-  font-size: 16px;
+  font-size: 32px;
 }
 
 .detail-section {
-  margin-bottom: 24px;
-  padding: 20px;
+  margin-bottom: 48px;
+  padding: 40px;
   background: rgba(15, 22, 44, 0.7);
   border: 1px solid rgba(86, 105, 255, 0.22);
-  border-radius: 18px;
+  border-radius: 36px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
 .section-title {
   display: block;
-  font-size: 18px;
+  font-size: 36px;
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .section-content {
-  font-size: 14px;
+  font-size: 28px;
   color: rgba(201, 209, 255, 0.78);
   line-height: 1.8;
 }
@@ -409,7 +412,7 @@
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 32px;
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
@@ -417,22 +420,22 @@
 }
 
 .info-item {
-  padding: 12px;
+  padding: 24px;
   background: rgba(17, 25, 48, 0.6);
-  border-radius: 12px;
+  border-radius: 24px;
   border: 1px solid rgba(99, 110, 255, 0.18);
 }
 
 .info-label {
   display: block;
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.65);
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .info-value {
   display: block;
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   color: rgba(239, 242, 255, 0.92);
 }
@@ -440,28 +443,28 @@
 .service-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 20px;
 }
 
 .service-tag {
-  padding: 8px 14px;
+  padding: 16px 28px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.16);
   color: rgba(223, 230, 255, 0.9);
-  font-size: 13px;
+  font-size: 26px;
 }
 
 .services-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
 }
 
 .service-card {
-  padding: 16px;
+  padding: 32px;
   background: rgba(17, 25, 48, 0.6);
   border: 1px solid rgba(99, 110, 255, 0.18);
-  border-radius: 14px;
+  border-radius: 28px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -475,19 +478,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 20px;
+  margin-bottom: 16px;
 }
 
 .service-title {
-  font-size: 15px;
+  font-size: 30px;
   font-weight: 600;
   color: rgba(226, 232, 255, 0.88);
 }
 
 .service-category {
-  font-size: 11px;
-  padding: 3px 10px;
+  font-size: 22px;
+  padding: 6px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.18);
   color: rgba(214, 222, 255, 0.9);
@@ -495,28 +498,28 @@
 }
 
 .service-desc {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(195, 204, 255, 0.72);
   line-height: 1.6;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .service-meta {
   display: flex;
-  gap: 12px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .meta-text {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.65);
 }
 
 .firm-card {
-  padding: 16px;
+  padding: 32px;
   background: rgba(17, 25, 48, 0.6);
   border: 1px solid rgba(99, 110, 255, 0.18);
-  border-radius: 14px;
+  border-radius: 28px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -530,19 +533,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .firm-name {
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   color: rgba(226, 232, 255, 0.88);
 }
 
 .firm-rating {
-  font-size: 12px;
-  padding: 3px 10px;
+  font-size: 24px;
+  padding: 6px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.18);
   color: rgba(214, 222, 255, 0.9);
@@ -550,29 +553,29 @@
 }
 
 .firm-desc {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(195, 204, 255, 0.72);
   line-height: 1.6;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .firm-meta {
   display: flex;
-  gap: 12px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .booking-section {
-  margin-top: 24px;
+  margin-top: 48px;
 }
 
 .booking-btn {
   width: 100%;
-  padding: 16px;
-  border-radius: 14px;
+  padding: 32px;
+  border-radius: 28px;
   background: linear-gradient(110deg, #2563eb, #7c3aed);
   color: #ffffff;
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   border: none;
   box-shadow: 0 12px 32px rgba(79, 109, 255, 0.35);
@@ -585,20 +588,20 @@
 }
 
 .booking-form {
-  padding: 24px;
+  padding: 48px;
   background: rgba(15, 22, 44, 0.7);
   border: 1px solid rgba(86, 105, 255, 0.22);
-  border-radius: 18px;
+  border-radius: 36px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
 .form-title {
   display: block;
-  font-size: 18px;
+  font-size: 36px;
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   text-align: center;
 }
 
@@ -606,17 +609,17 @@
 .form-textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  border-radius: 24px;
   border: 1px solid rgba(120, 131, 255, 0.25);
   background: rgba(17, 25, 48, 0.72);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 28px;
 }
 
 .form-textarea {
-  min-height: 100px;
+  min-height: 200px;
 }
 
 .picker-input {
@@ -631,9 +634,9 @@
 }
 
 .form-hint {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.6);
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .form-input::placeholder,
@@ -643,21 +646,21 @@
 
 .form-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 24px;
+  margin-top: 40px;
   align-items: center;
 }
 
 .form-btn {
   flex: 1;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 28px;
+  border-radius: 24px;
+  font-size: 30px;
   font-weight: 600;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 48px;
+  height: 96px;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -686,11 +689,11 @@
 
 // Lawyer card styles
 .lawyer-card {
-  padding: 16px;
+  padding: 32px;
   background: rgba(17, 25, 48, 0.6);
   border: 1px solid rgba(99, 110, 255, 0.18);
-  border-radius: 14px;
-  margin-bottom: 12px;
+  border-radius: 28px;
+  margin-bottom: 24px;
 
   &:last-child {
     margin-bottom: 0;
@@ -700,113 +703,556 @@
 .lawyer-header {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 24px;
+  margin-bottom: 20px;
 }
 
 .lawyer-name {
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   color: rgba(226, 232, 255, 0.88);
 }
 
 .lawyer-title {
-  font-size: 13px;
-  padding: 3px 10px;
+  font-size: 26px;
+  padding: 6px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.18);
   color: rgba(214, 222, 255, 0.9);
 }
 
 .lawyer-info {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(195, 204, 255, 0.72);
   line-height: 1.8;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .lawyer-specialties {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .specialties-label {
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(194, 204, 255, 0.65);
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   display: block;
 }
 
 @media (max-width: 640px) {
   .search-detail-page {
-    padding-top: 100px;
+    padding-top: 200px;
   }
 
   .result-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 12px;
   }
 }
+
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .form-label {
   display: block;
-  font-size: 13px;
+  font-size: 26px;
   color: rgba(223, 230, 255, 0.88);
-  margin-bottom: 8px;
-  letter-spacing: 0.3px;
+  margin-bottom: 16px;
+  letter-spacing: 0.6px;
 }
 
 .available-times-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .available-time-chip {
-  padding: 6px 12px;
+  padding: 12px 24px;
   border-radius: 999px;
   background: rgba(120, 131, 255, 0.18);
   color: rgba(240, 244, 255, 0.92);
-  font-size: 12px;
+  font-size: 24px;
 }
 
 .available-time-more {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.8);
   align-self: center;
 }
 
 .available-times-empty {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.6);
 }
 
 .card-times {
-  margin-top: 14px;
+  margin-top: 28px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
 }
 
 .card-time-chip {
-  padding: 4px 10px;
+  padding: 8px 20px;
   border-radius: 999px;
   background: rgba(79, 109, 255, 0.15);
   color: rgba(223, 230, 255, 0.9);
-  font-size: 12px;
+  font-size: 24px;
 }
 
 .card-time-more {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.75);
-  line-height: 20px;
+  line-height: 40px;
 }
 
 .card-time-empty {
-  font-size: 12px;
+  font-size: 24px;
   color: rgba(194, 204, 255, 0.6);
+}
+
+// 桌面端固定尺寸（大写PX不转换）
+@media (min-width: 769px) {
+  .search-page {
+    padding: 80PX 10PX 80PX;
+    font-size: 14PX;
+  }
+
+  .search-detail-page {
+    padding-top: 100PX;
+  }
+
+  .search-hero {
+    margin-bottom: 24PX;
+
+    .hero-title {
+      font-size: 26PX;
+      margin-bottom: 8PX;
+    }
+
+    .hero-desc {
+      font-size: 14PX;
+    }
+  }
+
+  .search-box {
+    margin-bottom: 20PX;
+  }
+
+  .search-input {
+    padding: 14PX 16PX;
+    border-radius: 14PX;
+    font-size: 14PX;
+    line-height: 1.5;
+    min-height: 44PX;
+  }
+
+  .search-input::placeholder {
+    font-size: 13PX;
+  }
+
+  .clear-btn {
+    right: 8PX;
+    padding: 0 14PX;
+    font-size: 12PX;
+  }
+
+  .tab-bar {
+    gap: 12PX;
+    margin-bottom: 16PX;
+  }
+
+  .tab-item {
+    min-height: 44PX;
+    border-radius: 12PX;
+  }
+
+  .tab-label {
+    font-size: 17PX;
+  }
+
+  .category-bar {
+    gap: 10PX;
+    margin-bottom: 18PX;
+  }
+
+  .category-chip {
+    padding: 8PX 12PX;
+    border-radius: 14PX;
+    font-size: 13PX;
+    gap: 6PX;
+  }
+
+  .category-icon {
+    font-size: 15PX;
+  }
+
+  .result-header {
+    gap: 12PX;
+    margin: 12PX 0;
+  }
+
+  .result-count {
+    font-size: 14PX;
+  }
+
+  .result-query {
+    font-size: 12PX;
+  }
+
+  .result-list {
+    gap: 18PX;
+  }
+
+  .result-card {
+    padding: 18PX 20PX;
+    border-radius: 18PX;
+  }
+
+  .card-header {
+    gap: 10PX;
+    margin-bottom: 10PX;
+  }
+
+  .card-title {
+    font-size: 16PX;
+  }
+
+  .card-tag {
+    font-size: 12PX;
+    padding: 2PX 10PX;
+  }
+
+  .card-desc {
+    font-size: 13PX;
+    margin-bottom: 12PX;
+  }
+
+  .card-meta,
+  .card-footer {
+    gap: 12PX;
+    font-size: 12PX;
+  }
+
+  .meta-item {
+    gap: 4PX;
+  }
+
+  .service-chips {
+    gap: 8PX;
+    margin-top: 10PX;
+  }
+
+  .chip {
+    font-size: 12PX;
+    padding: 4PX 10PX;
+  }
+
+  .empty-state {
+    margin-top: 20PX;
+    padding: 24PX 20PX;
+    border-radius: 18PX;
+    gap: 10PX;
+  }
+
+  .empty-title {
+    font-size: 15PX;
+  }
+
+  .empty-desc {
+    font-size: 13PX;
+  }
+
+  .empty-btn {
+    padding: 0 22PX;
+    font-size: 13PX;
+    height: 34PX;
+    line-height: 34PX;
+    margin-top: 6PX;
+  }
+
+  .card-bg-black {
+    border-radius: 18PX;
+  }
+
+  .back-button {
+    padding: 8PX 16PX;
+    margin-top: 16PX;
+    margin-bottom: 24PX;
+    border-radius: 12PX;
+    font-size: 14PX;
+  }
+
+  .detail-header {
+    margin-bottom: 24PX;
+  }
+
+  .detail-title {
+    font-size: 26PX;
+    margin-bottom: 12PX;
+  }
+
+  .detail-rating,
+  .detail-category-badge {
+    gap: 6PX;
+    padding: 6PX 14PX;
+  }
+
+  .rating-text,
+  .category-text {
+    font-size: 13PX;
+  }
+
+  .category-icon {
+    font-size: 16PX;
+  }
+
+  .detail-section {
+    margin-bottom: 24PX;
+    padding: 20PX;
+    border-radius: 18PX;
+  }
+
+  .section-title {
+    font-size: 18PX;
+    margin-bottom: 16PX;
+  }
+
+  .section-content {
+    font-size: 14PX;
+  }
+
+  .info-grid {
+    gap: 16PX;
+  }
+
+  .info-item {
+    padding: 12PX;
+    border-radius: 12PX;
+  }
+
+  .info-label {
+    font-size: 12PX;
+    margin-bottom: 6PX;
+  }
+
+  .info-value {
+    font-size: 16PX;
+  }
+
+  .service-tags {
+    gap: 10PX;
+  }
+
+  .service-tag {
+    padding: 8PX 14PX;
+    font-size: 13PX;
+  }
+
+  .services-list {
+    gap: 12PX;
+  }
+
+  .service-card {
+    padding: 16PX;
+    border-radius: 14PX;
+  }
+
+  .service-header {
+    gap: 10PX;
+    margin-bottom: 8PX;
+  }
+
+  .service-title {
+    font-size: 15PX;
+  }
+
+  .service-category {
+    font-size: 11PX;
+    padding: 3PX 10PX;
+  }
+
+  .service-desc {
+    font-size: 13PX;
+    margin-bottom: 10PX;
+  }
+
+  .service-meta {
+    gap: 12PX;
+  }
+
+  .meta-text {
+    font-size: 12PX;
+  }
+
+  .firm-card {
+    padding: 16PX;
+    border-radius: 14PX;
+  }
+
+  .firm-header-inline {
+    gap: 10PX;
+    margin-bottom: 10PX;
+  }
+
+  .firm-name {
+    font-size: 16PX;
+  }
+
+  .firm-rating {
+    font-size: 12PX;
+    padding: 3PX 10PX;
+  }
+
+  .firm-desc {
+    font-size: 13PX;
+    margin-bottom: 10PX;
+  }
+
+  .firm-meta {
+    gap: 12PX;
+  }
+
+  .booking-section {
+    margin-top: 24PX;
+  }
+
+  .booking-btn {
+    padding: 16PX;
+    border-radius: 14PX;
+    font-size: 16PX;
+  }
+
+  .booking-form {
+    padding: 24PX;
+    border-radius: 18PX;
+  }
+
+  .form-title {
+    font-size: 18PX;
+    margin-bottom: 20PX;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 14PX 16PX;
+    margin-bottom: 16PX;
+    border-radius: 12PX;
+    font-size: 14PX;
+  }
+
+  .form-textarea {
+    min-height: 100PX;
+  }
+
+  .form-hint {
+    font-size: 12PX;
+    margin-bottom: 16PX;
+  }
+
+  .form-actions {
+    gap: 12PX;
+    margin-top: 20PX;
+  }
+
+  .form-btn {
+    padding: 14PX;
+    border-radius: 12PX;
+    font-size: 15PX;
+    height: 48PX;
+  }
+
+  .lawyer-card {
+    padding: 16PX;
+    border-radius: 14PX;
+    margin-bottom: 12PX;
+  }
+
+  .lawyer-header {
+    gap: 12PX;
+    margin-bottom: 10PX;
+  }
+
+  .lawyer-name {
+    font-size: 16PX;
+  }
+
+  .lawyer-title {
+    font-size: 13PX;
+    padding: 3PX 10PX;
+  }
+
+  .lawyer-info {
+    font-size: 13PX;
+    margin-bottom: 6PX;
+  }
+
+  .lawyer-specialties {
+    margin-top: 10PX;
+  }
+
+  .specialties-label {
+    font-size: 13PX;
+    margin-bottom: 8PX;
+  }
+
+  .form-group {
+    margin-bottom: 16PX;
+  }
+
+  .form-label {
+    font-size: 13PX;
+    margin-bottom: 8PX;
+    letter-spacing: 0.3PX;
+  }
+
+  .available-times-preview {
+    gap: 8PX;
+    margin-bottom: 8PX;
+  }
+
+  .available-time-chip {
+    padding: 6PX 12PX;
+    font-size: 12PX;
+  }
+
+  .available-time-more {
+    font-size: 12PX;
+  }
+
+  .available-times-empty {
+    font-size: 12PX;
+  }
+
+  .card-times {
+    margin-top: 14PX;
+    gap: 8PX;
+  }
+
+  .card-time-chip {
+    padding: 4PX 10PX;
+    font-size: 12PX;
+  }
+
+  .card-time-more {
+    font-size: 12PX;
+    line-height: 20PX;
+  }
+
+  .card-time-empty {
+    font-size: 12PX;
+  }
+
+  .search-detail-page {
+    padding-top: 100PX;
+  }
+
+  .result-header {
+    flex-direction: row;
+    gap: 12PX;
+  }
 }

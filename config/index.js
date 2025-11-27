@@ -75,6 +75,10 @@ module.exports = function (merge, { command, mode }) {
           enable: true,
           config: {}
         },
+        pxtransform: {
+          enable: true,
+          config: {}
+        },
         cssModules: {
           enable: false,
           config: {

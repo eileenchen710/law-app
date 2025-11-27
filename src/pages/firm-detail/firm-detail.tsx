@@ -347,7 +347,7 @@ export default function FirmDetail() {
             </View>
             <Textarea
               className="form-textarea"
-              placeholder="请描述您的法律问题（选填）"
+              placeholder="请描述您的问题（选填）"
               value={formData.description}
               onInput={(e) =>
                 setFormData({ ...formData, description: e.detail.value })

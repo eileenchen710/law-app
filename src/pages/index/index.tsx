@@ -527,12 +527,12 @@ export default function Index() {
           {/* 左侧文字内容 */}
           <View className="hero-text-section">
             <View className="hero-badge">
-              <Text className="badge-text">汇聚顶尖律所 · 专业法律服务平台</Text>
+              <Text className="badge-text">汇聚顶尖律所 · 专业服务平台</Text>
             </View>
 
             <View className="hero-title">
               <Text className="title-main metallic-gradient-text">
-                专业法律服务
+                专业服务
               </Text>
               <Text className="title-sub metallic-gradient-text">触手可及</Text>
             </View>
@@ -855,7 +855,7 @@ export default function Index() {
               </Text>
               <Textarea
                 className="form-textarea"
-                placeholder="请详细描述您遇到的法律问题，以便律师更好地为您提供帮助..."
+                placeholder="请详细描述您遇到的问题，以便桴渡更好地为您提供帮助..."
                 value={formMessage}
                 onInput={(e) => setFormMessage(e.detail.value)}
                 style={{
@@ -891,10 +891,10 @@ export default function Index() {
         <View className="footer-content">
           <View className="footer-brand">
             <Image src={logo} className="footer-logo" mode="aspectFit" />
-            <Text className="footer-name">法律服务平台</Text>
+            <Text className="footer-name">桴渡服务平台</Text>
           </View>
           <Text className="footer-copyright">
-            © {new Date().getFullYear()} 法律服务平台. 保留所有权利.
+            © {new Date().getFullYear()} 桴渡. 保留所有权利.
           </Text>
         </View>
       </View>

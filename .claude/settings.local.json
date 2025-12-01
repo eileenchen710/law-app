@@ -5,7 +5,11 @@
       "Bash(rm:*)",
       "Bash(npm run build:weapp:*)",
       "Bash(npm run dev:h5:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(xargs ls:*)",
+      "Bash(sort:*)",
+      "Bash(sips:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

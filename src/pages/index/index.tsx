@@ -12,7 +12,7 @@ import Taro, { useLoad, usePageScroll, useDidShow } from "@tarojs/taro";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./index.scss";
 import logo from "../../assets/logo.png";
-import heroImage from "../../assets/legal-app-hero.png";
+import heroImage from "../../assets/legal-app-hero-compressed.jpg";
 import lawFirmLogo from "../../assets/fu_du.png";
 import ServiceCard from "./components/ServiceCard";
 import AppHeader from "./components/AppHeader";

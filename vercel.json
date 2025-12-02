@@ -54,7 +54,7 @@
       "destination": "/api"
     },
     {
-      "source": "/((?!api|_next|static|favicon.ico|.*\\.).*)",
+      "source": "/((?!api|_next|static|config|favicon.ico|.*\\.).*)",
       "destination": "/index.html"
     }
   ]

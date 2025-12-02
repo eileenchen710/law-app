@@ -20,7 +20,8 @@ module.exports = function (merge, { command, mode }) {
     copy: {
       patterns: [
         { from: 'src/assets/images/favicon.ico', to: 'dist/favicon.ico' },
-        { from: 'src/assets/images/index.png', to: 'dist/index.png' }
+        { from: 'src/assets/images/index.png', to: 'dist/index.png' },
+        { from: 'public/config/app-mode.json', to: 'dist/config/app-mode.json' }
       ],
       options: {}
     },

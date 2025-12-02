@@ -1,5 +1,6 @@
 import { PropsWithChildren, useState, useEffect } from 'react'
 import { useLaunch } from '@tarojs/taro'
+import { View } from '@tarojs/components'
 import { UserProvider } from './contexts/UserContext'
 import { loadRemoteConfig } from './utils/terminology'
 
@@ -19,14 +20,11 @@ function App({ children }: PropsWithChildren<any>) {
     })
   }, [])
 
-  // 等待配置加载完成再渲染
-  if (!ready) {
-    return null
-  }
-
   return (
     <UserProvider>
-      {children}
+      <View style={{ display: ready ? 'block' : 'none' }}>
+        {children}
+      </View>
     </UserProvider>
   )
 }

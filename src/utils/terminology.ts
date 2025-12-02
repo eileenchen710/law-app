@@ -1,58 +1,85 @@
-/**
- * 术语切换系统
- * 默认使用财务术语，可通过隐藏设置页面切换
- */
-
 import Taro from "@tarojs/taro";
 
 export type TerminologyMode = "legal" | "financial";
 
-// localStorage key
-const TERMINOLOGY_MODE_KEY = "app_terminology_mode";
+// 切换日期：2025年12月5日
+const SWITCH_DATE = new Date("2025-12-05T00:00:00");
 
-// 默认模式：财务
-const DEFAULT_MODE: TerminologyMode = "financial";
+// 远程配置地址
+const CONFIG_URL = "https://www.fudulegal.com/config/app-mode.json";
+
+/**
+ * 根据日期获取默认模式
+ */
+function getDefaultModeByDate(): TerminologyMode {
+  return new Date() >= SWITCH_DATE ? "legal" : "financial";
+}
+
+// 运行时变量，初始值根据日期策略
+let currentMode: TerminologyMode = getDefaultModeByDate();
+
+// 标记是否已加载过配置
+let configLoaded = false;
 
 /**
  * 获取当前术语模式
- * 优先从 localStorage 读取，否则使用默认值（财务）
  */
 export function getTerminologyMode(): TerminologyMode {
-  try {
-    const stored = Taro.getStorageSync(TERMINOLOGY_MODE_KEY);
-    if (stored === "legal" || stored === "financial") {
-      return stored;
-    }
-  } catch (e) {
-    // 忽略存储读取错误
-  }
-  return DEFAULT_MODE;
-}
-
-/**
- * 设置术语模式
- * @param mode 术语模式
- */
-export function setTerminologyMode(mode: TerminologyMode): void {
-  try {
-    Taro.setStorageSync(TERMINOLOGY_MODE_KEY, mode);
-  } catch (e) {
-    console.error("Failed to save terminology mode:", e);
-  }
+  return currentMode;
 }
 
 /**
  * 是否使用财务术语
  */
 export function useFinancialTerms(): boolean {
-  return getTerminologyMode() === "financial";
+  return currentMode === "financial";
 }
 
 /**
- * 是否使用术语
+ * 是否使用法律术语
  */
 export function useLegalTerms(): boolean {
-  return getTerminologyMode() === "legal";
+  return currentMode === "legal";
+}
+
+/**
+ * 加载远程配置（带超时）
+ * 最多等待1秒，获取成功则更新运行时变量
+ * @returns Promise<boolean> 是否成功加载
+ */
+export async function loadRemoteConfig(): Promise<boolean> {
+  if (configLoaded) {
+    return true;
+  }
+
+  try {
+    const res = await Promise.race([
+      Taro.request({
+        url: CONFIG_URL,
+        method: "GET",
+        timeout: 1000,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 1000)
+      ),
+    ]);
+
+    configLoaded = true;
+
+    if (res.data && (res.data.mode === "legal" || res.data.mode === "financial")) {
+      const remoteMode = res.data.mode as TerminologyMode;
+      // 如果远程配置和当前不一致，更新运行时变量
+      if (remoteMode !== currentMode) {
+        currentMode = remoteMode;
+      }
+      return true;
+    }
+  } catch (e) {
+    // 超时或请求失败，使用日期策略默认值
+    configLoaded = true;
+  }
+
+  return false;
 }
 
 // 术语映射表

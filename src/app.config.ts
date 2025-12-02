@@ -6,7 +6,6 @@ export default defineAppConfig({
     'pages/login/login',
     'pages/firm-detail/firm-detail',
     'pages/service-detail/service-detail',
-    'pages/dev-settings/dev-settings',
   ],
   window: {
     backgroundTextStyle: 'light',

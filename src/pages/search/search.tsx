@@ -17,10 +17,14 @@ import { submitConsultationRequest } from "../../services/api";
 import type { ConsultationPayload } from "../../services/types";
 import { useUser } from "../../contexts/UserContext";
 import { useDebounce } from "../../hooks/useDebounce";
+import { getTerms } from "../../utils/terminology";
+
+// 获取当前术语
+const T = getTerms();
 
 const TABS = [
-  { id: "firms", label: "律所" },
-  { id: "services", label: "法律服务" },
+  { id: "firms", label: T.searchFirmTab },
+  { id: "services", label: T.searchServiceTab },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -82,7 +86,7 @@ export default function Search() {
   const menuItems = [
     { label: "首页", onClick: () => goToIndexSection() },
     { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
-    { label: "合作律所", onClick: () => goToIndexSection("lawfirms") },
+    { label: T.firmSection, onClick: () => goToIndexSection("lawfirms") },
     { label: "联系我们", onClick: () => goToIndexSection("contact") },
     { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
   ];
@@ -456,7 +460,7 @@ export default function Search() {
       </View>
       <Textarea
         className="form-textarea"
-        placeholder="请描述您的法律问题（选填）"
+        placeholder={`请描述您的${T.serviceShort}问题（选填）`}
         value={formData.description}
         onInput={(e) =>
           setFormData({ ...formData, description: e.detail.value })
@@ -506,7 +510,7 @@ export default function Search() {
         </View>
 
         <View className="detail-section">
-          <Text className="section-title">律所简介</Text>
+          <Text className="section-title">{T.firm}简介</Text>
           <Text className="section-content">
             {selectedFirm.description || "暂无简介"}
           </Text>
@@ -597,7 +601,7 @@ export default function Search() {
 
         {selectedFirm.lawyers && selectedFirm.lawyers.length > 0 && (
           <View className="detail-section">
-            <Text className="section-title">专业律师团队</Text>
+            <Text className="section-title">专业{T.professional}团队</Text>
             {selectedFirm.lawyers.map((lawyer, index) => (
               <View key={index} className="lawyer-card">
                 <View className="lawyer-header">
@@ -643,7 +647,7 @@ export default function Search() {
         {firmServices.length > 0 && (
           <View className="detail-section">
             <Text className="section-title">
-              提供的法律服务 ({firmServices.length})
+              提供的{T.service} ({firmServices.length})
             </Text>
             <View className="services-list">
               {firmServices.map((service) => {
@@ -745,13 +749,13 @@ export default function Search() {
             </View>
             {selectedService.lawyerName && (
               <View className="info-item">
-                <Text className="info-label">主办律师</Text>
+                <Text className="info-label">主办{T.professional}</Text>
                 <Text className="info-value">{selectedService.lawyerName}</Text>
               </View>
             )}
             {selectedService.lawyerTitle && (
               <View className="info-item">
-                <Text className="info-label">律师职称</Text>
+                <Text className="info-label">{T.professional}职称</Text>
                 <Text className="info-value">{selectedService.lawyerTitle}</Text>
               </View>
             )}
@@ -760,7 +764,7 @@ export default function Search() {
 
         {serviceFirm && (
           <View className="detail-section">
-            <Text className="section-title">所属律所</Text>
+            <Text className="section-title">所属{T.firm}</Text>
             <View
               className="firm-card"
               onClick={() => handleFirmClick(serviceFirm.id)}
@@ -831,7 +835,7 @@ export default function Search() {
               </View>
               <Textarea
                 className="form-textarea"
-                placeholder="请描述您的法律问题（选填）"
+                placeholder={`请描述您的${T.serviceShort}问题（选填）`}
                 value={formData.description}
                 onInput={(e) =>
                   setFormData({ ...formData, description: e.detail.value })
@@ -863,7 +867,7 @@ export default function Search() {
       <View className="search-hero">
         <Text className="hero-title metallic-gradient-text">智能检索</Text>
         <Text className="hero-desc">
-          快速定位合作律所与法律服务，支持关键词与分类组合搜索
+          快速定位{T.firmSection}与{T.service}，支持关键词与分类组合搜索
         </Text>
       </View>
 
@@ -872,8 +876,8 @@ export default function Search() {
           className="search-input"
           placeholder={
             activeTab === "firms"
-              ? "搜索律所名称、简介或亮点"
-              : "搜索服务名称、律师或分类"
+              ? `搜索${T.firm}名称、简介或亮点`
+              : `搜索服务名称、${T.professional}或分类`
           }
           value={query}
           onInput={(event) => setQuery(event.detail.value)}
@@ -935,7 +939,7 @@ export default function Search() {
             {normalizedQuery ? (
               <Text className="result-query">关键词：{query}</Text>
             ) : (
-              <Text className="result-query">建议先在后台完善律所与服务数据</Text>
+              <Text className="result-query">建议先在后台完善{T.firm}与服务数据</Text>
             )}
           </View>
 
@@ -1017,7 +1021,7 @@ export default function Search() {
               </View>
               <View className="card-footer">
                 <Text className="meta-item">
-                  主办律师：{service.lawyerName || "待定"}
+                  主办{T.professional}：{service.lawyerName || "待定"}
                 </Text>
                 {service.lawyerTitle ? (
                   <Text className="meta-item">{service.lawyerTitle}</Text>

@@ -12,7 +12,8 @@ import Taro, { useLoad, usePageScroll, useDidShow } from "@tarojs/taro";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./index.scss";
 import logo from "../../assets/logo.png";
-import heroImage from "../../assets/legal-app-hero-compressed.jpg";
+import legalHeroImage from "../../assets/legal-app-hero-compressed.jpg";
+import financialHeroImage from "../../assets/financial-app-hero-compressed.png";
 import lawFirmLogo from "../../assets/fu_du.png";
 import ServiceCard from "./components/ServiceCard";
 import AppHeader from "./components/AppHeader";
@@ -33,13 +34,20 @@ import {
 } from "../../services/api";
 import type { ApiError } from "../../services/http";
 import type { ConsultationPayload } from "../../services/types";
+import { getTerms, useFinancialTerms } from "../../utils/terminology";
 
+// 获取当前术语
+const T = getTerms();
+
+type UiService = LegalServiceMock & { lawFirm: string };
+
+// 特性亮点（使用术语系统）
 const featureHighlights = [
   {
     id: "firms",
-    title: "多家律所",
-    description: "汇集顶尖律师资源",
-    icon: "⚖️",
+    title: T.featureFirms,
+    description: T.featureFirmsDesc,
+    icon: useFinancialTerms() ? "💰" : "⚖️",
   },
   {
     id: "secure",
@@ -54,8 +62,6 @@ const featureHighlights = [
     icon: "👥",
   },
 ];
-
-type UiService = LegalServiceMock & { lawFirm: string };
 
 function logApiFailure(tag: string, error: unknown) {
   const err = error as ApiError | Error;
@@ -80,7 +86,9 @@ export default function Index() {
   const [selectedServiceName, setSelectedServiceName] = useState<string | null>(
     null
   );
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null
+  );
   const [selectedFirmId, setSelectedFirmId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formName, setFormName] = useState("");
@@ -97,31 +105,34 @@ export default function Index() {
         // 获取真实的律所和服务数据
         const [firmsRes, servicesRes] = await Promise.all([
           fetchFirms({ page: 1, size: 20 }),
-          fetchServices({ page: 1, size: 20 })
+          fetchServices({ page: 1, size: 20 }),
         ]);
 
         // 转换律所数据
-        let firms = (firmsRes.items || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description || "",
-          price: item.price || "面议",
-          services: item.services || [],
-          rating: item.rating || 4.8,
-          cases: item.cases || 0,
-          recommended: item.recommended || false,
-          city: item.city,
-          address: item.address,
-          phone: item.phone,
-          email: item.email,
-          website: item.website,
-          practiceAreas: item.practice_areas,
-          tags: item.tags,
-          lawyers: item.lawyers,
-          contactEmail: item.contact_email,
-          contactPhone: item.contact_phone,
-          slug: item.slug
-        } as LawFirmMock));
+        let firms = (firmsRes.items || []).map(
+          (item) =>
+            ({
+              id: item.id,
+              name: item.name,
+              description: item.description || "",
+              price: item.price || "面议",
+              services: item.services || [],
+              rating: item.rating || 4.8,
+              cases: item.cases || 0,
+              recommended: item.recommended || false,
+              city: item.city,
+              address: item.address,
+              phone: item.phone,
+              email: item.email,
+              website: item.website,
+              practiceAreas: item.practice_areas,
+              tags: item.tags,
+              lawyers: item.lawyers,
+              contactEmail: item.contact_email,
+              contactPhone: item.contact_phone,
+              slug: item.slug,
+            } as LawFirmMock)
+        );
 
         // 如果超过3个，按评分排序并取前3名
         if (firms.length > 3) {
@@ -131,18 +142,21 @@ export default function Index() {
         }
 
         // 转换服务数据
-        const services = (servicesRes.items || []).map(item => ({
-          id: item.id,
-          title: item.title,
-          description: item.description || "",
-          category: item.category,
-          lawFirmId: item.law_firm_id || item.firm_id || "",
-          lawFirm: item.firm_name || "律所名称待定",
-          price: item.price || "面议",
-          duration: item.duration || "1-2小时",
-          lawyerName: item.lawyer_name || "专业律师",
-          lawyerTitle: item.lawyer_title || "资深律师"
-        } as LegalServiceMock));
+        const services = (servicesRes.items || []).map(
+          (item) =>
+            ({
+              id: item.id,
+              title: item.title,
+              description: item.description || "",
+              category: item.category,
+              lawFirmId: item.law_firm_id || item.firm_id || "",
+              lawFirm: item.firm_name || `${T.firm}名称待定`,
+              price: item.price || "面议",
+              duration: item.duration || "1-2小时",
+              lawyerName: item.lawyer_name || T.professional,
+              lawyerTitle: item.lawyer_title || `资深${T.professionalTitle}`,
+            } as LegalServiceMock)
+        );
 
         setLawFirms(firms);
         setLegalServices(services);
@@ -157,7 +171,7 @@ export default function Index() {
 
         console.log("✅ 首页数据加载成功:", {
           律所数量: firms.length,
-          服务数量: services.length
+          服务数量: services.length,
         });
       } catch (error) {
         console.error("❌ 首页数据加载失败:", error);
@@ -169,7 +183,9 @@ export default function Index() {
         setLegalServices(snapshot.legalServices);
         // 默认选中中间那家律所
         const middleIndex = Math.floor(snapshot.lawFirms.length / 2);
-        setActiveFirm(snapshot.lawFirms[middleIndex]?.id ?? snapshot.lawFirms[0]?.id ?? null);
+        setActiveFirm(
+          snapshot.lawFirms[middleIndex]?.id ?? snapshot.lawFirms[0]?.id ?? null
+        );
       }
     };
 
@@ -194,7 +210,7 @@ export default function Index() {
     () =>
       legalServices.map((service) => ({
         ...service,
-        lawFirm: firmMap.get(service.lawFirmId)?.name ?? "未关联律所",
+        lawFirm: firmMap.get(service.lawFirmId)?.name ?? `未关联${T.firm}`,
       })),
     [legalServices, firmMap]
   );
@@ -251,9 +267,9 @@ export default function Index() {
 
           Taro.pageScrollTo({
             scrollTop: offsetTop,
-            duration: 300
+            duration: 300,
           }).catch((err) => {
-            console.warn('Scroll failed:', err);
+            console.warn("Scroll failed:", err);
           });
         }
       });
@@ -373,13 +389,21 @@ export default function Index() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      Taro.showToast({ title: "请输入正确的邮箱地址", icon: "none", duration: 2000 });
+      Taro.showToast({
+        title: "请输入正确的邮箱地址",
+        icon: "none",
+        duration: 2000,
+      });
       return;
     }
 
     const phoneRegex = /^\+?[0-9\-\s]{6,16}$/;
     if (!phoneRegex.test(trimmedPhone)) {
-      Taro.showToast({ title: "请输入正确的联系电话", icon: "none", duration: 2000 });
+      Taro.showToast({
+        title: "请输入正确的联系电话",
+        icon: "none",
+        duration: 2000,
+      });
       return;
     }
 
@@ -448,9 +472,15 @@ export default function Index() {
 
   // 桌面端导航（替代底部 tabBar）
   const menuItems = [
-    { label: "首页", onClick: () => Taro.switchTab({ url: "/pages/index/index" }) },
-    { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
-    { label: "合作律所", onClick: () => handleNavClick("lawfirms") },
+    {
+      label: "首页",
+      onClick: () => Taro.switchTab({ url: "/pages/index/index" }),
+    },
+    {
+      label: "搜索",
+      onClick: () => Taro.switchTab({ url: "/pages/search/search" }),
+    },
+    { label: T.firmSection, onClick: () => handleNavClick("lawfirms") },
     { label: "联系我们", onClick: () => handleNavClick("contact") },
     { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
   ];
@@ -487,13 +517,13 @@ export default function Index() {
               className="mobile-menu-item"
               onClick={() => handleNavClick("services")}
             >
-              法律服务
+              {T.serviceSection}
             </Text>
             <Text
               className="mobile-menu-item"
               onClick={() => handleNavClick("lawfirms")}
             >
-              合作律所
+              {T.firmSection}
             </Text>
             <Text
               className="mobile-menu-item"
@@ -527,19 +557,17 @@ export default function Index() {
           {/* 左侧文字内容 */}
           <View className="hero-text-section">
             <View className="hero-badge">
-              <Text className="badge-text">汇聚顶尖律所 · 专业服务平台</Text>
+              <Text className="badge-text">{T.heroBadge}</Text>
             </View>
 
             <View className="hero-title">
               <Text className="title-main metallic-gradient-text">
-                专业服务
+                专业{T.serviceShort}服务
               </Text>
               <Text className="title-sub metallic-gradient-text">触手可及</Text>
             </View>
 
-            <Text className="hero-desc">
-              连接您与澳大利亚顶级律师事务所，提供刑事辩护、家事法、移民法等全方位专业法律咨询与代理服务
-            </Text>
+            <Text className="hero-desc">{T.heroDesc}</Text>
 
             {/* 桌面端按钮 - 在文字下方 */}
             <View className="hero-actions desktop-only">
@@ -561,7 +589,7 @@ export default function Index() {
           {/* 右侧图片 */}
           <View className="hero-image-section">
             <View className="hero-image-container">
-              <Image src={heroImage} className="hero-image" mode="widthFix" />
+              <Image src={useFinancialTerms() ? financialHeroImage : legalHeroImage} className="hero-image" mode="widthFix" />
             </View>
           </View>
 
@@ -594,15 +622,15 @@ export default function Index() {
         </View>
       </View>
 
-      {/* 律所展示 */}
+      {/* 商家/律所展示 */}
       <View className="lawfirms-section" id="lawfirms">
         <View className="section-header">
           <View className="section-title">
             <Text className="title-line">选择合适的</Text>
-            <Text className="highlight">法律服务</Text>
+            <Text className="highlight">{T.service}</Text>
           </View>
           <Text className="section-desc">
-            根据您的需求选择合适的律师事务所和法律服务方案
+            根据您的需求选择合适的{T.firmFull}和{T.service}方案
           </Text>
         </View>
 
@@ -614,9 +642,10 @@ export default function Index() {
                 firm.recommended ? "recommended" : ""
               }`}
               onClick={() => setActiveFirm(firm.id)}
+              data-recommend-tag={T.recommendTag}
             >
               {firm.recommended && (
-                <View className="recommend-badge">推荐选择</View>
+                <View className="recommend-badge">{T.recommendTag}</View>
               )}
 
               <View className="firm-header">
@@ -679,11 +708,11 @@ export default function Index() {
         <View className="stats-grid">
           <View className="stat-item">
             <Text className="stat-number">4+</Text>
-            <Text className="stat-label">合作律所</Text>
+            <Text className="stat-label">{T.firmSection}</Text>
           </View>
           <View className="stat-item">
             <Text className="stat-number">50+</Text>
-            <Text className="stat-label">专业律师</Text>
+            <Text className="stat-label">{T.professional}</Text>
           </View>
           <View className="stat-item">
             <Text className="stat-number">8000+</Text>
@@ -696,12 +725,12 @@ export default function Index() {
         </View>
       </View>
 
-      {/* 法律服务 */}
+      {/* 服务 */}
       <View className="services-section" id="services">
         <View className="section-header">
-          <Text className="section-title">专业法律服务</Text>
+          <Text className="section-title">专业{T.service}</Text>
           <Text className="section-desc">
-            我们汇聚顶尖律所资源，为您提供全方位的法律服务解决方案
+            我们汇聚顶尖{T.firm}资源，为您提供全方位的{T.service}解决方案
           </Text>
         </View>
 
@@ -758,14 +787,15 @@ export default function Index() {
             <Text className="highlight">预约表单</Text>
           </View>
           <Text className="section-desc">
-            填写您的咨询需求，专业律师将及时为您提供法律建议。
+            填写您的咨询需求，{T.professional}将及时为您提供专业建议。
           </Text>
         </View>
 
         <View className="contact-form">
           <View className="form-header">
             <Text className="form-desc">
-              请详细填写您的个人信息和法律问题，我们会安排最适合的律师为您提供专业咨询。
+              请详细填写您的个人信息和{T.serviceShort}问题，我们会安排最适合的
+              {T.professional}为您提供专业咨询。
             </Text>
           </View>
 
@@ -830,7 +860,7 @@ export default function Index() {
               <Input
                 className="form-input"
                 type="text"
-                placeholder="请选择您需要咨询的法律服务"
+                placeholder={`请选择您需要咨询的${T.service}`}
                 value={formService}
                 onInput={(e) => {
                   const value = e.detail.value;
@@ -879,7 +909,8 @@ export default function Index() {
                 我们承诺保护您的隐私信息，咨询内容将严格保密。
               </Text>
               <Text className="footer-text">
-                提交后，我们将在1-2个工作日内联系您并安排律师咨询时间。
+                提交后，我们将在1-2个工作日内联系您并安排{T.professional}
+                咨询时间。
               </Text>
             </View>
           </View>

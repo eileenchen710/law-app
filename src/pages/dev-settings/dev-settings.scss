@@ -1,0 +1,164 @@
+@use "sass:color";
+
+$primary-color: #d4a574;
+$bg-dark: #0a0a0f;
+$bg-card: #12121a;
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$text-muted: rgba(255, 255, 255, 0.5);
+$border-color: rgba(255, 255, 255, 0.1);
+
+.dev-settings-page {
+  min-height: 100vh;
+  background: $bg-dark;
+  padding: 40px 20px;
+  box-sizing: border-box;
+
+  &.not-available {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .not-available-text {
+      color: $text-secondary;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.settings-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .header-title {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 8px;
+  }
+
+  .header-desc {
+    display: block;
+    font-size: 14px;
+    color: $text-muted;
+  }
+}
+
+.settings-section {
+  background: $bg-card;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid $border-color;
+
+  .section-title {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    color: $primary-color;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid $border-color;
+
+  .setting-info {
+    flex: 1;
+
+    .setting-label {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      color: $text-primary;
+      margin-bottom: 4px;
+    }
+
+    .setting-desc {
+      display: block;
+      font-size: 13px;
+      color: $text-secondary;
+    }
+  }
+}
+
+.mode-preview {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(212, 165, 116, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(212, 165, 116, 0.2);
+
+  .preview-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: $primary-color;
+    margin-bottom: 12px;
+  }
+
+  .preview-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .preview-item {
+    display: flex;
+    align-items: center;
+
+    .preview-label {
+      font-size: 14px;
+      color: $text-secondary;
+      width: 80px;
+    }
+
+    .preview-value {
+      font-size: 14px;
+      color: $text-primary;
+      font-weight: 500;
+    }
+  }
+}
+
+.save-notice {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  text-align: center;
+
+  .notice-text {
+    font-size: 14px;
+    color: #4caf50;
+  }
+}
+
+.settings-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 14px;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}

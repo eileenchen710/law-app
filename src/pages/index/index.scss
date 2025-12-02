@@ -863,7 +863,7 @@ button,
         transform: scale(1.02);
 
         &::before {
-          content: "推荐律所";
+          content: attr(data-recommend-tag);
           position: absolute;
           top: -12px;
           left: 50%;

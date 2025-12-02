@@ -41,6 +41,10 @@ import {
   adaptFirmFromApi,
   adaptServiceFromApi,
 } from "../../services/dataAdapter";
+import { getTerms } from "../../utils/terminology";
+
+// 获取当前术语
+const T = getTerms();
 
 interface FirmFormState {
   name: string;
@@ -235,7 +239,7 @@ export default function Me() {
   const menuItems = [
     { label: "首页", onClick: () => goToIndexSection() },
     { label: "搜索", onClick: () => Taro.switchTab({ url: "/pages/search/search" }) },
-    { label: "合作律所", onClick: () => goToIndexSection("lawfirms") },
+    { label: T.firmSection, onClick: () => goToIndexSection("lawfirms") },
     { label: "联系我们", onClick: () => goToIndexSection("contact") },
     { label: "我的", onClick: () => Taro.switchTab({ url: "/pages/me/me" }) },
   ];
@@ -272,7 +276,7 @@ export default function Me() {
     const tabsArray = [
       { key: "appointments", label: "我的预约", visible: true },
       { key: "all-appointments", label: "预约管理", visible: isAdmin },
-      { key: "firms", label: "律所管理", visible: isAdmin },
+      { key: "firms", label: `${T.firm}管理`, visible: isAdmin },
       { key: "services", label: "服务管理", visible: isAdmin },
     ];
     return tabsArray;
@@ -586,7 +590,7 @@ export default function Me() {
   const handleFirmSubmit = async () => {
     const firm = firmForm;
     if (!firm.name?.trim()) {
-      Taro.showToast({ title: "请填写律所名称", icon: "none" });
+      Taro.showToast({ title: `请填写${T.firm}名称`, icon: "none" });
       return;
     }
 
@@ -613,11 +617,11 @@ export default function Me() {
       try {
         const parsed = JSON.parse(firm.lawyersText);
         if (!Array.isArray(parsed)) {
-          throw new Error("律师信息必须是数组格式");
+          throw new Error(`${T.professional}信息必须是数组格式`);
         }
         lawyers = parsed;
       } catch (error) {
-        Taro.showToast({ title: "律师信息格式错误", icon: "none" });
+        Taro.showToast({ title: `${T.professional}信息格式错误`, icon: "none" });
         return;
       }
     }
@@ -645,7 +649,7 @@ export default function Me() {
           contact_phone: firm.contactPhone.trim() || undefined,
           available_times: availableTimes,
         });
-        Taro.showToast({ title: "律所已更新", icon: "success" });
+        Taro.showToast({ title: `${T.firm}已更新`, icon: "success" });
       } else {
         const newData = {
           name: firm.name.trim(),
@@ -673,7 +677,7 @@ export default function Me() {
           Object.entries(newData).filter(([_, v]) => v !== undefined)
         );
         await apiClient.createFirm(filteredData);
-        Taro.showToast({ title: "律所已创建", icon: "success" });
+        Taro.showToast({ title: `${T.firm}已创建`, icon: "success" });
       }
 
       setFirmForm(createEmptyFirmForm());
@@ -716,7 +720,7 @@ export default function Me() {
   const handleFirmDelete = async (id: string) => {
     try {
       await apiClient.deleteFirm(id);
-      Taro.showToast({ title: "律所已删除", icon: "success" });
+      Taro.showToast({ title: `${T.firm}已删除`, icon: "success" });
       await loadAdminData(); // 重新加载数据
     } catch (error) {
       console.error("Failed to delete firm:", error);
@@ -760,13 +764,13 @@ export default function Me() {
       } else {
         await apiClient.createService({
           title: svc.title.trim(),
-          description: svc.description.trim() || "专业法律服务",
+          description: svc.description.trim() || `专业${T.service}`,
           category: svc.category || DEFAULT_CATEGORY_ID,
           law_firm_id: svc.lawFirmId,
           price: svc.price.trim() || "面议",
           duration: svc.duration.trim() || "1-2小时",
-          lawyer_name: svc.lawyerName.trim() || "专业律师",
-          lawyer_title: svc.lawyerTitle.trim() || "资深律师",
+          lawyer_name: svc.lawyerName.trim() || T.professional,
+          lawyer_title: svc.lawyerTitle.trim() || `资深${T.professionalTitle}`,
         });
         Taro.showToast({ title: "服务已创建", icon: "success" });
       }
@@ -825,7 +829,7 @@ export default function Me() {
         <View className="empty-state">
           <Text className="empty-title">暂无预约记录</Text>
           <Text className="empty-desc">
-            您可以在首页选择律师服务，提交新的预约申请。
+            您可以在首页选择{T.professional}服务，提交新的预约申请。
           </Text>
           <Button className="action-button" onClick={goToHome}>
             去首页预约
@@ -849,7 +853,7 @@ export default function Me() {
                   {formatDateTime(item.time)}
                 </Text>
                 <Text className="appointment-field">
-                  <Text className="appointment-label">律所：</Text>
+                  <Text className="appointment-label">{T.firm}：</Text>
                   {item.firm_name || "-"}
                 </Text>
                 <Text className="appointment-field">
@@ -929,7 +933,7 @@ export default function Me() {
                   {formatDateTime(item.time)}
                 </Text>
                 <Text className="appointment-field">
-                  <Text className="appointment-label">律所：</Text>
+                  <Text className="appointment-label">{T.firm}：</Text>
                   {item.firm_name || "-"}
                 </Text>
                 <Text className="appointment-field">
@@ -970,16 +974,16 @@ export default function Me() {
   const renderFirmsManagement = () => (
     <View className="section">
       <View className="section-header">
-        <Text className="section-title">律所管理</Text>
-        <Text className="section-desc">添加、编辑或删除合作律所信息</Text>
+        <Text className="section-title">{T.firm}管理</Text>
+        <Text className="section-desc">添加、编辑或删除{T.firmSection}信息</Text>
       </View>
 
       <View className="form-card card-bg-black">
         <View className="form-row">
-          <Text className="form-label">律所名称 *</Text>
+          <Text className="form-label">{T.firm}名称 *</Text>
           <Input
             className="form-input"
-            placeholder="请输入律所名称"
+            placeholder={`请输入${T.firm}名称`}
             value={firmForm.name}
             onInput={handleFirmInput("name")}
           />
@@ -989,17 +993,17 @@ export default function Me() {
           <Text className="form-label">URL友好名称 (slug)</Text>
           <Input
             className="form-input"
-            placeholder="例如：huaxia-law-firm"
+            placeholder="例如：huaxia-firm"
             value={firmForm.slug}
             onInput={handleFirmInput("slug")}
           />
         </View>
 
         <View className="form-row">
-          <Text className="form-label">律所简介</Text>
+          <Text className="form-label">{T.firm}简介</Text>
           <Textarea
             className="form-textarea"
-            placeholder="请输入律所简介"
+            placeholder={`请输入${T.firm}简介`}
             value={firmForm.description}
             onInput={handleFirmInput("description")}
           />
@@ -1134,17 +1138,17 @@ export default function Me() {
           <Text className="form-label">特色标签（逗号分隔）</Text>
           <Input
             className="form-input"
-            placeholder="头部律所, 跨境业务, 资本运营"
+            placeholder={`头部${T.firm}, 跨境业务, 资本运营`}
             value={firmForm.tagsText}
             onInput={handleFirmInput("tagsText")}
           />
         </View>
 
         <View className="form-row">
-          <Text className="form-label">律师团队（JSON格式）</Text>
+          <Text className="form-label">{T.professional}团队（JSON格式）</Text>
           <Textarea
             className="form-textarea"
-            placeholder={`[\n  {\n    "name": "张律师",\n    "title": "高级合伙人",\n    "phone": "+86-138-0000-1234",\n    "email": "zhang@firm.com",\n    "specialties": ["上市合规", "股权激励"]\n  }\n]`}
+            placeholder={`[\n  {\n    "name": "张${T.professionalTitle}",\n    "title": "高级合伙人",\n    "phone": "+86-138-0000-1234",\n    "email": "zhang@firm.com",\n    "specialties": ["上市合规", "股权激励"]\n  }\n]`}
             value={firmForm.lawyersText}
             onInput={handleFirmInput("lawyersText")}
             style={{ minHeight: "150px" }}
@@ -1174,7 +1178,7 @@ export default function Me() {
 
         <View className="form-row">
           <Button className="submit-btn" onClick={handleFirmSubmit}>
-            {editingFirmId ? "更新律所" : "添加律所"}
+            {editingFirmId ? `更新${T.firm}` : `添加${T.firm}`}
           </Button>
           {editingFirmId && (
             <Button className="reset-btn" onClick={handleFirmCancel}>
@@ -1229,7 +1233,7 @@ export default function Me() {
         ))}
         {lawFirms.length === 0 && (
           <View className="empty">
-            <Text>暂无律所，请先添加律所。</Text>
+            <Text>暂无{T.firm}，请先添加{T.firm}。</Text>
           </View>
         )}
       </View>
@@ -1240,7 +1244,7 @@ export default function Me() {
     <View className="section">
       <View className="section-header">
         <Text className="section-title">服务管理</Text>
-        <Text className="section-desc">添加、编辑或删除法律服务项目</Text>
+        <Text className="section-desc">添加、编辑或删除{T.service}项目</Text>
       </View>
 
       <View className="form-card card-bg-black">
@@ -1266,7 +1270,7 @@ export default function Me() {
 
         <View className="form-row inline">
           <View className="form-field">
-            <Text className="form-label">所属律所 *</Text>
+            <Text className="form-label">所属{T.firm} *</Text>
             <Picker
               mode="selector"
               range={lawFirms}
@@ -1285,7 +1289,7 @@ export default function Me() {
               <View className="picker-display">
                 <Text className="picker-text">
                   {lawFirms.find((f) => f.id === serviceForm.lawFirmId)?.name ||
-                    "请选择律所"}
+                    `请选择${T.firm}`}
                 </Text>
               </View>
             </Picker>
@@ -1347,19 +1351,19 @@ export default function Me() {
 
         <View className="form-row inline">
           <View className="form-field">
-            <Text className="form-label">律师姓名</Text>
+            <Text className="form-label">{T.professional}姓名</Text>
             <Input
               className="form-input"
-              placeholder="张律师"
+              placeholder={`张${T.professionalTitle}`}
               value={serviceForm.lawyerName}
               onInput={handleServiceInput("lawyerName")}
             />
           </View>
           <View className="form-field">
-            <Text className="form-label">律师职称</Text>
+            <Text className="form-label">{T.professional}职称</Text>
             <Input
               className="form-input"
-              placeholder="资深律师"
+              placeholder={`资深${T.professionalTitle}`}
               value={serviceForm.lawyerTitle}
               onInput={handleServiceInput("lawyerTitle")}
             />
@@ -1407,7 +1411,7 @@ export default function Me() {
               </View>
               <Text className="list-card-desc">{service.description}</Text>
               <Text className="list-card-meta">
-                律所：{firm?.name || "未关联"} | 律师：{service.lawyerName}
+                {T.firm}：{firm?.name || "未关联"} | {T.professional}：{service.lawyerName}
               </Text>
               <View className="list-card-actions">
                 <Button
@@ -1428,7 +1432,7 @@ export default function Me() {
         })}
         {legalServices.length === 0 && (
           <View className="empty">
-            <Text>暂无服务，请先创建律所并添加服务项目。</Text>
+            <Text>暂无服务，请先创建{T.firm}并添加服务项目。</Text>
           </View>
         )}
       </View>

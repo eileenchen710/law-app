@@ -7,6 +7,10 @@ import { getSnapshot, onMockDataChange } from "../../services/dataStore";
 import type { LawFirmMock, LegalServiceMock } from "../../mock/types";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import AppHeader from "../index/components/AppHeader";
+import { getTerms } from "../../utils/terminology";
+
+// 获取当前术语
+const T = getTerms();
 
 const formatBookingTime = (value: string): string => {
   const parsed = dayjs(value);
@@ -105,7 +109,7 @@ export default function FirmDetail() {
     if (availableTimes.length === 0) {
       return (
         <Text className="form-hint">
-          该律所暂未设置可预约时间，您可以在备注中填写期望时间。
+          该{T.firm}暂未设置可预约时间，您可以在备注中填写期望时间。
         </Text>
       );
     }
@@ -203,7 +207,7 @@ export default function FirmDetail() {
       <View className="firm-detail-page">
         <AppHeader menuItems={[]} showActions={false} scrolled={false} />
         <View className="empty-state">
-          <Text className="empty-title">律所不存在</Text>
+          <Text className="empty-title">{T.firm}不存在</Text>
           <Button onClick={() => Taro.navigateBack()}>返回</Button>
         </View>
       </View>
@@ -235,7 +239,7 @@ export default function FirmDetail() {
       </View>
 
       <View className="firm-section">
-        <Text className="section-title">律所简介</Text>
+        <Text className="section-title">{T.firm}简介</Text>
         <Text className="section-content">{firm.description || "暂无简介"}</Text>
       </View>
 
@@ -275,7 +279,7 @@ export default function FirmDetail() {
 
       {services.length > 0 && (
         <View className="firm-section">
-          <Text className="section-title">提供的法律服务 ({services.length})</Text>
+          <Text className="section-title">提供的{T.service} ({services.length})</Text>
           <View className="services-list">
             {services.map((service) => {
               const category = SERVICE_CATEGORIES.find(

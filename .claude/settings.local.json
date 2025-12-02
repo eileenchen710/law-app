@@ -9,7 +9,8 @@
       "Bash(xargs ls:*)",
       "Bash(sort:*)",
       "Bash(sips:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run build:h5:*)"
     ],
     "deny": [],
     "ask": []

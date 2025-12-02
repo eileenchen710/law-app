@@ -7,6 +7,10 @@ import { getSnapshot, onMockDataChange } from "../../services/dataStore";
 import type { LawFirmMock, LegalServiceMock } from "../../mock/types";
 import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import AppHeader from "../index/components/AppHeader";
+import { getTerms } from "../../utils/terminology";
+
+// 获取当前术语
+const T = getTerms();
 
 const formatBookingTime = (value: string): string => {
   const parsed = dayjs(value);
@@ -260,13 +264,13 @@ export default function ServiceDetail() {
           </View>
           {service.lawyerName && (
             <View className="info-item">
-              <Text className="info-label">主办律师</Text>
+              <Text className="info-label">主办{T.professional}</Text>
               <Text className="info-value">{service.lawyerName}</Text>
             </View>
           )}
           {service.lawyerTitle && (
             <View className="info-item">
-              <Text className="info-label">律师职称</Text>
+              <Text className="info-label">{T.professional}职称</Text>
               <Text className="info-value">{service.lawyerTitle}</Text>
             </View>
           )}
@@ -280,7 +284,7 @@ export default function ServiceDetail() {
 
       {firm && (
         <View className="service-section">
-          <Text className="section-title">所属律所</Text>
+          <Text className="section-title">所属{T.firm}</Text>
           <View
             className="firm-card"
             onClick={() =>
@@ -344,7 +348,7 @@ export default function ServiceDetail() {
             </View>
             <Textarea
               className="form-textarea"
-              placeholder="请描述您的法律问题（选填）"
+              placeholder={`请描述您的${T.serviceShort}问题（选填）`}
               value={formData.description}
               onInput={(e) =>
                 setFormData({ ...formData, description: e.detail.value })

@@ -43,9 +43,6 @@ import {
 } from "../../services/dataAdapter";
 import { getTerms } from "../../utils/terminology";
 
-// 获取当前术语
-const T = getTerms();
-
 interface FirmFormState {
   name: string;
   slug: string;
@@ -201,6 +198,9 @@ const formatDateTime = (value?: string | number | Date | null) => {
 };
 
 export default function Me() {
+  // 获取当前术语（在组件内部调用，确保配置已加载）
+  const T = getTerms();
+
   const [user, setUser] = useState<UserProfile | null>(null);
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [allAppointments, setAllAppointments] = useState<AppointmentSummary[]>(

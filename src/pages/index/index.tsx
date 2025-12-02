@@ -36,32 +36,7 @@ import type { ApiError } from "../../services/http";
 import type { ConsultationPayload } from "../../services/types";
 import { getTerms, useFinancialTerms } from "../../utils/terminology";
 
-// 获取当前术语
-const T = getTerms();
-
 type UiService = LegalServiceMock & { lawFirm: string };
-
-// 特性亮点（使用术语系统）
-const featureHighlights = [
-  {
-    id: "firms",
-    title: T.featureFirms,
-    description: T.featureFirmsDesc,
-    icon: useFinancialTerms() ? "💰" : "⚖️",
-  },
-  {
-    id: "secure",
-    title: "专业可靠",
-    description: "20年+行业经验",
-    icon: "🛡️",
-  },
-  {
-    id: "service",
-    title: "服务至上",
-    description: "8000+成功案例",
-    icon: "👥",
-  },
-];
 
 function logApiFailure(tag: string, error: unknown) {
   const err = error as ApiError | Error;
@@ -75,6 +50,32 @@ function logApiFailure(tag: string, error: unknown) {
 }
 
 export default function Index() {
+  // 获取当前术语（在组件内部调用，确保配置已加载）
+  const T = getTerms();
+  const isFinancial = useFinancialTerms();
+
+  // 特性亮点
+  const featureHighlights = useMemo(() => [
+    {
+      id: "firms",
+      title: T.featureFirms,
+      description: T.featureFirmsDesc,
+      icon: isFinancial ? "💰" : "⚖️",
+    },
+    {
+      id: "secure",
+      title: "专业可靠",
+      description: "20年+行业经验",
+      icon: "🛡️",
+    },
+    {
+      id: "service",
+      title: "服务至上",
+      description: "8000+成功案例",
+      icon: "👥",
+    },
+  ], [T, isFinancial]);
+
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
   const [legalServices, setLegalServices] = useState<LegalServiceMock[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");

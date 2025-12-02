@@ -19,15 +19,7 @@ import { useUser } from "../../contexts/UserContext";
 import { useDebounce } from "../../hooks/useDebounce";
 import { getTerms } from "../../utils/terminology";
 
-// 获取当前术语
-const T = getTerms();
-
-const TABS = [
-  { id: "firms", label: T.searchFirmTab },
-  { id: "services", label: T.searchServiceTab },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
+type TabId = "firms" | "services";
 
 function normalize(text: string): string {
   return text.toLowerCase();
@@ -49,6 +41,15 @@ function formatBookingTime(value: string): string {
 }
 
 export default function Search() {
+  // 获取当前术语（在组件内部调用，确保配置已加载）
+  const T = getTerms();
+
+  // TABS 依赖于 T，需要在组件内部定义
+  const TABS = useMemo(() => [
+    { id: "firms" as const, label: T.searchFirmTab },
+    { id: "services" as const, label: T.searchServiceTab },
+  ], [T]);
+
   const [lawFirms, setLawFirms] = useState<LawFirmMock[]>([]);
   const [legalServices, setLegalServices] = useState<LegalServiceMock[]>([]);
   const [query, setQuery] = useState("");

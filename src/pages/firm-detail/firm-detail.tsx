@@ -9,9 +9,6 @@ import { SERVICE_CATEGORIES } from "../../constants/serviceCategories";
 import AppHeader from "../index/components/AppHeader";
 import { getTerms } from "../../utils/terminology";
 
-// 获取当前术语
-const T = getTerms();
-
 const formatBookingTime = (value: string): string => {
   const parsed = dayjs(value);
   if (parsed.isValid()) {
@@ -21,6 +18,9 @@ const formatBookingTime = (value: string): string => {
 };
 
 export default function FirmDetail() {
+  // 获取当前术语（在组件内部调用，确保配置已加载）
+  const T = getTerms();
+
   const router = useRouter();
   const firmId = router.params.id || "";
 

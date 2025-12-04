@@ -20,9 +20,15 @@ function App({ children }: PropsWithChildren<any>) {
     })
   }, [])
 
+  // 使用 opacity + visibility 替代 display:none
+  // 这样可以保留布局计算，避免首次渲染时视口尺寸计算错误
+  const containerStyle = ready
+    ? { opacity: 1, visibility: 'visible' as const, transition: 'opacity 0.15s ease-out' }
+    : { opacity: 0, visibility: 'hidden' as const }
+
   return (
     <UserProvider>
-      <View style={{ display: ready ? 'block' : 'none' }}>
+      <View style={containerStyle}>
         {children}
       </View>
     </UserProvider>

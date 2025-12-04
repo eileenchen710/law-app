@@ -10,7 +10,9 @@
       "Bash(sort:*)",
       "Bash(sips:*)",
       "Bash(find:*)",
-      "Bash(npm run build:h5:*)"
+      "Bash(npm run build:h5:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
